@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.fix-input-bg {
+  background-color: transparent !important;
+}
+
+.fix-cta-button {
+  padding: 12px !important;
+  font-size: 14px !important;
+  line-height: 24px !important;
+}
+
+.text-accent {
+  color: #007bff;
+}
+
+.custom-bento-card {
+  border-radius: var(--spacing-4, 16px);
+  border: var(--spacing-px, 1px) solid rgba(255, 255, 255, 0.16);
+  opacity: var(--spacing-px, 1);
+  background: radial-gradient(
+      102.78% 100.22% at 21.68% 25.66%,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(0, 0, 0, 0) 38.9%,
+      rgba(255, 255, 255, 0.05) 85.47%
+    ),
+    rgba(0, 4, 26, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.bento-image-postition {
+  position: relative;
+  overflow: hidden;
+}
