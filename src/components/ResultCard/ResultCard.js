@@ -2,19 +2,23 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { CodeIcon } from '@iconicicons/react';
 import { Badge, Loading } from '@lemonsqueezy/wedges';
-import { Context } from '../../app/context';
 
-const ResultCard = ({ cardData, endpoint }) => {
-  const [responseObject, setResponseObject] = useState(cardData);
+import {
+  NODE_ENDPOINT,
+  METHODS,
+  SET_METHOD_RESPONSE_DATA,
+} from '../../app/store/store';
 
+const ResultCard = ({ config, endpoint }) => {
+  const [cardData, setCardData] = useState(config);
+  // const methods = METHODS.use();
+  // const nodeEndpoint = NODE_ENDPOINT.use();
   // UI result state
+
   const [normalResult, setNormalResult] = useState(false);
   const [rateLimitResult, setRateLimitResult] = useState(false);
-  const [errorResult, setErrorResult] = useState(false);
+  // const [errorResult, setErrorResult] = useState(false);
   const [fetchErrorResult, setFetchErrorResult] = useState(false);
-
-  // context provider is updated here to use data in charts outside the card on results page
-  const [config, setConfig] = useContext(Context);
 
   const fetchData = async () => {
     const response = await fetch(cardData.method_url, {
@@ -25,131 +29,123 @@ const ResultCard = ({ cardData, endpoint }) => {
       },
       method: 'POST',
     });
-
     if (!response.ok) {
-      return response.text().then((text) => {
-        throw new Error(text);
-      });
+      // return response.json();
+      console.log(response);
+      // return response.json().then((res) => {
+      throw new Error(
+        'Fetch failed. ' + response.status + ' ' + response.statusText
+      );
+      // });
     }
-
     const body = await response.json();
     return body;
   };
 
   useEffect(() => {
-    Object.keys(responseObject.data).length === 0 &&
+    Object.keys(cardData.data).length === 0 &&
       fetchData()
         .then((res) => {
           console.log(res);
-          setResponseObject((prev) => {
+          setCardData((prev) => {
             return {
               ...prev,
               isLoading: false,
               data: res,
             };
           });
-          setConfig(() => {
-            let updated = config;
-            updated.methods[responseObject.id] = responseObject;
-            return updated;
-          });
-          // setConfig((prev) => {
-          //   let upd = prev;
-          //   upd.methods[responseObject.id] = {
-          //     ...prev,
-          //     isLoading: false,
-          //     data: res,
-          //   };
-          //   return upd;
-          // });
+          SET_METHOD_RESPONSE_DATA(cardData.id, res);
         })
         .catch((error) => {
-          setResponseObject((prev) => {
+          setCardData((prev) => {
             return {
               ...prev,
               isLoading: false,
+              data: { error: error.message },
             };
           });
-          setFetchErrorResult(error.message);
+          SET_METHOD_RESPONSE_DATA(cardData.id, {
+            error: error.message,
+          });
         });
   }, []);
 
   useEffect(() => {
     // no errors
     if (
-      Object.keys(responseObject.data).length != 0 &&
-      responseObject.data.hasOwnProperty('error') === false &&
-      responseObject.data.target_blocks ===
-        responseObject.data.blocks_processed_successfully
+      Object.keys(cardData.data).length != 0 &&
+      cardData.data.hasOwnProperty('error') === false
     ) {
-      // Blocks processed = Target blocks
       setNormalResult(true);
     }
 
-    // method error
-    // if (
-    //   Object.keys(results.data).length != 0 &&
-    //   results.data.hasOwnProperty('error') === true
-    // ) {
-    //   setErrorResult(true);
-    // }
-  }, [responseObject]);
+    if (
+      cardData.data.target_blocks !==
+      cardData.data.blocks_processed_successfully
+    ) {
+      setRateLimitResult(true);
+    }
 
-  // useEffect(() => {
-  //   if (
-  //     Object.keys(responseObject.data).length != 0 &&
-  //     responseObject.data.hasOwnProperty('error') === false
-  //   ) {
-  //     setConfig((prev) => {
-  //       let upd = prev;
-  //       upd.methods[responseObject.id] = {
-  //         ...responseObject,
-  //       };
-  //       return upd;
-  //     });
-  //   }
-  // }, [responseObject]);
+    if (cardData.data.hasOwnProperty('error') === true) {
+      setFetchErrorResult(cardData.data.error);
+    }
+  }, [cardData]);
 
   return (
     <div className="custom-bento-card rounded-xl border-2 p-6 mb-4">
       <div className="flex justify-between items-center mb-6">
         <Badge before={<CodeIcon />} color="blue" stroke>
-          {responseObject.method_used}
+          {cardData.method_used}
         </Badge>
-        {responseObject.isLoading === true && (
-          <Loading type="spinner" size="xxs" />
-        )}
+        {cardData.isLoading === true && <Loading type="spinner" size="xxs" />}
       </div>
+
       {normalResult && (
         <div className="grid grid-cols-3">
           <div>
-            <div className="text-xl font-bold mb-1">
-              {responseObject.data.blocks_processed_successfully}/
-              {responseObject.data.target_blocks}
+            <div
+              className={
+                rateLimitResult
+                  ? 'text-xl font-bold mb-1 text-yellow-500 '
+                  : 'text-xl font-bold mb-1'
+              }
+            >
+              {cardData.data.blocks_processed_successfully}/
+              {cardData.data.target_blocks}
             </div>
             <p className="text-xs">Blocks</p>
           </div>
           <div>
             <div className="text-xl font-bold mb-1">
-              {responseObject.data.time_taken_in_seconds.toFixed(2)} s
+              {cardData.data.time_taken_in_seconds.toFixed(2)} s
             </div>
             <p className="text-xs">Time taken</p>
           </div>
           <div>
             <div className="text-xl font-bold mb-1">
-              {responseObject.data.blocks_per_seconds.toFixed(2)}
+              {cardData.data.blocks_per_seconds.toFixed(2)}
             </div>
             <p className="text-xs">Blocks per second</p>
           </div>
         </div>
       )}
-      {errorResult && (
-        <div className="text-xs text-yellow-500 font-mono">
-          {results.data.error}
+
+      {rateLimitResult && (
+        <div className="text-xs text-yellow-500 font-mono mt-6">
+          Rate limit exceeded. Failure rate{' '}
+          {(
+            (cardData.data.blocks_processed_successfully /
+              cardData.data.target_blocks) *
+            100
+          ).toFixed(2)}
+          %.
         </div>
       )}
+
       {fetchErrorResult !== false && (
-        <div className="text-xs text-red-500 font-mono">{fetchErrorResult}</div>
+        <div className="text-xs text-red-500 font-mono mt-6">
+          {fetchErrorResult}
+        </div>
       )}
     </div>
   );

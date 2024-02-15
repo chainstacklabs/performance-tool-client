@@ -12,7 +12,11 @@ import Header from '@/components/Header/Header';
 
 import Link from 'next/link';
 
-import Provider, { Context } from './context';
+import {
+  NODE_ENDPOINT,
+  SET_NODE_ENDPOINT,
+  CLEAR_METHODS_DATA,
+} from './store/store';
 
 export function FormTabs() {
   return (
@@ -56,9 +60,10 @@ export function FormTabs() {
 }
 
 export default function Home() {
-  const [config, setConfig] = useContext(Context);
-  const [endpoint, setEndpoint] = useState(config.endpoints[0]);
-  const [methods, setMethods] = useState(config);
+  const nodeEndpoint = NODE_ENDPOINT.use();
+  useEffect(() => {
+    CLEAR_METHODS_DATA();
+  }, []);
 
   return (
     <div className="m-auto max-w-6xl">
@@ -117,29 +122,26 @@ export default function Home() {
               required
               className="fix-input-bg my-4 w-full"
               placeholder="Your endpoint URL"
-              value={endpoint}
+              value={nodeEndpoint}
               onChange={(e) => {
-                console.log(e.target.value);
-                setEndpoint(e.target.value);
-                setConfig({
-                  endpoints: [e.target.value],
-                  methods,
-                });
+                SET_NODE_ENDPOINT(e.target.value);
+                // setConfig({
+                //   endpoints: [e.target.value],
+                //   methods,
+                // });
               }}
             />
             <Link
               href={{
                 pathname: '/result',
-                // query: {
-                //   search: 'search'
-                // },
               }}
             >
               <Button
                 variant="primary"
                 className="fix-cta-button w-full"
                 onClick={() => {
-                  // run tests
+                  // run test
+                  // setNodeEndpoint(inputValue);
                 }}
               >
                 Run test →
