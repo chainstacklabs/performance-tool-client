@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useEffect } from 'react';
 import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
 import { TypeAnimation } from 'react-type-animation';
 
@@ -125,10 +125,6 @@ export default function Home() {
               value={nodeEndpoint}
               onChange={(e) => {
                 SET_NODE_ENDPOINT(e.target.value);
-                // setConfig({
-                //   endpoints: [e.target.value],
-                //   methods,
-                // });
               }}
             />
             <Link
@@ -136,14 +132,7 @@ export default function Home() {
                 pathname: '/result',
               }}
             >
-              <Button
-                variant="primary"
-                className="fix-cta-button w-full"
-                onClick={() => {
-                  // run test
-                  // setNodeEndpoint(inputValue);
-                }}
-              >
+              <Button variant="primary" className="fix-cta-button w-full">
                 Run test →
               </Button>
             </Link>

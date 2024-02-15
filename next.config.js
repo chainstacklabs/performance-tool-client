@@ -21,6 +21,7 @@ const nextConfig = {
       },
     ];
   },
+  reactStrictMode: false,
 };
 
 const withMDX = require('@next/mdx')({

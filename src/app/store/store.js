@@ -6,12 +6,12 @@ import { produce } from 'immer';
 const BACKEND_URL = 'http://localhost:8000/api/v1/scenarios/';
 
 export const NODE_ENDPOINT = entity(
-  //   'https://ethereum-holesky.core.chainstack.com/e4aeac86d26b2ee19f6a03aa3acb0d41'
-  'https://eth-mainnet.blastapi.io/bd70bad7-693b-4112-bc03-7bd06fe8a675'
+  //   ''
+  'https://ethereum-holesky.core.chainstack.com/e4aeac86d26b2ee19f6a03aa3acb0d41'
+  //   'https://eth-mainnet.blastapi.io/bd70bad7-693b-4112-bc03-7bd06fe8a675'
 );
 
 export const SET_NODE_ENDPOINT = (value) => {
-  //   console.log('SET_NODE_ENDPOINT', value);
   NODE_ENDPOINT.set(value);
 };
 

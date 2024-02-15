@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Header from '@/components/Header/Header';
 import ResultCard from '@/components/ResultCard/ResultCard';
@@ -8,6 +8,7 @@ import ExplainResultsIcon from '../../components/Icons/ExplainResultsIcon';
 import { Button, Loading } from '@lemonsqueezy/wedges';
 import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
 import { Chart } from 'react-google-charts';
+import Link from 'next/link';
 
 import { NODE_ENDPOINT, METHODS } from '../store/store';
 
@@ -17,13 +18,9 @@ const result = () => {
 
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
   const [chartData, setChartData] = useState(null);
+  const [explainIsDisabled, setExplainIsDisabled] = useState(true);
 
   useEffect(() => {
-    console.log('methods', methods);
-    console.log(
-      'check',
-      methods.every((item) => Object.keys(item.data).length != 0) === true
-    );
     if (methods.every((item) => Object.keys(item.data).length != 0) === true) {
       setChartData([
         ['', ...methods.map((item) => item.method_used)],
@@ -35,16 +32,13 @@ const result = () => {
               item.data.hasOwnProperty('error') === false
             ) {
               return +item.data.blocks_per_seconds.toFixed(2);
-            }
-            // if (item.data.hasOwnProperty('error') === true) {
-            //   return 0;
-            // }
-            else {
+            } else {
               return 0;
             }
           }),
         ],
       ]);
+      setExplainIsDisabled(false);
     }
   }, [methods]);
 
@@ -77,22 +71,7 @@ const result = () => {
             <ResultCard key={index} endpoint={nodeEndpoint} config={item} />
           );
         })}
-        <div className="flex gap-4 flex-grow mb-4">
-          <Button
-            style={{ width: 'calc(50% - 8px)' }}
-            before={<ExplainResultsIcon />}
-            variant="tertiary"
-          >
-            Explain results
-          </Button>
-          <Button
-            style={{ width: 'calc(50% - 8px)' }}
-            before={<PlusIcon />}
-            variant="tertiary"
-          >
-            New test
-          </Button>
-        </div>
+
         <div className="custom-bento-card rounded-xl border-2 px-6 py-2">
           {!chartData ? (
             <div
@@ -129,6 +108,32 @@ const result = () => {
               }}
             />
           )}
+        </div>
+
+        <div className="flex gap-4 flex-grow mt-4">
+          <Button
+            style={{ width: 'calc(50% - 8px)' }}
+            before={<ExplainResultsIcon />}
+            variant="tertiary"
+            disabled={explainIsDisabled}
+          >
+            Explain results
+          </Button>
+          <Link
+            style={{ width: 'calc(50% - 8px)' }}
+            href={{
+              pathname: '/',
+            }}
+          >
+            <Button
+              className="w-full"
+              before={<PlusIcon />}
+              variant="tertiary"
+              disabled={explainIsDisabled}
+            >
+              New test
+            </Button>
+          </Link>
         </div>
       </main>
     </div>

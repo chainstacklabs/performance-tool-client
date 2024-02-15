@@ -1,23 +1,15 @@
 'use client';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CodeIcon } from '@iconicicons/react';
-import { Badge, Loading } from '@lemonsqueezy/wedges';
+import { Badge, Loading, Tooltip } from '@lemonsqueezy/wedges';
 
-import {
-  NODE_ENDPOINT,
-  METHODS,
-  SET_METHOD_RESPONSE_DATA,
-} from '../../app/store/store';
+import { SET_METHOD_RESPONSE_DATA } from '../../app/store/store';
 
 const ResultCard = ({ config, endpoint }) => {
   const [cardData, setCardData] = useState(config);
-  // const methods = METHODS.use();
-  // const nodeEndpoint = NODE_ENDPOINT.use();
-  // UI result state
 
   const [normalResult, setNormalResult] = useState(false);
   const [rateLimitResult, setRateLimitResult] = useState(false);
-  // const [errorResult, setErrorResult] = useState(false);
   const [fetchErrorResult, setFetchErrorResult] = useState(false);
 
   const fetchData = async () => {
@@ -30,44 +22,43 @@ const ResultCard = ({ config, endpoint }) => {
       method: 'POST',
     });
     if (!response.ok) {
-      // return response.json();
-      console.log(response);
-      // return response.json().then((res) => {
       throw new Error(
         'Fetch failed. ' + response.status + ' ' + response.statusText
       );
-      // });
     }
     const body = await response.json();
     return body;
   };
 
   useEffect(() => {
-    Object.keys(cardData.data).length === 0 &&
-      fetchData()
-        .then((res) => {
-          console.log(res);
-          setCardData((prev) => {
-            return {
-              ...prev,
-              isLoading: false,
-              data: res,
-            };
+    if (endpoint === '') {
+      window.location.replace('/');
+    } else {
+      Object.keys(cardData.data).length === 0 &&
+        fetchData()
+          .then((res) => {
+            setCardData((prev) => {
+              return {
+                ...prev,
+                isLoading: false,
+                data: res,
+              };
+            });
+            SET_METHOD_RESPONSE_DATA(cardData.id, res);
+          })
+          .catch((error) => {
+            setCardData((prev) => {
+              return {
+                ...prev,
+                isLoading: false,
+                data: { error: error.message },
+              };
+            });
+            SET_METHOD_RESPONSE_DATA(cardData.id, {
+              error: error.message,
+            });
           });
-          SET_METHOD_RESPONSE_DATA(cardData.id, res);
-        })
-        .catch((error) => {
-          setCardData((prev) => {
-            return {
-              ...prev,
-              isLoading: false,
-              data: { error: error.message },
-            };
-          });
-          SET_METHOD_RESPONSE_DATA(cardData.id, {
-            error: error.message,
-          });
-        });
+    }
   }, []);
 
   useEffect(() => {
@@ -79,6 +70,7 @@ const ResultCard = ({ config, endpoint }) => {
       setNormalResult(true);
     }
 
+    // show rate limit warning
     if (
       cardData.data.target_blocks !==
       cardData.data.blocks_processed_successfully
@@ -86,6 +78,7 @@ const ResultCard = ({ config, endpoint }) => {
       setRateLimitResult(true);
     }
 
+    // fetch error
     if (cardData.data.hasOwnProperty('error') === true) {
       setFetchErrorResult(cardData.data.error);
     }
@@ -106,26 +99,36 @@ const ResultCard = ({ config, endpoint }) => {
             <div
               className={
                 rateLimitResult
-                  ? 'text-xl font-bold mb-1 text-yellow-500 '
-                  : 'text-xl font-bold mb-1'
+                  ? 'text-xl font-bold text-yellow-500 '
+                  : 'text-xl font-bold'
               }
             >
               {cardData.data.blocks_processed_successfully}/
               {cardData.data.target_blocks}
             </div>
-            <p className="text-xs">Blocks</p>
+
+            <div className="flex items-center">
+              <p className="text-xs leading-6 mr-1">Blocks</p>
+              <Tooltip
+                align="center"
+                animation={true}
+                content="Blocks processed / Target blocks"
+                delayDuration={0}
+                side="right"
+              />
+            </div>
           </div>
           <div>
-            <div className="text-xl font-bold mb-1">
+            <div className="text-xl font-bold">
               {cardData.data.time_taken_in_seconds.toFixed(2)} s
             </div>
-            <p className="text-xs">Time taken</p>
+            <p className="text-xs leading-6">Time taken</p>
           </div>
           <div>
-            <div className="text-xl font-bold mb-1">
+            <div className="text-xl font-bold">
               {cardData.data.blocks_per_seconds.toFixed(2)}
             </div>
-            <p className="text-xs">Blocks per second</p>
+            <p className="text-xs leading-6">Blocks per second</p>
           </div>
         </div>
       )}
