@@ -1,51 +1,59 @@
 'use client';
 import { useContext, useEffect, useState } from 'react';
-import { Context } from '../context';
 
 import Header from '@/components/Header/Header';
 import ResultCard from '@/components/ResultCard/ResultCard';
-
-import { Button } from '@lemonsqueezy/wedges';
-import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
-
 import ExplainResultsIcon from '../../components/Icons/ExplainResultsIcon';
 
+import { Button, Loading } from '@lemonsqueezy/wedges';
+import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
 import { Chart } from 'react-google-charts';
 
+import { NODE_ENDPOINT, METHODS } from '../store/store';
+
 const result = () => {
-  const [config, setConfig] = useContext(Context);
+  const nodeEndpoint = NODE_ENDPOINT.use();
+  const methods = METHODS.use();
+
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
-
-  const [chartData, setChartData] = useState([]);
-
-  // const configMethodNamesArray = Object.keys(config.methods);
+  const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
-    console.log('config', config);
-    
-    setChartData([
-      ['', ...config.methods.map((item) => item.method_used)],
-      [
-        '',
-        ...config.methods.map((item) => {
-          if (Object.keys(item.data).length != 0) {
-            return item.time_taken_in_seconds;
-          } else {
-            return 0;
-          }
-        }),
-      ],
-    ]);
-  }, [config]);
+    console.log('methods', methods);
+    console.log(
+      'check',
+      methods.every((item) => Object.keys(item.data).length != 0) === true
+    );
+    if (methods.every((item) => Object.keys(item.data).length != 0) === true) {
+      setChartData([
+        ['', ...methods.map((item) => item.method_used)],
+        [
+          '',
+          ...methods.map((item) => {
+            if (
+              Object.keys(item.data).length != 0 &&
+              item.data.hasOwnProperty('error') === false
+            ) {
+              return +item.data.blocks_per_seconds.toFixed(2);
+            }
+            // if (item.data.hasOwnProperty('error') === true) {
+            //   return 0;
+            // }
+            else {
+              return 0;
+            }
+          }),
+        ],
+      ]);
+    }
+  }, [methods]);
 
   return (
     <div className="m-auto max-w-6xl">
       <Header />
       <main className="max-w-lg m-auto">
         <div className="mb-10 px-4 border-gray-800 border-r border-l flex items-center">
-          <div className="w-full truncate mr-4 font-mono">
-            {config.endpoints[0]}
-          </div>
+          <div className="w-full truncate mr-4 font-mono">{nodeEndpoint}</div>
           <Button
             before={
               copiedToClipboard === true ? (
@@ -56,7 +64,7 @@ const result = () => {
             }
             variant="transparent"
             onClick={() => {
-              navigator.clipboard.writeText(config.endpoints[0]);
+              navigator.clipboard.writeText(nodeEndpoint);
               setCopiedToClipboard(true);
               setTimeout(() => {
                 setCopiedToClipboard(false);
@@ -64,13 +72,9 @@ const result = () => {
             }}
           />
         </div>
-        {config.methods.map((item, index) => {
+        {methods.map((item, index) => {
           return (
-            <ResultCard
-              key={index}
-              endpoint={config.endpoints[0]}
-              cardData={item}
-            />
+            <ResultCard key={index} endpoint={nodeEndpoint} config={item} />
           );
         })}
         <div className="flex gap-4 flex-grow mb-4">
@@ -90,31 +94,41 @@ const result = () => {
           </Button>
         </div>
         <div className="custom-bento-card rounded-xl border-2 px-6 py-2">
-          <Chart
-            chartType="BarChart"
-            width="100%"
-            // height="400px"
-            data={chartData}
-            options={{
-              chartArea: { width: '100%' },
-              backgroundColor: 'transparent',
-              colors: ['#0BB6FF', '#0162F3', '#005C89', '#008960'],
-              hAxis: {
-                minValue: 0,
-                textStyle: { color: '#EEF8FB' },
-                gridlines: {
-                  color: '#333645',
+          {!chartData ? (
+            <div
+              style={{ width: '100%', height: '200px' }}
+              className="flex justify-around items-center"
+            >
+              <Loading type="spinner" size="xxs" />
+            </div>
+          ) : (
+            <Chart
+              chartType="BarChart"
+              width="100%"
+              data={chartData}
+              options={{
+                chartArea: { width: '100%' },
+                backgroundColor: 'transparent',
+                colors: ['#0BB6FF', '#0162F3', '#005C89', '#008960'],
+                hAxis: {
+                  title: 'Blocks per second',
+                  titleTextStyle: { color: '#fff' },
+                  minValue: 0,
+                  textStyle: { color: '#EEF8FB' },
+                  gridlines: {
+                    color: '#333645',
+                  },
                 },
-              },
-              vAxis: {
-                textStyle: { color: '#ff00d0' },
-              },
-              legend: {
-                position: 'top',
-                textStyle: { color: '#fff' },
-              },
-            }}
-          />
+                vAxis: {
+                  textStyle: { color: '#ff00d0' },
+                },
+                legend: {
+                  position: 'top',
+                  textStyle: { color: '#fff' },
+                },
+              }}
+            />
+          )}
         </div>
       </main>
     </div>
