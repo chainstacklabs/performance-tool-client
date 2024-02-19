@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 import { NODE_ENDPOINT, METHODS } from '../store/store';
 
-const result = () => {
+const Result = () => {
   const nodeEndpoint = NODE_ENDPOINT.use();
   const methods = METHODS.use();
 
@@ -140,4 +140,4 @@ const result = () => {
   );
 };
 
-export default result;
+export default Result;
