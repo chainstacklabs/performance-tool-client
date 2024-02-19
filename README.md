@@ -43,3 +43,5 @@ Add new object at the end of array.
 
 - Don't forget to increment `id` field's value.
 - `method_used` field is for cards label, shown in results UI
+- update `method_url` with new path
+- leave rest fileds with no updates
