@@ -93,12 +93,12 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-8 my-20 text-gray-400 font-mono">
           <p>
             In a world cluttered with different tools, we understand that just
-            presenting latency numbers doesn't cut it. What discerning customers
-            truly seek is a comprehensive view of node performance.
+            presenting latency numbers doesn&apos;t cut it. What discerning
+            customers truly seek is a comprehensive view of node performance.
           </p>
           <p>
             Relying solely on latency numbers might be useful for some, but
-            we're here to serve a higher purpose. This tool is built in
+            we&apos;re here to serve a higher purpose. This tool is built in
             Chainstack for anyone who values real, profiled node performance.
           </p>
         </div>
