@@ -1,18 +1,18 @@
-'use client';
-import { useEffect } from 'react';
-import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
-import { TypeAnimation } from 'react-type-animation';
-import Performance from '@/components/Performance/Preformance';
-import Bento from '@/components/Bento/Bento';
-import FaqBasic from '@/components/Faq/FaqBasic';
-import Footer from '@/components/Footer/Footer';
-import Header from '@/components/Header/Header';
-import Link from 'next/link';
+"use client";
+import { useEffect } from "react";
+import { Button, Badge, Tabs, Tooltip, Input } from "@lemonsqueezy/wedges";
+import { TypeAnimation } from "react-type-animation";
+import Performance from "@/components/Performance/Preformance";
+import Bento from "@/components/Bento/Bento";
+import FaqBasic from "@/components/Faq/FaqBasic";
+import Footer from "@/components/Footer/Footer";
+import Header from "@/components/Header/Header";
+import Link from "next/link";
 import {
   NODE_ENDPOINT,
   SET_NODE_ENDPOINT,
   CLEAR_METHODS_DATA,
-} from './store/store';
+} from "./store/store";
 
 function FormTabs() {
   return (
@@ -67,20 +67,20 @@ export default function Home() {
 
       <main>
         <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-48 font-black">
-          meet{' '}
+          meet{" "}
           <TypeAnimation
             sequence={[
-              'modern',
+              "modern",
               3000,
-              'sophisticated',
+              "sophisticated",
               3000,
-              'precise',
+              "precise",
               3000,
-              'tailored',
+              "tailored",
               3000,
-              'perfect',
+              "perfect",
               3000,
-              'modern',
+              "modern",
               3000,
             ]}
             preRenderFirstString={true}
@@ -92,14 +92,19 @@ export default function Home() {
         </h1>
         <div className="grid grid-cols-2 gap-8 my-20 text-gray-400 font-mono">
           <p>
-            In a world cluttered with different tools, we understand that just
-            presenting latency numbers doesn&apos;t cut it. What discerning
-            customers truly seek is a comprehensive view of node performance.
+            In the dynamic landscape of blockchain technology, where the
+            efficiency and reliability of RPC nodes are paramount; traditional
+            tools often need to catch up by focusing mostly on latency. At
+            Chainstack, we recognize the necessity of a more holistic approach
+            to node performance evaluation.
           </p>
           <p>
-            Relying solely on latency numbers might be useful for some, but
-            we&apos;re here to serve a higher purpose. This tool is built in
-            Chainstack for anyone who values real, profiled node performance.
+            Chainstack Compare transcends conventional metrics by taking a a
+            different approach to measuring node efficiency, particularly in
+            data fetching—a critical factor for the performance of decentralized
+            applications. Designed to the modern needs of developers, our tool
+            provides a nuanced assessment that goes beyond simple latency
+            numbers to capture the essence of real-world node performance.
           </p>
         </div>
 
@@ -125,7 +130,7 @@ export default function Home() {
             />
             <Link
               href={{
-                pathname: '/result',
+                pathname: "/result",
               }}
             >
               <Button variant="primary" className="fix-cta-button w-full">
