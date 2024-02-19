@@ -3,12 +3,8 @@
 import { entity } from 'simpler-state';
 import { produce } from 'immer';
 
-const BACKEND_URL = 'http://localhost:8000/api/v1/scenarios/';
-
 export const NODE_ENDPOINT = entity(
-  //   ''
   'https://ethereum-holesky.core.chainstack.com/e4aeac86d26b2ee19f6a03aa3acb0d41'
-  //   'https://eth-mainnet.blastapi.io/bd70bad7-693b-4112-bc03-7bd06fe8a675'
 );
 
 export const SET_NODE_ENDPOINT = (value) => {
@@ -19,7 +15,7 @@ export const METHODS = entity([
   {
     id: 0,
     method_used: 'eth_getBlockByNumber',
-    method_url: BACKEND_URL + 'test-get-block',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-get-block',
     perform: true,
     isLoading: true,
     data: {},
@@ -27,7 +23,7 @@ export const METHODS = entity([
   {
     id: 1,
     method_used: 'eth_call',
-    method_url: BACKEND_URL + 'test-eth-call',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-eth-call',
     perform: true,
     isLoading: true,
     data: {},
@@ -42,6 +38,7 @@ export const SET_METHOD_RESPONSE_DATA = (id, payload) => {
   METHODS.set(
     produce((value) => {
       value[id].data = payload;
+      // keep this code to test rate limits
       // let x = payload;
       // x.blocks_processed_successfully = 78;
       // value[id].data = x;

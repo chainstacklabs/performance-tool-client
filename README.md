@@ -1,41 +1,45 @@
-# Wedges Next.js Example Template
+## Commands
 
-Wedges is a professionally designed <a href="https://lemonsqueezy.com/wedges/figma/">design system for Figma</a> and an open-source React UI library that combines <a href="https://www.radix-ui.com/primitives" target="_blank" rel="noopener noreferrer">Radix UI primitives</a> and <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer">Tailwind CSS</a>. Its goal is to simplify the process of building beautiful, functional and accessible user interfaces.
-
-With Wedges, you get a range of pre-built, customizable components that are easy to use and integrate into your React projects. It also comes with full TypeScript support, ensuring type safety and developer-friendly experience.
-
-## Technologies
-
-- <a href="https://nextjs.org/" target="_blank" rel="noopener noreferrer">Next.js</a>
-- <a href="https://lemonsqueezy.com/wedges/" target="_blank" rel="noopener noreferrer">Wedges</a>
-- <a href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer">TypeScript</a>
-- <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer">Tailwind CSS</a>
-- <a href="https://www.radix-ui.com/primitives" target="_blank" rel="noopener noreferrer">Radix UI Primitives</a>
-
-## Getting Started
-
-To create a fresh Next.js project with Wedges pre-configured, run the following command:
-
-```bash
-npx create-next-app -e https://github.com/lmsqueezy/wedges-next-app-template
-```
-
-During the installation, you will be prompted to enter your project name. Once the installation is complete, run the following command to navigate to your project directory:
-
-```bash
-cd your-project-name
-```
-
-and start the development server:
+Run the development server on localhost:
 
 ```bash
 npm run dev
 ```
 
-## Documentation
+Build app:
 
-For full documentation, visit <a href="https://lemonsqueezy.com/wedges/docs/" target="_blank" rel="noopener noreferrer">Wedges Docs</a>.
+```bash
+npm run build
+```
 
-## License
+More bout [deploying options](https://nextjs.org/docs/app/building-your-application/deploying)
 
-Wedges is licensed under the <a href="https://github.com/lmsqueezy/wedges/LICENSE" target="_blank" rel="noreferrer noopener">MIT License</a>.
+## How to add new method
+
+Go to `src/app/store/store.js`, find `METHODS` array.
+
+```javascript
+export const METHODS = entity([
+  {
+    id: 0,
+    method_used: 'eth_getBlockByNumber',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-get-block',
+    perform: true,
+    isLoading: true,
+    data: {},
+  },
+  {
+    id: 1,
+    method_used: 'eth_call',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-eth-call',
+    perform: true,
+    isLoading: true,
+    data: {},
+  },
+]);
+```
+
+Add new object at the end of array.
+
+- Don't forget to increment `id` field's value.
+- `method_used` field is for cards label, shown in results UI

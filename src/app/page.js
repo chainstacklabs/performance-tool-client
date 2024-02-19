@@ -1,24 +1,20 @@
 'use client';
-
 import { useEffect } from 'react';
 import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
 import { TypeAnimation } from 'react-type-animation';
-
 import Performance from '@/components/Performance/Preformance';
 import Bento from '@/components/Bento/Bento';
 import FaqBasic from '@/components/Faq/FaqBasic';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
-
 import Link from 'next/link';
-
 import {
   NODE_ENDPOINT,
   SET_NODE_ENDPOINT,
   CLEAR_METHODS_DATA,
 } from './store/store';
 
-export function FormTabs() {
+function FormTabs() {
   return (
     <div className="m-auto flex w-fit max-w-full flex-col gap-10 text-left">
       <Tabs variant="fill" defaultValue="examples">
