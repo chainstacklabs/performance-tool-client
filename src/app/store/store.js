@@ -19,7 +19,7 @@ export const METHODS = entity([
   {
     id: 0,
     method_used: 'eth_getBlockByNumber',
-    method_url: BACKEND_URL + 'test-get-block2',
+    method_url: BACKEND_URL + 'test-get-block',
     perform: true,
     isLoading: true,
     data: {},
@@ -41,10 +41,10 @@ export const GET_METHODS_NAMES = entity(
 export const SET_METHOD_RESPONSE_DATA = (id, payload) => {
   METHODS.set(
     produce((value) => {
-      //   value[id].data = payload;
-      let x = payload;
-      x.blocks_processed_successfully = 78;
-      value[id].data = x;
+      value[id].data = payload;
+      // let x = payload;
+      // x.blocks_processed_successfully = 78;
+      // value[id].data = x;
     })
   );
 };
