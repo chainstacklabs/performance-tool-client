@@ -6,19 +6,28 @@ import ChainstackIcon from '@/components/Icons/ChainstackIcon';
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center my-5">
+    <header className="flex flex-col items-start sm:flex-row justify-between sm:items-center my-5">
       <Logo />
-      <div>
-        <Button
-          variant="transparent"
-          before={<GithubIcon width={24} height={24} />}
-          className="mr-4"
+      <div className="flex mt-4 sm:mt-0 lg:mt-0">
+        <a
+          href="https://github.com/chainstacklabs"
+          target="_blank"
+          className="sm:block lg:block hidden"
         >
-          Source code
-        </Button>
-        <Button before={<ChainstackIcon width={24} height={24} />}>
-          Start for free
-        </Button>
+          <Button
+            variant="transparent"
+            before={<GithubIcon width={24} height={24} />}
+            className="mr-4"
+          >
+            Source code
+          </Button>
+        </a>
+
+        <a href="https://chainstack.com/" target="_blank">
+          <Button before={<ChainstackIcon width={24} height={24} />}>
+            Start for free
+          </Button>
+        </a>
       </div>
     </header>
   );

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 // state management https://simpler-state.js.org/quick-start.html
-import { entity } from "simpler-state";
-import { produce } from "immer";
+import { entity } from 'simpler-state';
+import { produce } from 'immer';
 
-export const NODE_ENDPOINT = entity("https://ethereum.publicnode.com");
+export const NODE_ENDPOINT = entity('https://ethereum.publicnode.com');
 
 export const SET_NODE_ENDPOINT = (value) => {
   NODE_ENDPOINT.set(value);
@@ -12,16 +12,16 @@ export const SET_NODE_ENDPOINT = (value) => {
 export const METHODS = entity([
   {
     id: 0,
-    method_used: "eth_getBlockByNumber",
-    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_URL + "test-get-block",
+    method_used: 'eth_getBlockByNumber',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_URL + 'test-get-block',
     perform: true,
     isLoading: true,
     data: {},
   },
   {
     id: 1,
-    method_used: "eth_call",
-    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_URL + "test-eth-call",
+    method_used: 'eth_call',
+    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_URL + 'test-eth-call',
     perform: true,
     isLoading: true,
     data: {},
