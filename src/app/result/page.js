@@ -20,6 +20,24 @@ const Result = () => {
   const [chartData, setChartData] = useState(null);
   const [explainIsDisabled, setExplainIsDisabled] = useState(true);
 
+  const downloadJson = () => {
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+      JSON.stringify(
+        methods.map((method) => {
+          return {
+            method: method.method_used,
+            results: method.data,
+          };
+        })
+      )
+    )}`;
+    const link = document.createElement('a');
+    link.href = jsonString;
+    link.download = 'data.json';
+
+    link.click();
+  };
+
   useEffect(() => {
     if (methods.every((item) => Object.keys(item.data).length != 0) === true) {
       setChartData([
@@ -43,7 +61,7 @@ const Result = () => {
   }, [methods]);
 
   return (
-    <div className="m-auto max-w-6xl">
+    <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
       <Header />
       <main className="max-w-lg m-auto">
         <div className="mb-10 px-4 border-gray-800 border-r border-l flex items-center">
@@ -110,17 +128,18 @@ const Result = () => {
           )}
         </div>
 
-        <div className="flex gap-4 flex-grow mt-4">
+        <div className="flex flex-col sm:flex-row gap-4 flex-grow my-8 sm:mt-4">
           <Button
-            style={{ width: 'calc(50% - 8px)' }}
+            className="w-full sm:w-[calc(50%-8px)]"
             before={<ExplainResultsIcon />}
             variant="tertiary"
             disabled={explainIsDisabled}
+            onClick={downloadJson}
           >
-            Explain results
+            Download JSON
           </Button>
           <Link
-            style={{ width: 'calc(50% - 8px)' }}
+            className="w-full sm:w-[calc(50%-8px)]"
             href={{
               pathname: '/',
             }}

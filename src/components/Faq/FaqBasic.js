@@ -5,7 +5,7 @@ import Post from './post.mdx';
 const FaqBasic = () => {
   return (
     <div>
-      <h2 className="text-5xl font-bold text-accent text-center mt-20 mb-10">
+      <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-20 mb-10">
         FAQ
       </h2>
       <div className="max-w-lg m-auto">

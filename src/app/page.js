@@ -1,22 +1,23 @@
-"use client";
-import { useEffect } from "react";
-import { Button, Badge, Tabs, Tooltip, Input } from "@lemonsqueezy/wedges";
-import { TypeAnimation } from "react-type-animation";
-import Performance from "@/components/Performance/Preformance";
-import Bento from "@/components/Bento/Bento";
-import FaqBasic from "@/components/Faq/FaqBasic";
-import Footer from "@/components/Footer/Footer";
-import Header from "@/components/Header/Header";
-import Link from "next/link";
+'use client';
+import { useEffect } from 'react';
+import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
+import { TypeAnimation } from 'react-type-animation';
+import Performance from '@/components/Performance/Preformance';
+import Compare from '@/components/Performance/Compare';
+import Bento from '@/components/Bento/Bento';
+import FaqBasic from '@/components/Faq/FaqBasic';
+import Footer from '@/components/Footer/Footer';
+import Header from '@/components/Header/Header';
+import Link from 'next/link';
 import {
   NODE_ENDPOINT,
   SET_NODE_ENDPOINT,
   CLEAR_METHODS_DATA,
-} from "./store/store";
+} from './store/store';
 
 function FormTabs() {
   return (
-    <div className="m-auto flex w-fit max-w-full flex-col gap-10 text-left">
+    <div className="hidden m-auto lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left">
       <Tabs variant="fill" defaultValue="examples">
         <Tabs.List>
           <Tabs.Trigger value="examples">Single endpoint</Tabs.Trigger>
@@ -62,35 +63,36 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="m-auto max-w-6xl">
+    <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
       <Header />
 
       <main>
-        <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-48 font-black">
-          meet{" "}
+        <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-24 sm:my-48 lg:my-48 font-black">
+          meet <span className="block sm:hidden lg:hidden">modern compare</span>
           <TypeAnimation
+            className="sm:hidden lg:inline hidden"
             sequence={[
-              "modern",
+              'modern',
               3000,
-              "sophisticated",
+              'sophisticated',
               3000,
-              "precise",
+              'precise',
               3000,
-              "tailored",
+              'tailored',
               3000,
-              "perfect",
+              'perfect',
               3000,
-              "modern",
+              'modern',
               3000,
             ]}
             preRenderFirstString={true}
             speed={20}
             repeat={Infinity}
           />
-          <Performance />
+          <Compare />
           tool
         </h1>
-        <div className="grid grid-cols-2 gap-8 my-20 text-gray-400 font-mono">
+        <div className="grid lg:grid-cols-2 lg:grid-rows-1 sm:grid-cols-1 sm:grid-rows-2 gap-4 lg:gap-8 sm:gap-4 my-20 text-gray-400 font-mono">
           <p>
             In the dynamic landscape of blockchain technology, where the
             efficiency and reliability of RPC nodes are paramount; traditional
@@ -99,22 +101,22 @@ export default function Home() {
             to node performance evaluation.
           </p>
           <p>
-            Chainstack Compare transcends conventional metrics by taking a a
+            Chainstack Compare transcends conventional metrics by taking a
             different approach to measuring node efficiency, particularly in
-            data fetching—a critical factor for the performance of decentralized
-            applications. Designed to the modern needs of developers, our tool
-            provides a nuanced assessment that goes beyond simple latency
-            numbers to capture the essence of real-world node performance.
+            data fetching — a critical factor for the performance of
+            decentralized applications. Designed to the modern needs of
+            developers, our tool provides a nuanced assessment that goes beyond
+            simple latency numbers to capture the essence of real-world node
+            performance.
           </p>
         </div>
 
         {/* FORM */}
 
-        <div className="flex flex-row justify-between items-center p-12 custom-bento-card mb-10">
-          <h2 className="text-5xl font-bold text-accent">
+        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
+          <h2 className="text-5xl font-bold text-accent sm:mb-8">
             Test your
-            <br />
-            endpoint
+            <br className="lg:block sm:hidden hidden" /> endpoint
           </h2>
 
           <div className="">
@@ -130,7 +132,7 @@ export default function Home() {
             />
             <Link
               href={{
-                pathname: "/result",
+                pathname: '/result',
               }}
             >
               <Button variant="primary" className="fix-cta-button w-full">
