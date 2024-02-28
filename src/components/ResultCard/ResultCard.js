@@ -1,9 +1,9 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { CodeIcon } from '@iconicicons/react';
-import { Badge, Loading, Tooltip } from '@lemonsqueezy/wedges';
+"use client";
+import React, { useEffect, useState } from "react";
+import { CodeIcon } from "@iconicicons/react";
+import { Badge, Loading, Tooltip } from "@lemonsqueezy/wedges";
 
-import { SET_METHOD_RESPONSE_DATA } from '../../app/store/store';
+import { SET_METHOD_RESPONSE_DATA } from "../../app/store/store";
 
 const ResultCard = ({ config, endpoint }) => {
   const [cardData, setCardData] = useState(config);
@@ -13,17 +13,29 @@ const ResultCard = ({ config, endpoint }) => {
   const [fetchErrorResult, setFetchErrorResult] = useState(false);
 
   const fetchData = async () => {
+    // Your username and password for Basic Auth
+    const username = process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME;
+    const password = process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD;
+
+    // Encode username and password
+    const encodedCredentials = btoa(`${username}:${password}`);
+
+    console.log(username);
+    console.log(encodedCredentials);
+
     const response = await fetch(cardData.method_url, {
       body: JSON.stringify({ rpc_url: endpoint }),
       headers: {
-        accept: 'application/json',
-        'Content-Type': 'application/json',
+        accept: "application/json",
+        // Add the Authorization header for Basic Auth
+        Authorization: `Basic ${encodedCredentials}`,
       },
-      method: 'POST',
+
+      method: "POST",
     });
     if (!response.ok) {
       throw new Error(
-        'Fetch failed. ' + response.status + ' ' + response.statusText
+        "Fetch failed. " + response.status + " " + response.statusText
       );
     }
     const body = await response.json();
@@ -31,8 +43,8 @@ const ResultCard = ({ config, endpoint }) => {
   };
 
   useEffect(() => {
-    if (endpoint === '') {
-      window.location.replace('/');
+    if (endpoint === "") {
+      window.location.replace("/");
     } else {
       Object.keys(cardData.data).length === 0 &&
         fetchData()
@@ -65,7 +77,7 @@ const ResultCard = ({ config, endpoint }) => {
     // no errors
     if (
       Object.keys(cardData.data).length != 0 &&
-      cardData.data.hasOwnProperty('error') === false
+      cardData.data.hasOwnProperty("error") === false
     ) {
       setNormalResult(true);
     }
@@ -79,7 +91,7 @@ const ResultCard = ({ config, endpoint }) => {
     }
 
     // fetch error
-    if (cardData.data.hasOwnProperty('error') === true) {
+    if (cardData.data.hasOwnProperty("error") === true) {
       setFetchErrorResult(cardData.data.error);
     }
   }, [cardData]);
@@ -94,13 +106,13 @@ const ResultCard = ({ config, endpoint }) => {
       </div>
 
       {normalResult && (
-        <div className="grid grid-rows-3 gap-4 lg:grid-cols-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3">
           <div>
             <div
               className={
                 rateLimitResult
-                  ? 'text-xl font-bold text-yellow-500 '
-                  : 'text-xl font-bold'
+                  ? "text-xl font-bold text-yellow-500 "
+                  : "text-xl font-bold"
               }
             >
               {cardData.data.blocks_processed_successfully}/
@@ -135,7 +147,7 @@ const ResultCard = ({ config, endpoint }) => {
 
       {rateLimitResult && (
         <div className="text-xs text-yellow-500 font-mono mt-6">
-          Rate limit exceeded. Success rate{' '}
+          Rate limit exceeded. Success rate{" "}
           {(
             (cardData.data.blocks_processed_successfully /
               cardData.data.target_blocks) *
