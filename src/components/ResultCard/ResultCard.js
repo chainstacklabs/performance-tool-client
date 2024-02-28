@@ -27,6 +27,7 @@ const ResultCard = ({ config, endpoint }) => {
       body: JSON.stringify({ rpc_url: endpoint }),
       headers: {
         accept: "application/json",
+        "Content-Type": "application/json",
         // Add the Authorization header for Basic Auth
         Authorization: `Basic ${encodedCredentials}`,
       },
