@@ -68,7 +68,7 @@ export default function Home() {
 
       <main>
         <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-24 sm:my-48 lg:my-48 font-black">
-          meet <span className="block sm:hidden lg:hidden">modern compare</span>
+          meet the <span className="block sm:hidden lg:hidden">modern compare</span>
           <TypeAnimation
             className="sm:hidden lg:inline hidden"
             sequence={[
@@ -107,6 +107,7 @@ export default function Home() {
           </p>
           <p>
             Server-side instance specs:<br/>
+            <p>2 vCPUs with 2GB of RAM</p>
             Contract: <a href="https://etherscan.io/address/0x087CDFb5D353395Cff09d986295d59A0B9E15D77#code" 
             className="text-blue-500 hover:text-blue-700 underline" 
             target="_blank" 
