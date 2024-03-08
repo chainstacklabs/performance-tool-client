@@ -144,7 +144,18 @@ export default function Home() {
             <li>Harmony Testnet</li>
             </ul>
           </p>
+
         </div>
+        <div className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg p-2 bg-white rounded-lg shadow-md mb-4">
+    <a href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance" target='blank' className="flex flex-col items-start">
+      <h3 className="text-lg text-gray-900 font-semibold mb-2">
+        Learn how Chainstack Compare works
+      </h3>
+      <p className="text-gray-600">
+        The guide will explain the logic behind the tool and why we built it.
+      </p>
+    </a>
+  </div>
 
         {/* FORM */}
 
