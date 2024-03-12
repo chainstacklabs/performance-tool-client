@@ -154,6 +154,18 @@ const Result = () => {
             </Button>
           </Link>
         </div>
+
+        <a
+          href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance"
+          className="text-blue-500 hover:text-blue-700"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <p className="text-center w-full text-s mt-8 font-mono">
+            Learn how Chainstack Compare works
+            <br /> under the hood and why we built it ↗.
+          </p>
+        </a>
       </main>
     </div>
   );

@@ -123,24 +123,27 @@ export default function Home() {
           </div>
         </div>
         <div>
-              <p className="mb-2">Supported networks:</p>
-              <div className="[&>span]:mb-2 [&>span]:mr-2 [&>span]:!bg-[#121d3a]">
-                {supportedNetworks.map((item, i) => (
-                  <>
-                    {item.networks.map((network, idx) => {
-                      return (
-                        <Badge
-                          key={idx}
-                          before={<ProtocolIcon protocolName={item.protocol} />}
-                        >
-                          {network}
-                        </Badge>
-                      );
-                    })}
-                  </>
-                ))}
-              </div>
-            </div>
+          <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-20 mb-10">
+            Supported networks
+          </h2>
+
+          <div className="[&>span]:mb-2 [&>span]:mr-2 [&>span]:!bg-[#121d3a]">
+            {supportedNetworks.map((item, i) => (
+              <>
+                {item.networks.map((network, idx) => {
+                  return (
+                    <Badge
+                      key={idx}
+                      before={<ProtocolIcon protocolName={item.protocol} />}
+                    >
+                      {network}
+                    </Badge>
+                  );
+                })}
+              </>
+            ))}
+          </div>
+        </div>
         <div className="grid lg:grid-cols-2 lg:grid-rows-1 sm:grid-cols-1 sm:grid-rows-2 gap-4 lg:gap-8 sm:gap-4 my-20 text-gray-400 font-mono">
           <div>
             <p className="mb-4">
@@ -151,7 +154,24 @@ export default function Home() {
             <p className="mb-4">
               The tool runs server-side on an instance maintained by Chainstack.
             </p>
+            <div className="mb-4">
+              <p>Server-side instance specs:</p>
+              <p>2 vCPUs with 2GB of RAM</p>
+            </div>
+            <div className="mb-4">
+              <p>Contract:</p>
+              <a
+                href="https://etherscan.io/address/0x087CDFb5D353395Cff09d986295d59A0B9E15D77#code"
+                className="text-blue-500 hover:text-blue-700"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                CompareNodePerformance
+              </a>
+            </div>
+          </div>
 
+          <div>
             <p className="mb-2">
               The tool does a few calls to the exact same dummy contracts
               deployed on a few EVM networks. The tool measures the performance
@@ -177,50 +197,14 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Learn how Chainstack Compare works under the hood and and why we
+                Learn how Chainstack Compare works under the hood and why we
                 built it ↗.
               </a>
             </p>
           </div>
-
-          <div>
-            <div className="mb-4">
-              <p>Server-side instance specs:</p>
-              <p>2 vCPUs with 2GB of RAM</p>
-            </div>
-            <div className="mb-4">
-              <p>Contract:</p>
-              <a
-                href="https://etherscan.io/address/0x087CDFb5D353395Cff09d986295d59A0B9E15D77#code"
-                className="text-blue-500 hover:text-blue-700"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                CompareNodePerformance
-              </a>
-            </div>
-            
-          </div>
         </div>
-        {/* <div className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg p-2 bg-white rounded-lg shadow-md mb-4">
-          <a
-            href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance"
-            target="blank"
-
-          >
-            <h3 className="text-lg text-gray-900 font-semibold mb-2">
-              Learn how Chainstack Compare works
-            </h3>
-            <p className="text-gray-600">
-              The guide will explain the logic behind the tool and why we built
-              it.
-            </p>
-          </a>
-        </div> */}
 
         {/* FORM */}
-
-        
 
         {/* BENTO */}
 
