@@ -62,3 +62,58 @@ export const CLEAR_METHODS_DATA = () => {
     );
   });
 };
+
+export const SUPPORTED_NETWORKS = entity([
+  {
+    protocol: 'Ethereum',
+    networks: ['Mainnet', 'Holešky Testnet', 'Sepolia Testnet'],
+  },
+  {
+    protocol: 'Polygon',
+    networks: ['Mainnet', 'Mumbai Testnet'],
+  },
+  {
+    protocol: 'BNB Smart Chain',
+    networks: ['Mainnet', 'Testnet'],
+  },
+  {
+    protocol: 'Base',
+    networks: ['Mainnet', 'Sepolia Testnet'],
+  },
+  {
+    protocol: 'Avalanche',
+    networks: ['Mainnet', 'Fuji Testnet'],
+  },
+  {
+    protocol: 'Arbitrum',
+    networks: ['Mainnet', 'Sepolia Testnet'],
+  },
+  {
+    protocol: 'Optimism',
+    networks: ['Mainnet', 'Sepolia Testnet'],
+  },
+  {
+    protocol: 'Scroll',
+    networks: ['Mainnet', 'Sepolia Testnet'],
+  },
+  {
+    protocol: 'Ronin',
+    networks: ['Saigon Testnet'],
+  },
+  {
+    protocol: 'Gnosis Chain',
+    networks: ['Mainnet', 'Chiado Testnet'],
+  },
+  {
+    protocol: 'Cronos',
+    networks: ['Mainnet', 'Testnet'],
+  },
+  {
+    protocol: 'Fantom',
+    networks: ['Mainnet', 'Testnet'],
+  },
+  {
+    protocol: 'Harmony',
+    networks: ['Mainnet', 'Testnet'],
+  },
+]);
