@@ -8,11 +8,13 @@ import Bento from '@/components/Bento/Bento';
 import FaqBasic from '@/components/Faq/FaqBasic';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
+import ProtocolIcon from '@/components/ProtocolIcon/ProtocolIcon';
 import Link from 'next/link';
 import {
   NODE_ENDPOINT,
   SET_NODE_ENDPOINT,
   CLEAR_METHODS_DATA,
+  SUPPORTED_NETWORKS,
 } from './store/store';
 
 function FormTabs() {
@@ -58,6 +60,7 @@ function FormTabs() {
 
 export default function Home() {
   const nodeEndpoint = NODE_ENDPOINT.use();
+  const supportedNetworks = SUPPORTED_NETWORKS.use();
   useEffect(() => {
     CLEAR_METHODS_DATA();
   }, []);
@@ -68,7 +71,8 @@ export default function Home() {
 
       <main>
         <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-24 sm:my-48 lg:my-48 font-black">
-          meet the <span className="block sm:hidden lg:hidden">modern compare</span>
+          meet the{' '}
+          <span className="block sm:hidden lg:hidden">modern compare</span>
           <TypeAnimation
             className="sm:hidden lg:inline hidden"
             sequence={[
@@ -91,71 +95,99 @@ export default function Home() {
           tool
         </h1>
         <div className="grid lg:grid-cols-2 lg:grid-rows-1 sm:grid-cols-1 sm:grid-rows-2 gap-4 lg:gap-8 sm:gap-4 my-20 text-gray-400 font-mono">
-          <p>
-            Chainstack Compare is tool to measure the node performance metrics
-            that make sense.<br/>
-            The tool runs server-side on an instance maintained by Chainstack.<br/>
-            The tool does a few calls to the exact same dummy contracts deployed
-            on a few EVM networks.
-            The tool measures the performance from three data points:<br/>
-            i) the number of processed blocks with the calls;<br/>
-            ii) the time it takes to process the blocks with the calls;<br/>
-            iii) the resulting blocks-per-second metric, or the expected
-            data throughput.<br/>
-            As you can see, all the parameters are uninform except for the one
-            you care about and feed to the tool — your node endpoint.
-          </p>
-          <p>
-            Server-side instance specs:<br/>
-            <p>2 vCPUs with 2GB of RAM</p>
-            Contract: <a href="https://etherscan.io/address/0x087CDFb5D353395Cff09d986295d59A0B9E15D77#code" 
-            className="text-blue-500 hover:text-blue-700 underline" 
-            target="_blank" 
-            rel="noopener noreferrer">
-            CompareNodePerformance
-            </a><br/>
-            Supported networks:
-            <ul>
-            <li>Ethereum Mainnet</li>
-            <li>Ethereum Holešky Testnet</li>
-            <li>Ethereum Sepolia Testnet</li>
-            <li>Polygon Mainnet</li>
-            <li>Polygon Mumbai Testnet</li>
-            <li>BNB Smart Chain Mainnet</li>
-            <li>BNB Smart Chain Testnet</li>
-            <li>Base Mainnet</li>
-            <li>Base Sepolia Testnet</li>
-            <li>Avalanche Mainnet</li>
-            <li>Avalanche Fujo Testnet</li>
-            <li>Arbitrum Mainnet</li>
-            <li>Arbitrum Sepolia Testnet</li>
-            <li>Optimism Mainnet</li>
-            <li>Optimism Sepolia Testnet</li>
-            <li>Scroll Mainnet</li>
-            <li>Scroll Sepolia Testnet</li>
-            <li>Ronin Saigon Testnet</li>
-            <li>Gnosis Chain Mainnet</li>
-            <li>Gnosis Chain Chiado Testnetnet</li>
-            <li>Cronos Mainnet</li>
-            <li>Cronos Testnet</li>
-            <li>Fantom Mainnet</li>
-            <li>Fantom Testnet</li>
-            <li>Harmony Mainnet</li>
-            <li>Harmony Testnet</li>
-            </ul>
-          </p>
+          <div>
+            <p className="mb-4">
+              Chainstack Compare is tool to measure the node performance metrics
+              that make sense.
+            </p>
 
+            <p className="mb-4">
+              The tool runs server-side on an instance maintained by Chainstack.
+            </p>
+
+            <p className="mb-2">
+              The tool does a few calls to the exact same dummy contracts
+              deployed on a few EVM networks. The tool measures the performance
+              from three data points:
+            </p>
+
+            <ul className="list-disc list-inside mb-4">
+              <li>the number of processed blocks with the calls;</li>
+              <li>the time it takes to process the blocks with the calls;</li>
+              <li>
+                the resulting blocks-per-second metric, or the expected data
+                throughput.
+              </li>
+            </ul>
+            <p className="mb-2">
+              As you can see, all the parameters are uninform except for the one
+              you care about and feed to the tool — your node endpoint.
+            </p>
+            <p>
+              <a
+                href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance"
+                className="text-blue-500 hover:text-blue-700"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Learn how Chainstack Compare works under the hood and and why we
+                built it ↗.
+              </a>
+            </p>
+          </div>
+
+          <div>
+            <div className="mb-4">
+              <p>Server-side instance specs:</p>
+              <p>2 vCPUs with 2GB of RAM</p>
+            </div>
+            <div className="mb-4">
+              <p>Contract:</p>
+              <a
+                href="https://etherscan.io/address/0x087CDFb5D353395Cff09d986295d59A0B9E15D77#code"
+                className="text-blue-500 hover:text-blue-700"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                CompareNodePerformance
+              </a>
+            </div>
+            <div>
+              <p className="mb-2">Supported networks:</p>
+              <div className="[&>span]:mb-2 [&>span]:mr-2 [&>span]:!bg-[#121d3a]">
+                {supportedNetworks.map((item, i) => (
+                  <>
+                    {item.networks.map((network, idx) => {
+                      return (
+                        <Badge
+                          key={idx}
+                          before={<ProtocolIcon protocolName={item.protocol} />}
+                        >
+                          {network}
+                        </Badge>
+                      );
+                    })}
+                  </>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg p-2 bg-white rounded-lg shadow-md mb-4">
-    <a href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance" target='blank' className="flex flex-col items-start">
-      <h3 className="text-lg text-gray-900 font-semibold mb-2">
-        Learn how Chainstack Compare works
-      </h3>
-      <p className="text-gray-600">
-        The guide will explain the logic behind the tool and why we built it.
-      </p>
-    </a>
-  </div>
+        {/* <div className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg p-2 bg-white rounded-lg shadow-md mb-4">
+          <a
+            href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance"
+            target="blank"
+
+          >
+            <h3 className="text-lg text-gray-900 font-semibold mb-2">
+              Learn how Chainstack Compare works
+            </h3>
+            <p className="text-gray-600">
+              The guide will explain the logic behind the tool and why we built
+              it.
+            </p>
+          </a>
+        </div> */}
 
         {/* FORM */}
 
