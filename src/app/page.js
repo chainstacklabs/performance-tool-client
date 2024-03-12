@@ -94,6 +94,53 @@ export default function Home() {
           <Compare />
           tool
         </h1>
+        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
+          <h2 className="text-5xl font-bold text-accent sm:mb-8">
+            Test your
+            <br className="lg:block sm:hidden hidden" /> endpoint
+          </h2>
+
+          <div className="">
+            <FormTabs />
+            <Input
+              required
+              className="fix-input-bg my-4 w-full"
+              placeholder="Your endpoint URL"
+              value={nodeEndpoint}
+              onChange={(e) => {
+                SET_NODE_ENDPOINT(e.target.value);
+              }}
+            />
+            <Link
+              href={{
+                pathname: '/result',
+              }}
+            >
+              <Button variant="primary" className="fix-cta-button w-full">
+                Run test →
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div>
+              <p className="mb-2">Supported networks:</p>
+              <div className="[&>span]:mb-2 [&>span]:mr-2 [&>span]:!bg-[#121d3a]">
+                {supportedNetworks.map((item, i) => (
+                  <>
+                    {item.networks.map((network, idx) => {
+                      return (
+                        <Badge
+                          key={idx}
+                          before={<ProtocolIcon protocolName={item.protocol} />}
+                        >
+                          {network}
+                        </Badge>
+                      );
+                    })}
+                  </>
+                ))}
+              </div>
+            </div>
         <div className="grid lg:grid-cols-2 lg:grid-rows-1 sm:grid-cols-1 sm:grid-rows-2 gap-4 lg:gap-8 sm:gap-4 my-20 text-gray-400 font-mono">
           <div>
             <p className="mb-4">
@@ -152,25 +199,7 @@ export default function Home() {
                 CompareNodePerformance
               </a>
             </div>
-            <div>
-              <p className="mb-2">Supported networks:</p>
-              <div className="[&>span]:mb-2 [&>span]:mr-2 [&>span]:!bg-[#121d3a]">
-                {supportedNetworks.map((item, i) => (
-                  <>
-                    {item.networks.map((network, idx) => {
-                      return (
-                        <Badge
-                          key={idx}
-                          before={<ProtocolIcon protocolName={item.protocol} />}
-                        >
-                          {network}
-                        </Badge>
-                      );
-                    })}
-                  </>
-                ))}
-              </div>
-            </div>
+            
           </div>
         </div>
         {/* <div className="transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg p-2 bg-white rounded-lg shadow-md mb-4">
@@ -191,34 +220,7 @@ export default function Home() {
 
         {/* FORM */}
 
-        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
-          <h2 className="text-5xl font-bold text-accent sm:mb-8">
-            Test your
-            <br className="lg:block sm:hidden hidden" /> endpoint
-          </h2>
-
-          <div className="">
-            <FormTabs />
-            <Input
-              required
-              className="fix-input-bg my-4 w-full"
-              placeholder="Your endpoint URL"
-              value={nodeEndpoint}
-              onChange={(e) => {
-                SET_NODE_ENDPOINT(e.target.value);
-              }}
-            />
-            <Link
-              href={{
-                pathname: '/result',
-              }}
-            >
-              <Button variant="primary" className="fix-cta-button w-full">
-                Run test →
-              </Button>
-            </Link>
-          </div>
-        </div>
+        
 
         {/* BENTO */}
 
