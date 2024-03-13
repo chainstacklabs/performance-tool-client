@@ -9,6 +9,7 @@ const Header = () => {
     <header className="flex flex-col items-start sm:flex-row justify-between sm:items-center my-5">
       <Logo />
       <div className="flex mt-4 sm:mt-0 lg:mt-0">
+        {/*
         <a
           href="https://github.com/chainstacklabs"
           target="_blank"
@@ -22,7 +23,7 @@ const Header = () => {
             Source code
           </Button>
         </a>
-
+*/}
         <a href="https://chainstack.com/" target="_blank">
           <Button before={<ChainstackIcon width={24} height={24} />}>
             Start for free
