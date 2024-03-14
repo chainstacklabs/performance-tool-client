@@ -13,20 +13,11 @@ const ResultCard = ({ config, endpoint }) => {
   const [fetchErrorResult, setFetchErrorResult] = useState(false);
 
   const fetchData = async () => {
-    // Your username and password for Basic Auth
-    const username = process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME;
-    const password = process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD;
-
-    // Encode username and password
-    const encodedCredentials = btoa(`${username}:${password}`);
-
     const response = await fetch(cardData.method_url, {
       body: JSON.stringify({ rpc_url: endpoint }),
       headers: {
         accept: 'application/json',
         'Content-Type': 'application/json',
-        // Add the Authorization header for Basic Auth
-        Authorization: `Basic ${encodedCredentials}`,
       },
 
       method: 'POST',
