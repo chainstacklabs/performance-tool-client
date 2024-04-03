@@ -187,7 +187,7 @@ export default function Home() {
               </li>
             </ul>
             <p className="mb-2">
-              As you can see, all the parameters are uninform except for the one
+              As you can see, all the parameters are uniform except for the one
               you care about and feed to the tool — your node endpoint.
             </p>
             <p>
