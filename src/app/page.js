@@ -12,55 +12,90 @@ import ProtocolIcon from '@/components/ProtocolIcon/ProtocolIcon';
 import Link from 'next/link';
 import {
   NODE_ENDPOINT,
+  NODE_ENDPOINT_2,
   SET_NODE_ENDPOINT,
+  SET_NODE_ENDPOINT_2,
   CLEAR_METHODS_DATA,
   SUPPORTED_NETWORKS,
+  COMPARE_MODE,
+  SET_COMPARE_MODE,
 } from './store/store';
 
-function FormTabs() {
-  return (
-    <div className="hidden m-auto lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left">
-      <Tabs variant="fill" defaultValue="examples">
-        <Tabs.List>
-          <Tabs.Trigger value="examples">Single endpoint</Tabs.Trigger>
+// function FormTabs() {
+//   const nodeEndpoint = NODE_ENDPOINT.use();
+//   return (
+//     <div className="hidden lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left ">
+//       <Tabs variant="fill" defaultValue="single">
+//         <Tabs.List>
+//           <Tabs.Trigger value="single"> • Single endpoint</Tabs.Trigger>
+//           <Tabs.Trigger value="double"> •• Two endpoints</Tabs.Trigger>
+//         </Tabs.List>
 
-          <Tooltip content="Work in progress. Let us know if you are interested in this feature.">
-            <Tabs.Trigger
-              value="usage"
-              disabled
-              after={
-                <Badge size="sm" color="yellow">
-                  🚧
-                </Badge>
-              }
-            >
-              Chainstack vs Your
-            </Tabs.Trigger>
-          </Tooltip>
+//         <Tabs.Content value="single">
 
-          <Tooltip content="Work in progress. Let us know if you are interested in this feature.">
-            <Tabs.Trigger
-              value="playground"
-              disabled
-              after={
-                <Badge size="sm" color="yellow">
-                  🚧
-                </Badge>
-              }
-            >
-              Chainstack vs Custom
-            </Tabs.Trigger>
-          </Tooltip>
-        </Tabs.List>
-        {/* Add Tabs.Content for each trigger/tab */}
-      </Tabs>
-    </div>
-  );
-}
+//           <Input
+//             required
+//             className="fix-input-bg my-4 w-full"
+//             placeholder="Your endpoint URL"
+//             value={nodeEndpoint}
+//             onChange={(e) => {
+//               SET_NODE_ENDPOINT(e.target.value);
+//             }}
+//           />
+//           <Link
+//             href={{
+//               pathname: '/result',
+//             }}
+//           >
+//             <Button variant="primary" className="fix-cta-button w-full">
+//               Run test →
+//             </Button>
+//           </Link>
+
+//         </Tabs.Content>
+
+//         <Tabs.Content value="double">
+
+//           <Input
+//             required
+//             className="fix-input-bg my-4 w-full"
+//             placeholder="Your endpoint URL"
+//             value={nodeEndpoint}
+//             onChange={(e) => {
+//               SET_NODE_ENDPOINT(e.target.value);
+//             }}
+//           />
+//           <Input
+//             required
+//             className="fix-input-bg my-4 w-full"
+//             placeholder="Your endpoint URL"
+//             value={nodeEndpoint}
+//             onChange={(e) => {
+//               SET_NODE_ENDPOINT(e.target.value);
+//             }}
+//           />
+//           <Link
+//             href={{
+//               pathname: '/result',
+//             }}
+//           >
+//             <Button variant="primary" className="fix-cta-button w-full">
+//               Run test →
+//             </Button>
+//           </Link>
+
+//         </Tabs.Content>
+//       </Tabs>
+//     </div>
+//   );
+// }
 
 export default function Home() {
   const nodeEndpoint = NODE_ENDPOINT.use();
+  const nodeEndpoint2 = NODE_ENDPOINT_2.use();
   const supportedNetworks = SUPPORTED_NETWORKS.use();
+  const compareMode = COMPARE_MODE.use();
+
   useEffect(() => {
     CLEAR_METHODS_DATA();
   }, []);
@@ -94,33 +129,101 @@ export default function Home() {
           <Compare />
           tool
         </h1>
+
         <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
           <h2 className="text-5xl font-bold text-accent sm:mb-8">
             Test your
             <br className="lg:block sm:hidden hidden" /> endpoint
           </h2>
 
-          <div className="">
-            <FormTabs />
-            <Input
-              required
-              className="fix-input-bg my-4 w-full"
-              placeholder="Your endpoint URL"
-              value={nodeEndpoint}
-              onChange={(e) => {
-                SET_NODE_ENDPOINT(e.target.value);
-              }}
-            />
-            <Link
-              href={{
-                pathname: '/result',
-              }}
+          {/* <div className="w-8/12"> */}
+          <div className="hidden lg:w-8/12 lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left ">
+            <Tabs
+              variant="fill"
+              defaultValue={compareMode}
+              onValueChange={(value) => SET_COMPARE_MODE(value)}
             >
-              <Button variant="primary" className="fix-cta-button w-full">
-                Run test →
-              </Button>
-            </Link>
+              <Tabs.List>
+                <Tabs.Trigger value="single">
+                  {' '}
+                  • Single endpoint performance
+                </Tabs.Trigger>
+                <Tabs.Trigger value="double">
+                  {' '}
+                  •• Two endpoints compare
+                </Tabs.Trigger>
+              </Tabs.List>
+
+              {/* // CONTENT 1 */}
+
+              <Tabs.Content value="single">
+                <Input
+                  required
+                  className="fix-input-bg w-full"
+                  placeholder="Your endpoint URL"
+                  value={nodeEndpoint}
+                  onChange={(e) => {
+                    SET_NODE_ENDPOINT(e.target.value);
+                  }}
+                />
+                <Link
+                  href={{
+                    pathname: '/compare-single',
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    className="fix-cta-button w-full mt-4"
+                  >
+                    Run test →
+                  </Button>
+                </Link>
+              </Tabs.Content>
+
+              {/* // CONTENT 2 */}
+
+              <Tabs.Content value="double">
+                <div className="flex gap-4">
+                  <div className="flex-grow">
+                    <Input
+                      required
+                      className="fix-input-bg"
+                      placeholder="Endpoint 1"
+                      value={nodeEndpoint}
+                      onChange={(e) => {
+                        SET_NODE_ENDPOINT(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <Input
+                      required
+                      className="flex-1 fix-input-bg"
+                      placeholder="Endpoint 2"
+                      value={nodeEndpoint2}
+                      onChange={(e) => {
+                        SET_NODE_ENDPOINT_2(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <Link
+                  href={{
+                    pathname: '/compare-double',
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    className="fix-cta-button w-full mt-4"
+                  >
+                    Run test →
+                  </Button>
+                </Link>
+              </Tabs.Content>
+            </Tabs>
           </div>
+          {/* </div> */}
         </div>
         <div>
           <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-20 mb-10">
