@@ -30,7 +30,25 @@
   backdrop-filter: blur(10px);
 }
 
+.custom-bento-card:hover {
+  background: radial-gradient(
+      21.68% 25.66% at 102.78% 100.22%,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(0, 0, 0, 0) 38.9%,
+      rgba(255, 255, 255, 0.05) 85.47%
+    ),
+    hsla(231, 100%, 7.5%, 0.6);
+  transition: all 0.5s ease;
+}
+
 .bento-image-postition {
   position: relative;
   overflow: hidden;
+}
+
+.heading-gradient {
+  background: linear-gradient(85deg, #007bff 18.75%, #fff 84.9%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

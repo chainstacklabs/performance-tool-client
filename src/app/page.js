@@ -1,9 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
-import { TypeAnimation } from 'react-type-animation';
-import Performance from '@/components/Performance/Preformance';
-import Compare from '@/components/Performance/Compare';
+import { Button, Badge, Tabs, Input } from '@lemonsqueezy/wedges';
 import Bento from '@/components/Bento/Bento';
 import FaqBasic from '@/components/Faq/FaqBasic';
 import Footer from '@/components/Footer/Footer';
@@ -39,45 +36,26 @@ export default function Home() {
       <Header />
 
       <main>
-        <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-24 sm:my-48 lg:my-48 font-black">
-          meet the{' '}
-          <span className="block sm:hidden lg:hidden">modern compare</span>
-          <TypeAnimation
-            className="sm:hidden lg:inline hidden"
-            sequence={[
-              'uniform',
-              3000,
-              'practical',
-              3000,
-              'precise',
-              3000,
-              'useful',
-              3000,
-              'factual',
-              3000,
-            ]}
-            preRenderFirstString={true}
-            speed={20}
-            repeat={Infinity}
-          />
-          <Compare />
-          tool
+        <h1 className="uppercase text-center text-6xl tracking-wide mt-48 mb-4 font-black heading-gradient ">
+          Test RPC endpoint
+          <br />
+          performance
         </h1>
+        <div className="text-base mb-10 text-gray-400 text-center">
+          Chainstack Compare runs profiles based on standard
+          <br />
+          Ethereum RPC methods that fetch blockchain data.
+        </div>
 
-        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
-          <h2 className="text-5xl font-bold text-accent sm:mb-8">
-            Test your
-            <br className="lg:block sm:hidden hidden" /> endpoint
-          </h2>
-
+        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 mb-10 justify-around">
           {/* <div className="w-8/12"> */}
-          <div className="hidden lg:w-8/12 lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left ">
+          <div className="hidden lg:w-8/12 lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left p-12 custom-bento-card ">
             <Tabs
-              variant="fill"
+              variant="underlined"
               defaultValue={compareMode}
               onValueChange={(value) => SET_COMPARE_MODE(value)}
             >
-              <Tabs.List>
+              <Tabs.List stretch>
                 <Tabs.Trigger value="double" before={<ColumnsIcon />}>
                   Two endpoints comparison
                 </Tabs.Trigger>
@@ -89,33 +67,35 @@ export default function Home() {
               {/* // CONTENT 1 */}
 
               <Tabs.Content value="single">
-                <Input
-                  required
-                  className="fix-input-bg w-full"
-                  placeholder="Your endpoint URL"
-                  value={nodeEndpoint}
-                  onChange={(e) => {
-                    SET_NODE_ENDPOINT(e.target.value);
-                  }}
-                />
-                <Link
-                  href={{
-                    pathname: '/compare-single',
-                  }}
-                >
-                  <Button
-                    variant="primary"
-                    className="fix-cta-button w-full mt-4"
+                <div className="mt-10">
+                  <Input
+                    required
+                    className="fix-input-bg w-full"
+                    placeholder="Your endpoint URL"
+                    value={nodeEndpoint}
+                    onChange={(e) => {
+                      SET_NODE_ENDPOINT(e.target.value);
+                    }}
+                  />
+                  <Link
+                    href={{
+                      pathname: '/compare-single',
+                    }}
                   >
-                    Run test →
-                  </Button>
-                </Link>
+                    <Button
+                      variant="primary"
+                      className="fix-cta-button w-full mt-4"
+                    >
+                      Run test →
+                    </Button>
+                  </Link>
+                </div>
               </Tabs.Content>
 
               {/* // CONTENT 2 */}
 
               <Tabs.Content value="double">
-                <div className="flex gap-4">
+                <div className="flex gap-4 mt-10">
                   <div className="flex-grow">
                     <Input
                       required
@@ -158,7 +138,7 @@ export default function Home() {
           {/* </div> */}
         </div>
         <div>
-          <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-20 mb-10">
+          <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-40 mb-10">
             Supported networks
           </h2>
 
