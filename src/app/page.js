@@ -10,6 +10,9 @@ import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
 import ProtocolIcon from '@/components/ProtocolIcon/ProtocolIcon';
 import Link from 'next/link';
+
+import { ColumnsIcon, StopIcon } from '@iconicicons/react';
+
 import {
   NODE_ENDPOINT,
   NODE_ENDPOINT_2,
@@ -19,76 +22,7 @@ import {
   SUPPORTED_NETWORKS,
   COMPARE_MODE,
   SET_COMPARE_MODE,
-} from './store/store';
-
-// function FormTabs() {
-//   const nodeEndpoint = NODE_ENDPOINT.use();
-//   return (
-//     <div className="hidden lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left ">
-//       <Tabs variant="fill" defaultValue="single">
-//         <Tabs.List>
-//           <Tabs.Trigger value="single"> • Single endpoint</Tabs.Trigger>
-//           <Tabs.Trigger value="double"> •• Two endpoints</Tabs.Trigger>
-//         </Tabs.List>
-
-//         <Tabs.Content value="single">
-
-//           <Input
-//             required
-//             className="fix-input-bg my-4 w-full"
-//             placeholder="Your endpoint URL"
-//             value={nodeEndpoint}
-//             onChange={(e) => {
-//               SET_NODE_ENDPOINT(e.target.value);
-//             }}
-//           />
-//           <Link
-//             href={{
-//               pathname: '/result',
-//             }}
-//           >
-//             <Button variant="primary" className="fix-cta-button w-full">
-//               Run test →
-//             </Button>
-//           </Link>
-
-//         </Tabs.Content>
-
-//         <Tabs.Content value="double">
-
-//           <Input
-//             required
-//             className="fix-input-bg my-4 w-full"
-//             placeholder="Your endpoint URL"
-//             value={nodeEndpoint}
-//             onChange={(e) => {
-//               SET_NODE_ENDPOINT(e.target.value);
-//             }}
-//           />
-//           <Input
-//             required
-//             className="fix-input-bg my-4 w-full"
-//             placeholder="Your endpoint URL"
-//             value={nodeEndpoint}
-//             onChange={(e) => {
-//               SET_NODE_ENDPOINT(e.target.value);
-//             }}
-//           />
-//           <Link
-//             href={{
-//               pathname: '/result',
-//             }}
-//           >
-//             <Button variant="primary" className="fix-cta-button w-full">
-//               Run test →
-//             </Button>
-//           </Link>
-
-//         </Tabs.Content>
-//       </Tabs>
-//     </div>
-//   );
-// }
+} from '../store/store';
 
 export default function Home() {
   const nodeEndpoint = NODE_ENDPOINT.use();
@@ -144,13 +78,11 @@ export default function Home() {
               onValueChange={(value) => SET_COMPARE_MODE(value)}
             >
               <Tabs.List>
-                <Tabs.Trigger value="single">
-                  {' '}
-                  • Single endpoint performance
+                <Tabs.Trigger value="double" before={<ColumnsIcon />}>
+                  Two endpoints comparison
                 </Tabs.Trigger>
-                <Tabs.Trigger value="double">
-                  {' '}
-                  •• Two endpoints compare
+                <Tabs.Trigger value="single" before={<StopIcon />}>
+                  Single endpoint performance
                 </Tabs.Trigger>
               </Tabs.List>
 

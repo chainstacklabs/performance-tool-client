@@ -65,37 +65,6 @@ const Result = () => {
   };
 
   useEffect(() => {
-    // if (
-    //   methods.every((item) => Object.keys(item.data).length != 0) === true &&
-    //   methods2.every((item) => Object.keys(item.data).length != 0) === true
-    // ) {
-    // let sorted = [...methods, ...methods2];
-
-    // sorted.sort((a, b) => a.method_used.localeCompare(b.method_used));
-
-    // setChartData([
-    //   [
-    //     '',
-    //     ...sorted.map((item) => {
-    //       return `[${item.order}] ${item.method_used}`;
-    //     }),
-    //   ],
-    //   [
-    //     '',
-    //     ...sorted.map((item) => {
-    //       if (
-    //         Object.keys(item.data).length != 0 &&
-    //         item.data.hasOwnProperty('error') === false
-    //       ) {
-    //         return +item.data.blocks_per_seconds.toFixed(2);
-    //       } else {
-    //         return 0;
-    //       }
-    //     }),
-    //   ],
-    // ]);
-    // }
-
     if (
       methods.every((item) => Object.keys(item.data).length != 0) === true &&
       methods2.every((item) => Object.keys(item.data).length != 0) === true

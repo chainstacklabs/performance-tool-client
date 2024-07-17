@@ -3,28 +3,20 @@
 import { entity } from 'simpler-state';
 import { produce } from 'immer';
 
-export const NODE_ENDPOINT = entity(
-  ''
-  // 'https://nd-777-597-727.p2pify.com/1022f90128a148f6be9bfeef17f6cb9c'
-);
+export const NODE_ENDPOINT = entity('');
 
 export const SET_NODE_ENDPOINT = (value) => {
   NODE_ENDPOINT.set(value);
 };
 
-export const NODE_ENDPOINT_2 = entity(
-  ''
-  // 'https://special-rough-morning.quiknode.pro/c3789ddd23dc7e5c32759180aa6dc51bbd9a8fce/'
-  // 'https://site1.moralis-nodes.com/eth/f5bd44ea719a4d8091b40271b2c8e6a5'
-  // 'https://go.getblock.io/fc9aa8dbda6a4980addabe23ecd5dc67'
-);
+export const NODE_ENDPOINT_2 = entity('');
 
 export const SET_NODE_ENDPOINT_2 = (value) => {
   NODE_ENDPOINT_2.set(value);
 };
 
 // single or double
-export const COMPARE_MODE = entity('single');
+export const COMPARE_MODE = entity('double');
 
 export const SET_COMPARE_MODE = (value) => {
   COMPARE_MODE.set(value);
