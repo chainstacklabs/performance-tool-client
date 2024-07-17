@@ -22,7 +22,7 @@ import {
   SUPPORTED_NETWORKS,
   COMPARE_MODE,
   SET_COMPARE_MODE,
-} from '../store/store';
+} from './store/store';
 
 export default function Home() {
   const nodeEndpoint = NODE_ENDPOINT.use();
