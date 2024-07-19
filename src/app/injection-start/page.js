@@ -20,41 +20,50 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="max-w-lg mx-4 my-4">
-      <div className="flex gap-4">
-        <div className="flex-grow">
-          <Input
-            required
-            className="fix-input-bg"
-            placeholder="Endpoint 1"
-            value={nodeEndpoint}
-            onChange={(e) => {
-              SET_NODE_ENDPOINT(e.target.value);
-            }}
-          />
+    <div
+      className="mx-4 my-4 w-full"
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div>
+        <div className="flex gap-4">
+          <div className="flex-grow">
+            <Input
+              required
+              className="fix-input-bg"
+              placeholder="Endpoint 1"
+              value={nodeEndpoint}
+              onChange={(e) => {
+                SET_NODE_ENDPOINT(e.target.value);
+              }}
+            />
+          </div>
+          <div className="flex-grow">
+            <Input
+              required
+              className="flex-1 fix-input-bg"
+              placeholder="Endpoint 2"
+              value={nodeEndpoint2}
+              onChange={(e) => {
+                SET_NODE_ENDPOINT_2(e.target.value);
+              }}
+            />
+          </div>
         </div>
-        <div className="flex-grow">
-          <Input
-            required
-            className="flex-1 fix-input-bg"
-            placeholder="Endpoint 2"
-            value={nodeEndpoint2}
-            onChange={(e) => {
-              SET_NODE_ENDPOINT_2(e.target.value);
-            }}
-          />
-        </div>
-      </div>
 
-      <Link
-        href={{
-          pathname: '/injection-result-double',
-        }}
-      >
-        <Button variant="primary" className="fix-cta-button w-full mt-4">
-          Run test →
-        </Button>
-      </Link>
+        <Link
+          href={{
+            pathname: '/injection-result-double',
+          }}
+        >
+          <Button variant="primary" className="fix-cta-button w-full mt-4">
+            Run test →
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }
