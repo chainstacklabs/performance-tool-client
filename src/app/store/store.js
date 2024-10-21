@@ -3,13 +3,13 @@
 import { entity } from 'simpler-state';
 import { produce } from 'immer';
 
-export const NODE_ENDPOINT = entity('https://ethereum-rpc.publicnode.com');
+export const NODE_ENDPOINT = entity('');
 
 export const SET_NODE_ENDPOINT = (value) => {
   NODE_ENDPOINT.set(value);
 };
 
-export const NODE_ENDPOINT_2 = entity('https://ethereum-rpc.publicnode.com');
+export const NODE_ENDPOINT_2 = entity('');
 
 export const SET_NODE_ENDPOINT_2 = (value) => {
   NODE_ENDPOINT_2.set(value);
