@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <div
-      className="mx-4 my-4 w-full"
+      className="mx-4 my-4"
       style={{
         display: 'flex',
         justifyContent: 'center',

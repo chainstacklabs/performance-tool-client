@@ -1,14 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-import Header from '@/components/Header/Header';
 import ResultCard from '@/components/ResultCard/ResultCard';
-import ExplainResultsIcon from '../../components/Icons/ExplainResultsIcon';
 
 import { CodeIcon } from '@iconicicons/react';
-import { Button, Loading, Badge } from '@lemonsqueezy/wedges';
+import { Button } from '@lemonsqueezy/wedges';
 import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
-import { Chart } from 'react-google-charts';
+
 import Link from 'next/link';
 
 import {
@@ -121,7 +119,8 @@ const Result = () => {
   let grid = 'grid grid-cols-2 gap-10';
 
   return (
-    <div className="lg:m-auto lg:max-w-6xl ">
+    // <div className="lg:m-auto lg:max-w-6xl ">
+    <div className="mx-auto max-w-[1000px]">
       {/* URLS */}
       <div className={grid + ' mt-8'}>
         {[
@@ -225,138 +224,41 @@ const Result = () => {
       {/* eth_call */}
 
       <main className="m-auto mt-8">
-        <h2 className="text-5xl font-bold text-accent text-left mt-20 mb-10">
-          Compare results
-        </h2>
-
-        <div className="custom-bento-card rounded-xl border-2 px-6 py-2 mt-4">
-          <div className="flex flex-row my-4 items-center">
-            <Badge before={<CodeIcon />} color="blue" stroke className="">
-              {methodsNames[1]}
-            </Badge>
-            <div className="text-sm ml-4">Blocks per second</div>
-          </div>
-          {!chartData ? (
-            <div
-              style={{ width: '100%', height: '200px' }}
-              className="flex justify-around items-center"
-            >
-              <Loading type="spinner" size="xxs" />
-            </div>
-          ) : (
-            <Chart
-              chartType="BarChart"
-              width="100%"
-              data={chartData}
-              options={{
-                chartArea: { width: '100%' },
-                backgroundColor: 'transparent',
-                colors: ['#0162F3', '#74ACFF', '#6100AE', '#D29AFF'],
-
-                hAxis: {
-                  // title: 'Blocks per second',
-                  titleTextStyle: { color: '#fff' },
-                  minValue: 0,
-                  textStyle: { color: '#EEF8FB' },
-                  gridlines: {
-                    color: '#333645',
-                  },
-                },
-                vAxis: {
-                  textStyle: { color: '#ff00d0' },
-                },
-                legend: {
-                  position: 'top',
-                  textStyle: { color: '#fff' },
-                },
-              }}
-            />
-          )}
-        </div>
-        <div className="custom-bento-card rounded-xl border-2 px-6 py-2 mt-4">
-          <div className="flex flex-row my-4 items-center">
-            <Badge before={<CodeIcon />} color="blue" stroke className="">
-              {methodsNames[0]}
-            </Badge>
-            <div className="text-sm ml-4">Blocks per second</div>
-          </div>
-          {!chartData2 ? (
-            <div
-              style={{ width: '100%', height: '200px' }}
-              className="flex justify-around items-center"
-            >
-              <Loading type="spinner" size="xxs" />
-            </div>
-          ) : (
-            <Chart
-              chartType="BarChart"
-              width="100%"
-              data={chartData2}
-              options={{
-                chartArea: { width: '100%' },
-                backgroundColor: 'transparent',
-                colors: ['#0162F3', '#74ACFF', '#6100AE', '#D29AFF'],
-                // colors: ['#6100AE', '#D29AFF'],
-
-                hAxis: {
-                  // title: 'Blocks per second',
-                  titleTextStyle: { color: '#fff' },
-                  minValue: 0,
-                  textStyle: { color: '#EEF8FB' },
-                  gridlines: {
-                    color: '#333645',
-                  },
-                },
-                vAxis: {
-                  textStyle: { color: '#ff00d0' },
-                },
-                legend: {
-                  position: 'top',
-                  textStyle: { color: '#fff' },
-                },
-              }}
-            />
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 flex-grow my-8 sm:mt-4">
+        {/* <h2 className="text-5xl font-bold text-accent text-left mt-20 mb-10">
+          Full results
+        </h2> */}
+        <Link
+          className="w-full sm:w-[calc(50%-8px)]"
+          target="_blank"
+          href={{
+            pathname: '/compare-double',
+            query: { url1: nodeEndpoint, url2: nodeEndpoint2 },
+          }}
+        >
           <Button
-            className="w-full sm:w-[calc(50%-8px)]"
-            before={<ExplainResultsIcon />}
+            className="w-full"
+            // before={<PlusIcon />}
+            variant="primary"
+            disabled={explainIsDisabled}
+          >
+            See full results
+          </Button>
+        </Link>
+        {/* <Link
+          className="w-full sm:w-[calc(50%-8px)]"
+          href={{
+            pathname: '/injection-start',
+          }}
+        >
+          <Button
+            className="w-full"
+            before={<PlusIcon />}
             variant="tertiary"
             disabled={explainIsDisabled}
-            onClick={downloadJson}
           >
-            Download JSON
+            New test
           </Button>
-          <Link
-            className="w-full sm:w-[calc(50%-8px)]"
-            href={{
-              pathname: '/',
-            }}
-          >
-            <Button
-              className="w-full"
-              before={<PlusIcon />}
-              variant="tertiary"
-              disabled={explainIsDisabled}
-            >
-              New test
-            </Button>
-          </Link>
-        </div>
-
-        <a
-          href="https://docs.chainstack.com/docs/chainstack-compare-rpc-node-performance"
-          className="text-blue-500 hover:text-blue-700"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <p className="text-center w-full text-s mt-8 font-mono">
-            Learn how Chainstack Compare works
-            <br /> under the hood and why we built it ↗.
-          </p>
-        </a>
+        </Link> */}
       </main>
     </div>
   );

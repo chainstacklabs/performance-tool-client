@@ -5,7 +5,7 @@ import Header from '@/components/Header/Header';
 import ResultCard from '@/components/ResultCard/ResultCard';
 import ExplainResultsIcon from '../../components/Icons/ExplainResultsIcon';
 
-import { CodeIcon } from '@iconicicons/react';
+import { CodeIcon, ShareIcon } from '@iconicicons/react';
 import { Button, Loading, Badge } from '@lemonsqueezy/wedges';
 import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
 import { Chart } from 'react-google-charts';
@@ -14,12 +14,16 @@ import Link from 'next/link';
 import {
   NODE_ENDPOINT,
   NODE_ENDPOINT_2,
+  SET_NODE_ENDPOINT,
+  SET_NODE_ENDPOINT_2,
   METHODS,
   METHODS_2,
   SET_METHOD_RESPONSE_DATA,
   SET_METHOD_RESPONSE_DATA_2,
   GET_METHODS_NAMES,
 } from '../store/store';
+
+import { useSearchParams } from 'next/navigation';
 
 const Result = () => {
   const nodeEndpoint = NODE_ENDPOINT.use();
@@ -30,9 +34,13 @@ const Result = () => {
 
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
   const [copiedToClipboard2, setCopiedToClipboard2] = useState(false);
+  const [compareLinkCopiedToClipboard, setCompareLinkCopiedToClipboard] =
+    useState(false);
   const [chartData, setChartData] = useState(null);
   const [chartData2, setChartData2] = useState(null);
   const [explainIsDisabled, setExplainIsDisabled] = useState(false);
+
+  const searchParams = useSearchParams();
 
   const downloadJson = () => {
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
@@ -63,6 +71,15 @@ const Result = () => {
 
     link.click();
   };
+
+  useEffect(() => {
+    let url1 = searchParams.get('url1');
+    let url2 = searchParams.get('url2');
+    if (url1 != null && url2 != null) {
+      SET_NODE_ENDPOINT(url1);
+      SET_NODE_ENDPOINT_2(url2);
+    }
+  }, []);
 
   useEffect(() => {
     if (
@@ -321,9 +338,9 @@ const Result = () => {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 flex-grow my-8 sm:mt-4">
+        <div className="flex flex-col sm:flex-row gap-4 flex-grow my-10 ">
           <Button
-            className="w-full sm:w-[calc(50%-8px)]"
+            className="w-full sm:w-[calc(33.3%-8px)]"
             before={<ExplainResultsIcon />}
             variant="tertiary"
             disabled={explainIsDisabled}
@@ -331,8 +348,31 @@ const Result = () => {
           >
             Download JSON
           </Button>
+          <Button
+            className="w-full sm:w-[calc(33.3%-8px)]"
+            before={
+              compareLinkCopiedToClipboard === true ? (
+                <CheckIcon style={{ color: 'rgba(52, 211, 153, 1)' }} />
+              ) : (
+                <ClipboardIcon />
+              )
+            }
+            variant="tertiary"
+            disabled={explainIsDisabled}
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `https://compare.chainstack.com/compare-double?url1=${nodeEndpoint}&url2=${nodeEndpoint2}`
+              );
+              setCompareLinkCopiedToClipboard(true);
+              setTimeout(() => {
+                setCompareLinkCopiedToClipboard(false);
+              }, 1000);
+            }}
+          >
+            Copy link
+          </Button>
           <Link
-            className="w-full sm:w-[calc(50%-8px)]"
+            className="w-full sm:w-[calc(33.3%-8px)]"
             href={{
               pathname: '/',
             }}
