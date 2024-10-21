@@ -26,8 +26,12 @@ import {
 import { useSearchParams } from 'next/navigation';
 
 const Result = () => {
-  const nodeEndpoint = NODE_ENDPOINT.use();
-  const nodeEndpoint2 = NODE_ENDPOINT_2.use();
+  const searchParams = useSearchParams();
+  let url1 = searchParams.get('url1');
+  let url2 = searchParams.get('url2');
+
+  const nodeEndpoint = url1 ? url1 : NODE_ENDPOINT.use();
+  const nodeEndpoint2 = url2 ? url2 : NODE_ENDPOINT_2.use();
   const methods = METHODS.use();
   const methods2 = METHODS_2.use();
   const methodsNames = GET_METHODS_NAMES.use();
@@ -39,8 +43,6 @@ const Result = () => {
   const [chartData, setChartData] = useState(null);
   const [chartData2, setChartData2] = useState(null);
   const [explainIsDisabled, setExplainIsDisabled] = useState(false);
-
-  const searchParams = useSearchParams();
 
   const downloadJson = () => {
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
@@ -73,20 +75,12 @@ const Result = () => {
   };
 
   useEffect(() => {
-    let url1 = searchParams.get('url1');
-    let url2 = searchParams.get('url2');
-    if (url1 != null && url2 != null) {
-      SET_NODE_ENDPOINT(url1);
-      SET_NODE_ENDPOINT_2(url2);
-    }
-  }, []);
-
-  useEffect(() => {
     if (
       methods.every((item) => Object.keys(item.data).length != 0) === true &&
       methods2.every((item) => Object.keys(item.data).length != 0) === true
     ) {
       let chart = [methods[1], methods2[1]];
+      2;
       let chart2 = [methods[0], methods2[0]];
 
       setChartData([
