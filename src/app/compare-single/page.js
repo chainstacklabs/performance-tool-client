@@ -10,7 +10,11 @@ import { ClipboardIcon, CheckIcon, PlusIcon } from '@iconicicons/react';
 import { Chart } from 'react-google-charts';
 import Link from 'next/link';
 
-import { NODE_ENDPOINT, METHODS } from '../store/store';
+import {
+  NODE_ENDPOINT,
+  METHODS,
+  SET_METHOD_RESPONSE_DATA,
+} from '../store/store';
 
 const Result = () => {
   const nodeEndpoint = NODE_ENDPOINT.use();
@@ -86,7 +90,12 @@ const Result = () => {
         </div>
         {methods.map((item, index) => {
           return (
-            <ResultCard key={index} endpoint={nodeEndpoint} config={item} />
+            <ResultCard
+              key={index}
+              endpoint={nodeEndpoint}
+              config={item}
+              setMethodResponseData={SET_METHOD_RESPONSE_DATA}
+            />
           );
         })}
 

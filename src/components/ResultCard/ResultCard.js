@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { CodeIcon } from '@iconicicons/react';
 import { Badge, Loading, Tooltip } from '@lemonsqueezy/wedges';
 
-import { SET_METHOD_RESPONSE_DATA } from '../../app/store/store';
+import {
+  SET_METHOD_RESPONSE_DATA,
+  SET_METHOD_RESPONSE_DATA_2,
+} from '../../app/store/store';
 
-const ResultCard = ({ config, endpoint }) => {
+const ResultCard = ({ config, endpoint, setMethodResponseData }) => {
   const [cardData, setCardData] = useState(config);
 
   const [normalResult, setNormalResult] = useState(false);
@@ -32,7 +35,7 @@ const ResultCard = ({ config, endpoint }) => {
   };
 
   useEffect(() => {
-    if (endpoint === '') {
+    if (endpoint === '' || config.data.length === 0) {
       window.location.replace('/');
     } else {
       Object.keys(cardData.data).length === 0 &&
@@ -45,7 +48,7 @@ const ResultCard = ({ config, endpoint }) => {
                 data: res,
               };
             });
-            SET_METHOD_RESPONSE_DATA(cardData.id, res);
+            setMethodResponseData(cardData.id, res);
           })
           .catch((error) => {
             setCardData((prev) => {
@@ -55,7 +58,7 @@ const ResultCard = ({ config, endpoint }) => {
                 data: { error: error.message },
               };
             });
-            SET_METHOD_RESPONSE_DATA(cardData.id, {
+            setMethodResponseData(cardData.id, {
               error: error.message,
             });
           });

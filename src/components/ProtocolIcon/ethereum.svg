@@ -1,15 +1,1 @@
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_3770_982)">
-<path opacity="0.5" d="M8.45947 0V11.1111L12.9188 8.22222L8.45947 0Z" fill="white" style="fill:white;fill-opacity:1;"/>
-<path opacity="0.7" d="M8.45931 0L4 8.22222L8.45931 11.1111V0Z" fill="white" style="fill:white;fill-opacity:1;"/>
-<path opacity="0.5" d="M8.45947 12.0002L8.46148 16.0002L12.9188 9.11133L8.45947 12.0002Z" fill="white" style="fill:white;fill-opacity:1;"/>
-<path opacity="0.7" d="M8.45931 16.0002V12.0002L4 9.11133L8.45931 16.0002Z" fill="white" style="fill:white;fill-opacity:1;"/>
-<path opacity="0.5" d="M8.45947 11.1106L12.9188 8.22178L8.45947 5.77734V11.1106Z" fill="white" style="fill:white;fill-opacity:1;"/>
-<path opacity="0.7" d="M4 8.22178L8.45931 11.1106V5.77734L4 8.22178Z" fill="white" style="fill:white;fill-opacity:1;"/>
-</g>
-<defs>
-<clipPath id="clip0_3770_982">
-<rect width="16" height="16" fill="white" style="fill:white;fill-opacity:1;"/>
-</clipPath>
-</defs>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"><g fill="#fff" clip-path="url(#a)"><path d="M8.46 0v11.111l4.459-2.889z" opacity=".5" style="fill:#fff;fill-opacity:1"/><path d="M8.46 0 4 8.222l4.46 2.89z" opacity=".7" style="fill:#fff;fill-opacity:1"/><path d="m8.46 12 .001 4 4.458-6.889z" opacity=".5" style="fill:#fff;fill-opacity:1"/><path d="M8.46 16v-4L4 9.111z" opacity=".7" style="fill:#fff;fill-opacity:1"/><path d="m8.46 11.11 4.459-2.888-4.46-2.445z" opacity=".5" style="fill:#fff;fill-opacity:1"/><path d="m4 8.222 4.46 2.889V5.777z" opacity=".7" style="fill:#fff;fill-opacity:1"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z" style="fill:#fff;fill-opacity:1"/></clipPath></defs></svg>

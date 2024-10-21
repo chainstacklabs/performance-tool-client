@@ -1,66 +1,32 @@
 'use client';
 import { useEffect } from 'react';
-import { Button, Badge, Tabs, Tooltip, Input } from '@lemonsqueezy/wedges';
-import { TypeAnimation } from 'react-type-animation';
-import Performance from '@/components/Performance/Preformance';
-import Compare from '@/components/Performance/Compare';
+import { Button, Badge, Tabs, Input } from '@lemonsqueezy/wedges';
 import Bento from '@/components/Bento/Bento';
 import FaqBasic from '@/components/Faq/FaqBasic';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
 import ProtocolIcon from '@/components/ProtocolIcon/ProtocolIcon';
 import Link from 'next/link';
+
+import { ColumnsIcon, StopIcon } from '@iconicicons/react';
+
 import {
   NODE_ENDPOINT,
+  NODE_ENDPOINT_2,
   SET_NODE_ENDPOINT,
+  SET_NODE_ENDPOINT_2,
   CLEAR_METHODS_DATA,
   SUPPORTED_NETWORKS,
+  COMPARE_MODE,
+  SET_COMPARE_MODE,
 } from './store/store';
-
-function FormTabs() {
-  return (
-    <div className="hidden m-auto lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left">
-      <Tabs variant="fill" defaultValue="examples">
-        <Tabs.List>
-          <Tabs.Trigger value="examples">Single endpoint</Tabs.Trigger>
-
-          <Tooltip content="Work in progress. Let us know if you are interested in this feature.">
-            <Tabs.Trigger
-              value="usage"
-              disabled
-              after={
-                <Badge size="sm" color="yellow">
-                  🚧
-                </Badge>
-              }
-            >
-              Chainstack vs Your
-            </Tabs.Trigger>
-          </Tooltip>
-
-          <Tooltip content="Work in progress. Let us know if you are interested in this feature.">
-            <Tabs.Trigger
-              value="playground"
-              disabled
-              after={
-                <Badge size="sm" color="yellow">
-                  🚧
-                </Badge>
-              }
-            >
-              Chainstack vs Custom
-            </Tabs.Trigger>
-          </Tooltip>
-        </Tabs.List>
-        {/* Add Tabs.Content for each trigger/tab */}
-      </Tabs>
-    </div>
-  );
-}
 
 export default function Home() {
   const nodeEndpoint = NODE_ENDPOINT.use();
+  const nodeEndpoint2 = NODE_ENDPOINT_2.use();
   const supportedNetworks = SUPPORTED_NETWORKS.use();
+  const compareMode = COMPARE_MODE.use();
+
   useEffect(() => {
     CLEAR_METHODS_DATA();
   }, []);
@@ -70,60 +36,109 @@ export default function Home() {
       <Header />
 
       <main>
-        <h1 className="uppercase text-left text-5xl leading-tight tracking-wide my-24 sm:my-48 lg:my-48 font-black">
-          meet the{' '}
-          <span className="block sm:hidden lg:hidden">modern compare</span>
-          <TypeAnimation
-            className="sm:hidden lg:inline hidden"
-            sequence={[
-              'uniform',
-              3000,
-              'practical',
-              3000,
-              'precise',
-              3000,
-              'useful',
-              3000,
-              'factual',
-              3000,
-            ]}
-            preRenderFirstString={true}
-            speed={20}
-            repeat={Infinity}
-          />
-          <Compare />
-          tool
+        <h1 className="uppercase text-center text-6xl tracking-wide mt-48 mb-4 font-black heading-gradient ">
+          Test RPC endpoint
+          <br />
+          performance
         </h1>
-        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 custom-bento-card mb-10">
-          <h2 className="text-5xl font-bold text-accent sm:mb-8">
-            Test your
-            <br className="lg:block sm:hidden hidden" /> endpoint
-          </h2>
+        <div className="text-base mb-10 text-gray-400 text-center">
+          Chainstack Compare runs profiles based on standard
+          <br />
+          Ethereum RPC methods that fetch blockchain data.
+        </div>
 
-          <div className="">
-            <FormTabs />
-            <Input
-              required
-              className="fix-input-bg my-4 w-full"
-              placeholder="Your endpoint URL"
-              value={nodeEndpoint}
-              onChange={(e) => {
-                SET_NODE_ENDPOINT(e.target.value);
-              }}
-            />
-            <Link
-              href={{
-                pathname: '/result',
-              }}
+        <div className="flex lg:flex-row sm:flex-col flex-col justify-between lg:items-center sm:items-center p-8 sm:p-12 lg:p-12 mb-10 justify-around">
+          {/* <div className="w-8/12"> */}
+          <div className="hidden lg:w-8/12 lg:flex sm:flex w-fit max-w-full flex-col gap-10 text-left p-12 custom-bento-card ">
+            <Tabs
+              variant="underlined"
+              defaultValue={compareMode}
+              onValueChange={(value) => SET_COMPARE_MODE(value)}
             >
-              <Button variant="primary" className="fix-cta-button w-full">
-                Run test →
-              </Button>
-            </Link>
+              <Tabs.List stretch>
+                <Tabs.Trigger value="double" before={<ColumnsIcon />}>
+                  Two endpoints comparison
+                </Tabs.Trigger>
+                <Tabs.Trigger value="single" before={<StopIcon />}>
+                  Single endpoint performance
+                </Tabs.Trigger>
+              </Tabs.List>
+
+              {/* // CONTENT 1 */}
+
+              <Tabs.Content value="single">
+                <div className="mt-10">
+                  <Input
+                    required
+                    className="fix-input-bg w-full"
+                    placeholder="Your endpoint URL"
+                    value={nodeEndpoint}
+                    onChange={(e) => {
+                      SET_NODE_ENDPOINT(e.target.value);
+                    }}
+                  />
+                  <Link
+                    href={{
+                      pathname: '/compare-single',
+                    }}
+                  >
+                    <Button
+                      variant="primary"
+                      className="fix-cta-button w-full mt-4"
+                    >
+                      Run test →
+                    </Button>
+                  </Link>
+                </div>
+              </Tabs.Content>
+
+              {/* // CONTENT 2 */}
+
+              <Tabs.Content value="double">
+                <div className="flex gap-4 mt-10">
+                  <div className="flex-grow">
+                    <Input
+                      required
+                      className="fix-input-bg"
+                      placeholder="Endpoint 1"
+                      value={nodeEndpoint}
+                      onChange={(e) => {
+                        SET_NODE_ENDPOINT(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <Input
+                      required
+                      className="flex-1 fix-input-bg"
+                      placeholder="Endpoint 2"
+                      value={nodeEndpoint2}
+                      onChange={(e) => {
+                        SET_NODE_ENDPOINT_2(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <Link
+                  href={{
+                    pathname: '/compare-double',
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    className="fix-cta-button w-full mt-4"
+                  >
+                    Run test →
+                  </Button>
+                </Link>
+              </Tabs.Content>
+            </Tabs>
           </div>
+          {/* </div> */}
         </div>
         <div>
-          <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-20 mb-10">
+          <h2 className="text-5xl font-bold text-accent text-left sm:text-center lg:text-center mt-40 mb-10">
             Supported networks
           </h2>
 
