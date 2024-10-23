@@ -260,9 +260,11 @@ const Result = () => {
         </Link> */}
         </main>
       </div>
-      <Script id="iframe-message">
-        {
-          (window.onload = function () {
+      <Script
+        id="iframe-message"
+        dangerouslySetInnerHTML={{
+          __html: `
+          window.onload = function () {
             let h = document.body.scrollHeight;
 
             window.parent.postMessage(
@@ -271,9 +273,10 @@ const Result = () => {
               },
               '*'
             );
-          })
-        }
-      </Script>
+          }
+        `,
+        }}
+      />
     </>
   );
 };
