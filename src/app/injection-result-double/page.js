@@ -260,7 +260,7 @@ const Result = () => {
         </Link> */}
         </main>
       </div>
-      <Script>
+      <Script id="iframe-message">
         {
           (window.onload = function () {
             let h = document.body.scrollHeight;
