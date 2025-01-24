@@ -3,6 +3,7 @@ import Logo from '@/components/Logo/Logo';
 import { Button } from '@lemonsqueezy/wedges';
 import GithubIcon from '@/components/Icons/GithubIcon';
 import ChainstackIcon from '@/components/Icons/ChainstackIcon';
+import GrafanaIcon from '@/components/Icons/GrafanaIcon';
 
 const Header = () => {
   return (
@@ -24,6 +25,11 @@ const Header = () => {
           </Button>
         </a>
 */}
+        <a href="/dashboard" target="_blank" className="sm:block lg:block hidden">
+          <Button variant="transparent" before={<GrafanaIcon width={24} height={24} />} className="mr-4">
+            Dashboard
+          </Button>
+        </a>
         <a href="https://chainstack.com/" target="_blank">
           <Button before={<ChainstackIcon width={24} height={24} />}>
             Start for free
