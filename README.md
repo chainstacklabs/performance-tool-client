@@ -55,6 +55,10 @@ yarn build
 
 More about [deploying options](https://nextjs.org/docs/app/building-your-application/deploying)
 
+Deployments:
+
+Deployed on Vercel automatically on PR merge.
+
 ## How to Add New Method
 
 Navigate to `src/app/store/store.js` and find the `METHODS` array:
@@ -93,12 +97,17 @@ To add a new method:
 ```
 ├── src/
 │   ├── app/          # Next.js App Router components
-│   ├── components/   # Reusable React components
-│   ├── lib/         # Utility functions and helpers
-│   └── types/       # TypeScript type definitions
-├── public/          # Static assets
-└── config/          # Configuration files
+│   └── components/   # Reusable React components
+└── public/           # Static assets
 ```
+
+## Key Directories
+
+- `/app/compare-double/page.js`: Implements side-by-side comparison functionality for two blockchain nodes page
+- `/app/compare-single/page.js`: Implements testing functionality for one blockchain node page
+- `/app/injection-result-double/page.js`: Implements side-by-side comparison functionality for two blockchain nodes for injected page
+- `/app/store/store.js`: Contains global state management and methods configuration
+- `/app/page.js`: Initial page
 
 ## Core Technologies
 
