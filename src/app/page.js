@@ -27,9 +27,30 @@ export default function Home() {
   const supportedNetworks = SUPPORTED_NETWORKS.use();
   const compareMode = COMPARE_MODE.use();
 
-  useEffect(() => {
-    CLEAR_METHODS_DATA();
-  }, []);
+useEffect(() => {
+  CLEAR_METHODS_DATA();
+
+  // Inject GA4 script
+  const script = document.createElement('script');
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=G-8R3NNPM8SV';
+  script.async = true;
+  document.head.appendChild(script);
+
+  const inlineScript = document.createElement('script');
+  inlineScript.innerHTML = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8R3NNPM8SV');
+  `;
+  document.head.appendChild(inlineScript);
+
+  return () => {
+    // Cleanup if necessary
+    document.head.removeChild(script);
+    document.head.removeChild(inlineScript);
+  };
+}, []);
 
   return (
     <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
