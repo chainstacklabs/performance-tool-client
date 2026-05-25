@@ -21,6 +21,7 @@
     "react-dom": "^18",
     "react-google-charts": "^4.0.1",
     "react-type-animation": "^3.2.0",
+    "server-only": "^0.0.1",
     "simpler-state": "^1.2.1"
   },
   "devDependencies": {
