@@ -51,7 +51,7 @@ export default async function ChainCard({ chain }) {
 
       {error && (
         <div className="text-red-400 text-sm font-mono mb-3">
-          Data unavailable: {error}
+          Data unavailable
         </div>
       )}
 

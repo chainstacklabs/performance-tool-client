@@ -19,7 +19,10 @@ async function safe(label, promise) {
   try {
     return { ok: true, value: await promise };
   } catch (err) {
-    return { ok: false, error: `${label}: ${err.message}` };
+    // Keep the detailed Grafana/Prometheus error server-side only; the client
+    // gets a generic "Data unavailable" message (see ChainCard).
+    console.error(`[grafana] ${label}: ${err.message}`);
+    return { ok: false };
   }
 }
 
@@ -87,9 +90,7 @@ export const fetchChainData = cache(async (chain) => {
     ),
   ]);
 
-  const errors = [p50, p95, p99, success, trend]
-    .filter((r) => !r.ok)
-    .map((r) => r.error);
+  const hadError = [p50, p95, p99, success, trend].some((r) => !r.ok);
 
   const p50Map = p50.ok ? quantileByRegionToMap(p50.value) : new Map();
   const p95Map = p95.ok ? quantileByRegionToMap(p95.value) : new Map();
@@ -128,6 +129,6 @@ export const fetchChainData = cache(async (chain) => {
     providers,
     regions: [...regions].sort(),
     leader: providers[0] ?? null,
-    error: providers.length === 0 && errors.length ? errors.join('; ') : null,
+    error: providers.length === 0 && hadError,
   };
 });
