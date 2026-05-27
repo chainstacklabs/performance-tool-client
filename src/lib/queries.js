@@ -25,23 +25,24 @@ avg by (provider, source_region) (
   )
 )`.trim();
 
-// Aggregate success rate across providers and regions for the chain.
-export const successRateQuery = (chain) => `
-sum(count_over_time(response_latency_seconds{
+// Per-provider success rate over 24h (successful samples / all samples).
+export const providerSuccessQuery = (chain) => `
+sum by (provider) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   response_status="success",
   provider!~"TEST_.*"
 }[24h]))
 /
-sum(count_over_time(response_latency_seconds{
+sum by (provider) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   provider!~"TEST_.*"
 }[24h]))`.trim();
 
 // Per-provider p95 latency, evaluated at each step over a time range.
-// Used for inline sparklines — 1h lookback at 1h step gives 24 points/24h.
+// Used for inline sparklines — each point is p95 over a trailing 1h window;
+// the 24h range at a 1h step yields ~24 points.
 export const providerTrendQuery = (chain) => `
 avg by (provider) (
   quantile_over_time(0.95,

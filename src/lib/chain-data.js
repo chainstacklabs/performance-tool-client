@@ -4,7 +4,7 @@ import { runPromQuery, runPromRangeQuery } from './grafana';
 import {
   providerByRegionQuery,
   providerTrendQuery,
-  successRateQuery,
+  providerSuccessQuery,
 } from './queries';
 
 const TREND_STEP_SECONDS = 3600;
@@ -47,6 +47,15 @@ function avgOfMap(regionMap) {
   return n ? sum / n : null;
 }
 
+function successByProviderToMap(rows) {
+  const m = new Map();
+  for (const r of rows ?? []) {
+    const v = parseFloat(r.value[1]);
+    if (Number.isFinite(v)) m.set(r.metric.provider, v);
+  }
+  return m;
+}
+
 function trendToMap(rows) {
   const m = new Map();
   for (const r of rows ?? []) {
@@ -67,7 +76,7 @@ export const fetchChainData = cache(async (chain) => {
     safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5))),
     safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95))),
     safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99))),
-    safe('success', runPromQuery(successRateQuery(chain.promName))),
+    safe('success', runPromQuery(providerSuccessQuery(chain.promName))),
     safe(
       'trend',
       runPromRangeQuery(providerTrendQuery(chain.promName), {
@@ -86,6 +95,7 @@ export const fetchChainData = cache(async (chain) => {
   const p95Map = p95.ok ? quantileByRegionToMap(p95.value) : new Map();
   const p99Map = p99.ok ? quantileByRegionToMap(p99.value) : new Map();
   const trendMap = trend.ok ? trendToMap(trend.value) : new Map();
+  const successMap = success.ok ? successByProviderToMap(success.value) : new Map();
 
   const providerNames = new Set([
     ...p50Map.keys(),
@@ -108,18 +118,15 @@ export const fetchChainData = cache(async (chain) => {
       p99: avgOfMap(p99Map.get(name)),
       regions: Object.fromEntries(p95Map.get(name) ?? []),
       trend: trendMap.get(name) ?? [],
+      success: successMap.get(name) ?? null,
     }))
     .filter((p) => p.p95 !== null)
     .sort((a, b) => a.p95 - b.p95);
-
-  const successRate =
-    success.ok && success.value[0] ? parseFloat(success.value[0].value[1]) : null;
 
   return {
     chain,
     providers,
     regions: [...regions].sort(),
-    successRate,
     leader: providers[0] ?? null,
     error: providers.length === 0 && errors.length ? errors.join('; ') : null,
   };

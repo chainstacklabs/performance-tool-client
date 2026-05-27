@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
-import Headline from '@/components/Headline';
-import HeadlineSkeleton from '@/components/HeadlineSkeleton';
 import ChainTOC from '@/components/ChainTOC';
 import ChainTOCSkeleton from '@/components/ChainTOCSkeleton';
 import ChainCard from '@/components/Chain/ChainCard';
@@ -26,16 +24,10 @@ export default function Home() {
             performance overview
           </h1>
 
-          <div className="text-base mb-10 text-gray-400 text-center">
-            Live p50 / p95 / p99 across chains, providers, and regions.
+          <div className="text-base mb-12 text-gray-400 text-center max-w-xl mx-auto">
+            Latency percentiles for public RPC providers
             <br />
-            Trailing 24 hours · data refreshed every minute.
-          </div>
-
-          <div className="mb-10">
-            <Suspense fallback={<HeadlineSkeleton />}>
-              <Headline />
-            </Suspense>
+            Last 24 hours, updated every minute
           </div>
 
           <div className="mb-12">

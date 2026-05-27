@@ -1,39 +1,52 @@
 import { fetchChainData } from '@/lib/chain-data';
-import { formatLatency, formatPercent, chainAnchor } from '@/lib/format';
+import { formatLatency, formatPercent, chainAnchor, regionLabels, regionTitle } from '@/lib/format';
 import BulletBar from './BulletBar';
 import Sparkline from './Sparkline';
-import RegionHeatmap from './RegionHeatmap';
+
+const CARD_BG = '#0b0f1f';
+
+// Per-region p95 cell shading: hue 140 (green) → 0 (red), darker at the high
+// end for dark-theme legibility. Scaled against the chain's full range so a
+// colour means the same thing in every row.
+function heatColor(value, min, max) {
+  if (!Number.isFinite(value)) return 'transparent';
+  if (max === min) return 'hsl(140 40% 22%)';
+  const t = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const hue = 140 - 140 * t;
+  const light = 28 - 6 * t;
+  return `hsl(${hue.toFixed(0)} 45% ${light}%)`;
+}
 
 export default async function ChainCard({ chain }) {
   const data = await fetchChainData(chain);
-  const { providers, regions, successRate, error } = data;
+  const { providers, regions, error } = data;
 
   const maxP99 = providers.reduce((m, p) => Math.max(m, p.p99 ?? p.p95 ?? 0), 0);
   const dashboardUrl = `https://chainstack.grafana.net/public-dashboards/${chain.publicToken}?orgId=1&theme=dark`;
+
+  const regionLabel = regionLabels(regions);
+  const regionValues = providers.flatMap((p) =>
+    regions.map((r) => p.regions?.[r]).filter(Number.isFinite)
+  );
+  const regionMin = regionValues.length ? Math.min(...regionValues) : 0;
+  const regionMax = regionValues.length ? Math.max(...regionValues) : 0;
 
   return (
     <section
       id={chainAnchor(chain.promName)}
       className="border border-gray-800 rounded-xl p-6 scroll-mt-6"
-      style={{ background: '#0b0f1f' }}
+      style={{ background: CARD_BG }}
     >
       <div className="flex justify-between items-baseline mb-5 flex-wrap gap-3">
         <h2 className="text-2xl font-bold text-white">{chain.name}</h2>
-        <div className="flex gap-5 items-baseline">
-          {successRate !== null && Number.isFinite(successRate) && (
-            <span className="text-gray-400 text-sm font-mono">
-              Success {formatPercent(successRate)}
-            </span>
-          )}
-          <a
-            href={dashboardUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-400 text-sm font-mono"
-          >
-            Open in Grafana ↗
-          </a>
-        </div>
+        <a
+          href={dashboardUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:text-blue-400 text-sm font-mono"
+        >
+          Open in Grafana ↗
+        </a>
       </div>
 
       {error && (
@@ -44,60 +57,111 @@ export default async function ChainCard({ chain }) {
 
       {!error && providers.length === 0 && (
         <div className="text-gray-500 text-sm font-mono">
-          No successful samples in the last 24h.
+          No successful samples in the last 24 hours
         </div>
       )}
 
       {providers.length > 0 && (
-        <>
-          <div className="flex items-center text-[10px] uppercase tracking-wider text-gray-500 font-mono mb-2 gap-3 sm:gap-4">
-            <div className="w-32 sm:w-44 shrink-0">Provider</div>
-            <div className="flex-1">p50 / p95 / p99 · 24h</div>
-            <div className="hidden sm:block w-20 text-center">Trend</div>
-            <div className="w-16 sm:w-20 text-right">p50</div>
-            <div className="w-16 sm:w-20 text-right">p95</div>
-            <div className="w-16 sm:w-20 text-right hidden sm:block">p99</div>
-          </div>
-
-          <div className="space-y-2">
-            {providers.map((p, i) => (
-              <div
-                key={p.name}
-                className="flex items-center gap-3 sm:gap-4 text-sm"
-              >
-                <div className="w-32 sm:w-44 text-gray-300 font-mono shrink-0 truncate">
-                  {p.name}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <BulletBar
-                    p50={p.p50}
-                    p95={p.p95}
-                    p99={p.p99}
-                    max={maxP99}
-                    isLeader={i === 0}
-                  />
-                </div>
-                <div className="hidden sm:block w-20">
-                  <Sparkline
-                    values={p.trend}
-                    stroke={i === 0 ? '#10b981' : '#475569'}
-                  />
-                </div>
-                <div className="w-16 sm:w-20 text-right text-gray-300 font-mono shrink-0">
-                  {formatLatency(p.p50)}
-                </div>
-                <div className="w-16 sm:w-20 text-right text-gray-100 font-mono shrink-0">
-                  {formatLatency(p.p95)}
-                </div>
-                <div className="w-16 sm:w-20 text-right text-gray-500 font-mono shrink-0 hidden sm:block">
-                  {formatLatency(p.p99)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <RegionHeatmap providers={providers} regions={regions} />
-        </>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-separate border-spacing-0">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
+                <th
+                  className="sticky left-0 z-10 text-left font-normal py-2 pr-4"
+                  style={{ background: CARD_BG }}
+                >
+                  Provider
+                </th>
+                <th className="text-left font-normal px-3 min-w-[140px]">
+                  p50 / p95 / p99
+                </th>
+                <th className="font-normal px-2 hidden sm:table-cell">p95, 24h</th>
+                <th className="text-right font-normal px-2">p50</th>
+                <th className="text-right font-normal px-2">p95</th>
+                <th className="text-right font-normal px-2 hidden sm:table-cell">
+                  p99
+                </th>
+                {regions.map((r, idx) => (
+                  <th
+                    key={r}
+                    title={regionTitle(r)}
+                    className={`text-right font-normal px-2 whitespace-nowrap ${
+                      idx === 0 ? 'border-l border-gray-800' : ''
+                    }`}
+                  >
+                    {regionLabel[r]}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {providers.map((p, i) => (
+                <tr key={p.name}>
+                  <td
+                    className="sticky left-0 z-10 py-2 pr-4 align-middle"
+                    style={{ background: CARD_BG }}
+                  >
+                    <div
+                      className={`font-mono truncate max-w-[160px] ${
+                        i === 0 ? 'text-white' : 'text-gray-200'
+                      }`}
+                    >
+                      {p.name}
+                    </div>
+                    {Number.isFinite(p.success) && (
+                      <div
+                        title="Success rate, last 24 hours"
+                        className={`text-[10px] font-mono ${
+                          p.success < 0.999 ? 'text-amber-400' : 'text-gray-600'
+                        }`}
+                      >
+                        {formatPercent(p.success, 2)} ok
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-3 min-w-[140px]">
+                    <BulletBar
+                      p50={p.p50}
+                      p95={p.p95}
+                      p99={p.p99}
+                      max={maxP99}
+                      isLeader={i === 0}
+                    />
+                  </td>
+                  <td className="px-2 hidden sm:table-cell">
+                    <Sparkline
+                      values={p.trend}
+                      stroke={i === 0 ? '#10b981' : '#475569'}
+                    />
+                  </td>
+                  <td className="text-right px-2 py-2 font-mono text-gray-300 whitespace-nowrap">
+                    {formatLatency(p.p50)}
+                  </td>
+                  <td className="text-right px-2 py-2 font-mono text-gray-100 whitespace-nowrap">
+                    {formatLatency(p.p95)}
+                  </td>
+                  <td className="text-right px-2 py-2 font-mono text-gray-500 whitespace-nowrap hidden sm:table-cell">
+                    {formatLatency(p.p99)}
+                  </td>
+                  {regions.map((r, idx) => {
+                    const v = p.regions?.[r];
+                    return (
+                      <td
+                        key={r}
+                        className={`text-right px-2 py-2 font-mono text-gray-100 whitespace-nowrap ${
+                          idx === 0 ? 'border-l border-gray-800' : ''
+                        }`}
+                        style={{ background: heatColor(v, regionMin, regionMax) }}
+                      >
+                        {formatLatency(v)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );
