@@ -65,6 +65,22 @@ export default async function ChainCard({ chain }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-separate border-spacing-0">
             <thead>
+              {regions.length > 0 && (
+                <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
+                  <th className="sticky left-0 z-10" style={{ background: CARD_BG }} />
+                  <th />
+                  <th className="hidden sm:table-cell" />
+                  <th />
+                  <th />
+                  <th className="hidden sm:table-cell" />
+                  <th
+                    colSpan={regions.length}
+                    className="text-left font-normal px-2 pb-1 border-l border-gray-800"
+                  >
+                    p95 by region
+                  </th>
+                </tr>
+              )}
               <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
                 <th
                   className="sticky left-0 z-10 text-left font-normal py-2 pr-4"

@@ -27,6 +27,8 @@ const REGIONS = {
   ams2: { short: 'NL', country: 'Netherlands', city: 'Amsterdam' },
   ams3: { short: 'NL', country: 'Netherlands', city: 'Amsterdam' },
   sgp1: { short: 'SG', country: 'Singapore', city: 'Singapore' },
+  sin1: { short: 'SG', country: 'Singapore', city: 'Singapore' },
+  hnd1: { short: 'JP', country: 'Japan', city: 'Tokyo' },
   lon1: { short: 'UK', country: 'United Kingdom', city: 'London' },
   tor1: { short: 'CA', country: 'Canada', city: 'Toronto' },
   blr1: { short: 'IN', country: 'India', city: 'Bangalore' },
