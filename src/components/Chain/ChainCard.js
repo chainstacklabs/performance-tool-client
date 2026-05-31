@@ -73,6 +73,7 @@ export default async function ChainCard({ chain }) {
                   <th />
                   <th />
                   <th className="hidden sm:table-cell" />
+                  <th aria-hidden className="w-full" />
                   <th
                     colSpan={regions.length}
                     className="text-left font-normal px-2 pb-1 border-l border-gray-800"
@@ -97,6 +98,7 @@ export default async function ChainCard({ chain }) {
                 <th className="text-right font-normal px-2 hidden sm:table-cell">
                   p99
                 </th>
+                <th aria-hidden className="w-full" />
                 {regions.map((r, idx) => (
                   <th
                     key={r}
@@ -159,6 +161,7 @@ export default async function ChainCard({ chain }) {
                   <td className="text-right px-2 py-2 font-mono text-gray-500 whitespace-nowrap hidden sm:table-cell">
                     {formatLatency(p.p99)}
                   </td>
+                  <td aria-hidden className="w-full" />
                   {regions.map((r, idx) => {
                     const v = p.regions?.[r];
                     return (
