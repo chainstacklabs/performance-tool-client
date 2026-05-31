@@ -63,7 +63,25 @@ export default async function ChainCard({ chain }) {
 
       {providers.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-separate border-spacing-0">
+          <table className="w-full text-sm border-separate border-spacing-0 table-fixed">
+            {/* Fixed widths on the metric columns keep them identical across
+                every chain (so bars start and numbers line up card-to-card,
+                regardless of provider-name length); the region columns are
+                auto-width and split the remaining space, keeping the heatmap
+                flush-right with no gap. */}
+            <colgroup>
+              <col className="w-[200px]" />
+              <col className="w-40" />
+              <col className="w-0 sm:w-24" />
+              <col className="w-16" />
+              <col className="w-16" />
+              <col className="w-0 sm:w-16" />
+              {regions.length > 0 ? (
+                regions.map((r) => <col key={r} />)
+              ) : (
+                <col className="w-full" />
+              )}
+            </colgroup>
             <thead>
               {regions.length > 0 && (
                 <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
@@ -73,7 +91,6 @@ export default async function ChainCard({ chain }) {
                   <th />
                   <th />
                   <th className="hidden sm:table-cell" />
-                  <th aria-hidden className="w-full" />
                   <th
                     colSpan={regions.length}
                     className="text-left font-normal px-2 pb-1 border-l border-gray-800"
@@ -89,7 +106,7 @@ export default async function ChainCard({ chain }) {
                 >
                   Provider
                 </th>
-                <th className="text-left font-normal px-3 min-w-[140px]">
+                <th className="text-left font-normal px-3">
                   p50 / p95 / p99
                 </th>
                 <th className="font-normal px-2 hidden sm:table-cell">p95, 24h</th>
@@ -98,7 +115,6 @@ export default async function ChainCard({ chain }) {
                 <th className="text-right font-normal px-2 hidden sm:table-cell">
                   p99
                 </th>
-                <th aria-hidden className="w-full" />
                 {regions.map((r, idx) => (
                   <th
                     key={r}
@@ -120,7 +136,7 @@ export default async function ChainCard({ chain }) {
                     style={{ background: CARD_BG }}
                   >
                     <div
-                      className={`font-mono truncate max-w-[160px] ${
+                      className={`font-mono truncate ${
                         i === 0 ? 'text-white' : 'text-gray-200'
                       }`}
                     >
@@ -137,7 +153,7 @@ export default async function ChainCard({ chain }) {
                       </div>
                     )}
                   </td>
-                  <td className="px-3 min-w-[140px]">
+                  <td className="px-3">
                     <BulletBar
                       p50={p.p50}
                       p95={p.p95}
@@ -161,7 +177,6 @@ export default async function ChainCard({ chain }) {
                   <td className="text-right px-2 py-2 font-mono text-gray-500 whitespace-nowrap hidden sm:table-cell">
                     {formatLatency(p.p99)}
                   </td>
-                  <td aria-hidden className="w-full" />
                   {regions.map((r, idx) => {
                     const v = p.regions?.[r];
                     return (
