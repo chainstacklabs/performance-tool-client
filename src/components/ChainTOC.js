@@ -10,56 +10,73 @@ export default async function ChainTOC() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {chainsData.map((data) => {
-        const chainstack = data.providers.find(
-          (p) => p.name.toLowerCase() === 'chainstack'
-        );
-        const display = chainstack ?? data.leader;
+        const leader = data.leader;
         const logoName = data.chain.promName.toLowerCase().replace(/\s+/g, '');
         return (
           <a
             key={data.chain.promName}
             href={`#${chainAnchor(data.chain.promName)}`}
-            className="block border border-gray-800 rounded-lg p-3 hover:border-gray-700 hover:bg-gray-900/40 transition-colors"
-            style={{ background: '#0a0d18' }}
+            className="block rounded-xl p-4 transition-colors"
+            style={{
+              background: 'var(--color-bg-elevated)',
+              border: '1px solid var(--color-border)',
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-border-hover)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
           >
-            <div className="flex items-center justify-between mb-1">
+            {/* Row: logo + name | min latency */}
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image
                   src={`/logos/${logoName}.svg`}
                   alt={data.chain.name}
-                  width={20}
-                  height={20}
+                  width={32}
+                  height={32}
                   className="shrink-0"
+                  style={{ borderRadius: '9999px' }}
                 />
-                <div className="text-sm font-semibold text-white">
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   {data.chain.name}
-                </div>
+                </span>
               </div>
-              <div className="text-[10px] font-mono text-gray-500">
-                {data.providers.length} prov
-              </div>
+              {leader ? (
+                <span
+                  className="text-sm font-mono font-medium tabular-nums"
+                  style={{ color: 'var(--color-blue-brand)' }}
+                >
+                  {formatLatency(leader.p95)}
+                </span>
+              ) : (
+                <span
+                  className="text-xs font-mono"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                >
+                  —
+                </span>
+              )}
             </div>
-            <div className="h-6 -mx-1">
+
+            {/* Sparkline */}
+            <div className="mt-2">
               <Sparkline
-                values={display?.trend ?? []}
-                width={140}
-                height={24}
-                stroke="#10b981"
-                strokeWidth={1.25}
+                values={leader?.trend ?? []}
+                width="100%"
+                height={32}
+                stroke="var(--color-blue-brand)"
+                strokeWidth={1.5}
               />
             </div>
-            {display ? (
-              <div className="flex items-baseline justify-between mt-1">
-                <div className="text-xs font-mono text-gray-400 truncate pr-2">
-                  Chainstack p95
-                </div>
-                <div className="text-xs font-mono text-emerald-400">
-                  {formatLatency(display.p95)}
-                </div>
-              </div>
-            ) : (
-              <div className="text-xs font-mono text-gray-600 mt-1">No data</div>
-            )}
+
+            {/* Provider count */}
+            <div
+              className="mt-2 text-xs font-mono"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              {data.providers.length} providers
+            </div>
           </a>
         );
       })}
