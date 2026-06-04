@@ -1,6 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { runPromQuery, runPromRangeQuery } from './grafana';
+import { getMockChainData } from './mock-data';
 import {
   providerByRegionQuery,
   providerTrendQuery,
@@ -10,7 +11,6 @@ import {
 const TREND_STEP_SECONDS = 3600;
 const TREND_WINDOW_SECONDS = 24 * 3600;
 
-// Minute-aligned `now` keeps fetch cache stable within each 60s revalidate window.
 function minuteAlignedEnd() {
   return Math.floor(Date.now() / 60000) * 60;
 }
@@ -19,8 +19,6 @@ async function safe(label, promise) {
   try {
     return { ok: true, value: await promise };
   } catch (err) {
-    // Keep the detailed Grafana/Prometheus error server-side only; the client
-    // gets a generic "Data unavailable" message (see ChainCard).
     console.error(`[grafana] ${label}: ${err.message}`);
     return { ok: false };
   }
@@ -72,6 +70,10 @@ function trendToMap(rows) {
 }
 
 export const fetchChainData = cache(async (chain) => {
+  if (!process.env.GRAFANA_API_TOKEN) {
+    return getMockChainData(chain);
+  }
+
   const end = minuteAlignedEnd();
   const start = end - TREND_WINDOW_SECONDS;
 
