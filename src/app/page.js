@@ -20,7 +20,8 @@ export default async function Home() {
       <main>
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
 
-          <div className="text-center mt-16 mb-4">
+          {/* Compact hero */}
+          <div style={{ marginTop: 40, marginBottom: 24 }}>
             <div style={{
               display: 'inline-block',
               background: HEADING_GRADIENT,
@@ -29,22 +30,19 @@ export default async function Home() {
               WebkitTextFillColor: 'transparent',
               fontFamily: "'Suisse Int\\'l', sans-serif",
               fontWeight: 500,
-              fontSize: '56px',
-              lineHeight: '68px',
-              letterSpacing: '-1.12px',
+              fontSize: '36px',
+              lineHeight: '44px',
+              letterSpacing: '-0.72px',
               fontFeatureSettings: '"liga" off, "clig" off',
             }}>
-              RPC provider<br />performance overview
+              RPC provider performance overview
+            </div>
+            <div style={{ color: '#4A5260', fontSize: 13, marginTop: 6 }}>
+              Latency percentiles · last 24 hours · updated every minute
             </div>
           </div>
 
-          <div className="text-base mb-12 text-center max-w-xl mx-auto" style={{ color: '#8D95A5' }}>
-            Latency percentiles for public RPC providers
-            <br />
-            Last 24 hours, updated every minute
-          </div>
-
-          <div className="mb-16">
+          <div style={{ marginBottom: 48 }}>
             <RpcPerformancePage allChainsData={allChainsData} chains={CHAINS} />
           </div>
 
