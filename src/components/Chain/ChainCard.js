@@ -1,35 +1,45 @@
 import { fetchChainData } from '@/lib/chain-data';
-import { formatLatency, formatPercent, chainAnchor, regionLabels, regionTitle } from '@/lib/format';
-import BulletBar from './BulletBar';
+import { chainAnchor } from '@/lib/format';
 import Sparkline from './Sparkline';
 
 const CARD_BG = '#0b0f1f';
 
-// Per-region p95 cell shading: hue 140 (green) → 0 (red), darker at the high
-// end for dark-theme legibility. Scaled against the chain's full range so a
-// colour means the same thing in every row.
-function heatColor(value, min, max) {
-  if (!Number.isFinite(value)) return 'transparent';
-  if (max === min) return 'hsl(140 40% 22%)';
-  const t = Math.max(0, Math.min(1, (value - min) / (max - min)));
-  const hue = 140 - 140 * t;
-  const light = 28 - 6 * t;
-  return `hsl(${hue.toFixed(0)} 45% ${light}%)`;
+// Figma status colors: success #25b05f · warning #ffd002 · error #ff1a40
+function p95Color(ms) {
+  if (!Number.isFinite(ms)) return '#606772';
+  const t = Math.min(1, ms / 400);
+  const [a, b, pct] = t <= 0.5
+    ? ['#25b05f', '#ffd002', t * 2]
+    : ['#ffd002', '#ff1a40', (t - 0.5) * 2];
+  const hex = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const [ar,ag,ab] = hex(a), [br,bg,bb] = hex(b);
+  return `rgb(${Math.round(ar+(br-ar)*pct)},${Math.round(ag+(bg-ag)*pct)},${Math.round(ab+(bb-ab)*pct)})`;
+}
+
+function availColor(pct) {
+  if (pct >= 99.9) return '#9aa3ac';
+  if (pct >= 99.5) return '#ffd002';
+  return '#ff1a40';
+}
+
+const REGION_SHORT = {
+  'us-east-1': 'US', 'us-west-1': 'US', 'us-west-2': 'US',
+  'eu-west-1': 'EU', 'eu-central-1': 'EU', 'fra1': 'EU', 'ams3': 'EU',
+  'ap-southeast-1': 'APAC', 'ap-northeast-1': 'APAC', 'sgp1': 'SG', 'sin1': 'SG',
+  'nyc1': 'US', 'nyc3': 'US', 'sfo3': 'US', 'lon1': 'UK',
+};
+const regionShort = code => REGION_SHORT[code] ?? code.split('-')[0].toUpperCase();
+
+function compactRegions(regionsMap, regionList) {
+  return regionList
+    .filter(r => Number.isFinite(regionsMap?.[r]))
+    .map(r => `${regionShort(r)} ${Math.round(regionsMap[r] * 1000)}`)
+    .join(' · ');
 }
 
 export default async function ChainCard({ chain }) {
-  const data = await fetchChainData(chain);
-  const { providers, regions, error } = data;
-
-  const maxP99 = providers.reduce((m, p) => Math.max(m, p.p99 ?? p.p95 ?? 0), 0);
+  const { providers, regions, error } = await fetchChainData(chain);
   const dashboardUrl = `https://chainstack.grafana.net/public-dashboards/${chain.publicToken}?orgId=1&theme=dark`;
-
-  const regionLabel = regionLabels(regions);
-  const regionValues = providers.flatMap((p) =>
-    regions.map((r) => p.regions?.[r]).filter(Number.isFinite)
-  );
-  const regionMin = regionValues.length ? Math.min(...regionValues) : 0;
-  const regionMax = regionValues.length ? Math.max(...regionValues) : 0;
 
   return (
     <section
@@ -37,8 +47,8 @@ export default async function ChainCard({ chain }) {
       className="border border-gray-800 rounded-xl p-6 scroll-mt-6"
       style={{ background: CARD_BG }}
     >
-      <div className="flex justify-between items-baseline mb-5 flex-wrap gap-3">
-        <h2 className="text-2xl font-bold text-white">{chain.name}</h2>
+      <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
+        <h2 className="text-xl font-semibold text-white">{chain.name}</h2>
         <a
           href={dashboardUrl}
           target="_blank"
@@ -50,149 +60,105 @@ export default async function ChainCard({ chain }) {
       </div>
 
       {error && (
-        <div className="text-red-400 text-sm font-mono mb-3">
-          Data unavailable
-        </div>
+        <div className="text-red-400 text-sm font-mono mb-3">Data unavailable</div>
       )}
-
       {!error && providers.length === 0 && (
-        <div className="text-gray-500 text-sm font-mono">
-          No successful samples in the last 24 hours
-        </div>
+        <div className="text-gray-500 text-sm font-mono">No data</div>
       )}
 
       {providers.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-separate border-spacing-0 table-fixed">
-            {/* Fixed widths on the metric columns keep them identical across
-                every chain (so bars start and numbers line up card-to-card,
-                regardless of provider-name length); the region columns are
-                auto-width and split the remaining space, keeping the heatmap
-                flush-right with no gap. */}
-            <colgroup>
-              <col className="w-[200px]" />
-              <col className="w-40" />
-              <col className="w-0 sm:w-24" />
-              <col className="w-16" />
-              <col className="w-16" />
-              <col className="w-0 sm:w-16" />
-              {regions.length > 0 ? (
-                regions.map((r) => <col key={r} />)
-              ) : (
-                <col className="w-full" />
-              )}
-            </colgroup>
+          <table className="w-full border-separate border-spacing-0">
             <thead>
-              {regions.length > 0 && (
-                <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
-                  <th className="sticky left-0 z-10" style={{ background: CARD_BG }} />
-                  <th />
-                  <th className="hidden sm:table-cell" />
-                  <th />
-                  <th />
-                  <th className="hidden sm:table-cell" />
-                  <th
-                    colSpan={regions.length}
-                    className="text-left font-normal px-2 pb-1 border-l border-gray-800"
-                  >
-                    p95 by region
-                  </th>
-                </tr>
-              )}
-              <tr className="text-[10px] uppercase tracking-wider text-gray-500 font-mono">
+              <tr
+                className="text-[11px] uppercase tracking-wider font-mono"
+                style={{ color: '#606772' }}
+              >
                 <th
-                  className="sticky left-0 z-10 text-left font-normal py-2 pr-4"
+                  className="sticky left-0 text-left font-normal py-2 pr-6"
                   style={{ background: CARD_BG }}
                 >
                   Provider
                 </th>
-                <th className="text-left font-normal px-3">
-                  p50 / p95 / p99
+                <th className="text-right font-normal px-3 whitespace-nowrap">Avail.</th>
+                <th className="text-right font-normal px-3 whitespace-nowrap">P95, ms</th>
+                <th className="text-right font-normal px-3 whitespace-nowrap">P99 tail</th>
+                <th className="text-center font-normal px-3">24h</th>
+                <th className="text-left font-normal pl-4 whitespace-nowrap">
+                  Regions, P95 ms
                 </th>
-                <th className="font-normal px-2 hidden sm:table-cell">p95, 24h</th>
-                <th className="text-right font-normal px-2">p50</th>
-                <th className="text-right font-normal px-2">p95</th>
-                <th className="text-right font-normal px-2 hidden sm:table-cell">
-                  p99
-                </th>
-                {regions.map((r, idx) => (
-                  <th
-                    key={r}
-                    title={regionTitle(r)}
-                    className={`text-right font-normal px-2 whitespace-nowrap ${
-                      idx === 0 ? 'border-l border-gray-800' : ''
-                    }`}
-                  >
-                    {regionLabel[r]}
-                  </th>
-                ))}
               </tr>
             </thead>
             <tbody>
-              {providers.map((p, i) => (
-                <tr key={p.name}>
-                  <td
-                    className="sticky left-0 z-10 py-2 pr-4 align-middle"
-                    style={{ background: CARD_BG }}
+              {providers.map((p, i) => {
+                const p95ms = Number.isFinite(p.p95) ? Math.round(p.p95 * 1000) : null;
+                const p99ms = Number.isFinite(p.p99) ? Math.round(p.p99 * 1000) : null;
+                const tail  = p95ms != null && p99ms != null ? p99ms - p95ms : null;
+                const avail = Number.isFinite(p.success) ? p.success * 100 : null;
+                const isLeader = i === 0;
+
+                return (
+                  <tr
+                    key={p.name}
+                    className="border-t border-gray-800/60 hover:bg-white/[0.02] transition-colors"
                   >
-                    <div
-                      className={`font-mono truncate ${
-                        i === 0 ? 'text-white' : 'text-gray-200'
-                      }`}
+                    <td
+                      className="sticky left-0 py-2.5 pr-6 font-mono"
+                      style={{ background: CARD_BG }}
                     >
-                      {p.name}
-                    </div>
-                    {Number.isFinite(p.success) && (
-                      <div
-                        title="Success rate, last 24 hours"
-                        className={`text-[10px] font-mono ${
-                          p.success < 0.999 ? 'text-amber-400' : 'text-gray-600'
-                        }`}
-                      >
-                        {formatPercent(p.success, 2)} ok
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-3">
-                    <BulletBar
-                      p50={p.p50}
-                      p95={p.p95}
-                      p99={p.p99}
-                      max={maxP99}
-                      isLeader={i === 0}
-                    />
-                  </td>
-                  <td className="px-2 hidden sm:table-cell">
-                    <Sparkline
-                      values={p.trend}
-                      stroke={i === 0 ? '#10b981' : '#475569'}
-                    />
-                  </td>
-                  <td className="text-right px-2 py-2 font-mono text-gray-300 whitespace-nowrap">
-                    {formatLatency(p.p50)}
-                  </td>
-                  <td className="text-right px-2 py-2 font-mono text-gray-100 whitespace-nowrap">
-                    {formatLatency(p.p95)}
-                  </td>
-                  <td className="text-right px-2 py-2 font-mono text-gray-500 whitespace-nowrap hidden sm:table-cell">
-                    {formatLatency(p.p99)}
-                  </td>
-                  {regions.map((r, idx) => {
-                    const v = p.regions?.[r];
-                    return (
-                      <td
-                        key={r}
-                        className={`text-right px-2 py-2 font-mono text-gray-100 whitespace-nowrap ${
-                          idx === 0 ? 'border-l border-gray-800' : ''
-                        }`}
-                        style={{ background: heatColor(v, regionMin, regionMax) }}
-                      >
-                        {formatLatency(v)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+                      <span style={{ color: isLeader ? '#fff' : '#d1d5db' }}>
+                        {p.name}
+                      </span>
+                      {isLeader && (
+                        <span
+                          className="ml-2 text-[10px] px-1.5 py-0.5 rounded"
+                          style={{ background: '#002150', color: '#99CAFF' }}
+                        >
+                          best
+                        </span>
+                      )}
+                    </td>
+
+                    <td
+                      className="text-right px-3 py-2.5 font-mono tabular-nums text-[13px]"
+                      style={{ color: avail != null ? availColor(avail) : '#606772' }}
+                    >
+                      {avail != null ? `${avail.toFixed(2)}%` : '—'}
+                    </td>
+
+                    <td
+                      className="text-right px-3 py-2.5 font-mono tabular-nums text-[15px] font-semibold"
+                      style={{ color: p95ms != null ? p95Color(p95ms) : '#606772' }}
+                    >
+                      {p95ms ?? '—'}
+                    </td>
+
+                    <td
+                      className="text-right px-3 py-2.5 font-mono tabular-nums text-[13px]"
+                      style={{ color: '#606772' }}
+                    >
+                      {tail != null ? `+${tail}` : '—'}
+                    </td>
+
+                    <td className="px-3 py-2.5">
+                      <Sparkline
+                        values={p.trend}
+                        width={60}
+                        height={24}
+                        stroke={isLeader ? '#25b05f' : '#475569'}
+                        strokeWidth={1.25}
+                      />
+                    </td>
+
+                    <td
+                      className="pl-4 py-2.5 font-mono tabular-nums text-[12px] whitespace-nowrap"
+                      style={{ color: '#9aa3ac' }}
+                    >
+                      {compactRegions(p.regions, regions)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
