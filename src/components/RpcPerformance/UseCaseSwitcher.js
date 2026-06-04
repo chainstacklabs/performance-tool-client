@@ -20,7 +20,7 @@ export const DEFAULT_VIEW = {
 
 export default function UseCaseSwitcher({ active, onChange }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
       {USE_CASES.map(uc => {
         const isActive = uc.id === active;
         return (
@@ -32,8 +32,8 @@ export default function UseCaseSwitcher({ active, onChange }) {
               color:        isActive ? '#FFFFFF'  : '#4DAFFF',
               border:       `1px solid ${isActive ? '#007BFF' : '#1A3A5C'}`,
               borderRadius: '10px',
-              padding:      '12px 16px',
-              fontSize:     '14px',
+              padding:      '8px 18px',
+              fontSize:     '13px',
               fontWeight:   400,
               fontFamily:   'inherit',
               cursor:       'pointer',
