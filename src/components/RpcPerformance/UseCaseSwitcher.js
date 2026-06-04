@@ -1,9 +1,9 @@
 'use client';
 
 export const USE_CASES = [
-  { id: 'compare',     label: 'Compare providers',   desc: 'Choose the best provider for a protocol' },
-  { id: 'reliability', label: 'Monitor reliability', desc: 'Uptime, stability, and reliability risk' },
-  { id: 'issues',      label: 'Investigate issues',  desc: 'Current degradation and anomalies' },
+  { id: 'compare',     label: 'Compare providers' },
+  { id: 'reliability', label: 'Monitor reliability' },
+  { id: 'issues',      label: 'Investigate issues' },
 ];
 
 export const USE_CASE_VIEWS = {
@@ -20,7 +20,7 @@ export const DEFAULT_VIEW = {
 
 export default function UseCaseSwitcher({ active, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
       {USE_CASES.map(uc => {
         const isActive = uc.id === active;
         return (
@@ -28,17 +28,17 @@ export default function UseCaseSwitcher({ active, onChange }) {
             key={uc.id}
             onClick={() => onChange(uc.id)}
             style={{
-              background:   isActive ? '#007BFF' : '#03264F',
+              background:   isActive ? '#007BFF' : 'transparent',
               color:        isActive ? '#FFFFFF'  : '#4DAFFF',
-              border:       `1px solid ${isActive ? '#007BFF' : '#024B9A'}`,
+              border:       `1px solid ${isActive ? '#007BFF' : '#1A3A5C'}`,
               borderRadius: '10px',
-              padding:      '10px 22px',
+              padding:      '12px 16px',
               fontSize:     '14px',
-              fontWeight:   isActive ? 600 : 400,
+              fontWeight:   400,
               fontFamily:   'inherit',
               cursor:       'pointer',
-              letterSpacing: '-0.1px',
-              transition:   'all 0.15s',
+              textAlign:    'center',
+              transition:   'background 0.15s, border-color 0.15s, color 0.15s',
             }}
           >
             {uc.label}
