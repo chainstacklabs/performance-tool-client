@@ -2,9 +2,6 @@ import { CHAINS } from '@/lib/queries';
 import { fetchChainData } from '@/lib/chain-data';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
-import ChainTOC from '@/components/ChainTOC';
-import ChainTOCSkeleton from '@/components/ChainTOCSkeleton';
-import { Suspense } from 'react';
 import RpcPerformancePage from '@/components/RpcPerformance/RpcPerformancePage';
 
 export const revalidate = 60;
@@ -45,12 +42,6 @@ export default async function Home() {
             Latency percentiles for public RPC providers
             <br />
             Last 24 hours, updated every minute
-          </div>
-
-          <div className="mb-12">
-            <Suspense fallback={<ChainTOCSkeleton />}>
-              <ChainTOC />
-            </Suspense>
           </div>
 
           <div className="mb-16">
