@@ -100,19 +100,13 @@ export default function RpcPerformancePage({ allChainsData, chains }) {
 
   return (
     <div>
-      {/* Use case — primary */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ color: '#4A5260', fontSize: 11, fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-          Use case
-        </div>
+      {/* Use case tabs */}
+      <div style={{ marginBottom: 20 }}>
         <UseCaseSwitcher active={activeUseCase} onChange={handleUseCaseChange} />
       </div>
 
-      {/* Protocol — chips with logo */}
+      {/* Protocol chips */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ color: '#4A5260', fontSize: 11, fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-          Protocol
-        </div>
         <ProtocolChips chains={chains} active={activeProtocol} onChange={setActiveProtocol} />
       </div>
 
