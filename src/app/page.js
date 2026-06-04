@@ -9,17 +9,18 @@ import { CHAINS } from '@/lib/queries';
 
 export const revalidate = 60;
 
-const headingStyle = {
-  fontFamily: "'Suisse Int\'l', sans-serif",
+const lineBase = {
+  fontFamily: "'Suisse Int\\'l', -apple-system, sans-serif",
   fontWeight: 500,
-  fontSize: 'clamp(36px, 6vw, 56px)',
-  lineHeight: 1.21,
+  fontSize: '56px',
+  lineHeight: '68px',
   letterSpacing: '-0.02em',
   textTransform: 'uppercase',
+  display: 'block',
   backgroundClip: 'text',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
-  display: 'block',
+  color: 'transparent',
 };
 
 export default function Home() {
@@ -32,30 +33,17 @@ export default function Home() {
       <main>
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
 
-          {/* Hero heading — two layered copies blended together */}
-          <div className="relative text-center mt-16 mb-4 select-none">
-            <span
-              style={{
-                ...headingStyle,
-                background: 'radial-gradient(87.91% 179.45% at 81.17% -63.53%, #FFF 0%, #99CAFF 25.48%, #027BFF 62.02%, #002150 100%)',
-              }}
-            >
+          <div className="text-center mt-16 mb-4">
+            <span style={{
+              ...lineBase,
+              background: 'radial-gradient(87.91% 179.45% at 81.17% -63.53%, #FFF 0%, #99CAFF 25.48%, #027BFF 62.02%, #002150 100%)',
+            }}>
               RPC Provider
-              <br />
-              Performance Overview
             </span>
-            <span
-              aria-hidden="true"
-              style={{
-                ...headingStyle,
-                position: 'absolute',
-                inset: 0,
-                background: 'radial-gradient(109.24% 155.24% at -3.67% 116.54%, #002150 0%, #027BFF 37.98%, #B8DAFF 74.52%, #EBF4FF 100%), radial-gradient(87.91% 179.45% at 81.17% -63.53%, #FFF 0%, #99CAFF 25.48%, #027BFF 62.02%, #002150 100%)',
-                mixBlendMode: 'screen',
-              }}
-            >
-              RPC Provider
-              <br />
+            <span style={{
+              ...lineBase,
+              background: 'radial-gradient(109.24% 155.24% at -3.67% 116.54%, #002150 0%, #027BFF 37.98%, #B8DAFF 74.52%, #EBF4FF 100%)',
+            }}>
               Performance Overview
             </span>
           </div>
