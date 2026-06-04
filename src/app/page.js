@@ -18,10 +18,24 @@ export default function Home() {
 
       <main>
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
-          <h1 className="uppercase text-center text-5xl sm:text-6xl tracking-wide mt-16 mb-4 font-black heading-gradient">
-            RPC provider
+          <h1
+            className="text-center mt-16 mb-4"
+            style={{
+              fontFamily: "'Suisse Int\'l', sans-serif",
+              fontWeight: 500,
+              fontSize: '56px',
+              lineHeight: '68px',
+              letterSpacing: '-2%',
+              background: 'linear-gradient(180deg, #6699ff 0%, #cce0ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              textTransform: 'uppercase',
+            }}
+          >
+            RPC Provider
             <br />
-            performance overview
+            Performance Overview
           </h1>
 
           <div className="text-base mb-12 text-gray-400 text-center max-w-xl mx-auto">
