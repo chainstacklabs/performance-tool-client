@@ -1,8 +1,20 @@
 import { CHAINS } from '@/lib/queries';
 import { fetchChainData } from '@/lib/chain-data';
 import { formatLatency, chainAnchor } from '@/lib/format';
-import Sparkline from './Chain/Sparkline';
 import Image from 'next/image';
+
+// Figma status colors
+function latencyColor(seconds) {
+  if (!Number.isFinite(seconds)) return '#606772';
+  const ms = seconds * 1000;
+  const t = Math.min(1, ms / 400);
+  const [a, b, pct] = t <= 0.5
+    ? ['#25b05f', '#ffd002', t * 2]
+    : ['#ffd002', '#ff1a40', (t - 0.5) * 2];
+  const hex = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const [ar,ag,ab] = hex(a), [br,bg,bb] = hex(b);
+  return `rgb(${Math.round(ar+(br-ar)*pct)},${Math.round(ag+(bg-ag)*pct)},${Math.round(ab+(bb-ab)*pct)})`;
+}
 
 export default async function ChainTOC() {
   const chainsData = await Promise.all(CHAINS.map(fetchChainData));
@@ -18,17 +30,17 @@ export default async function ChainTOC() {
             href={`#${chainAnchor(data.chain.promName)}`}
             className="toc-card"
           >
-            {/* Logo + name | min p95 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Image
-                  src={`/logos/${logoName}.svg`}
-                  alt={data.chain.name}
-                  width={32}
-                  height={32}
-                  style={{ borderRadius: '9999px' }}
-                  className="shrink-0"
-                />
+                <div style={{ width: 32, height: 32, position: 'relative', flexShrink: 0 }}>
+                  <Image
+                    src={`/logos/${logoName}.svg`}
+                    alt={data.chain.name}
+                    fill
+                    style={{ objectFit: 'contain', borderRadius: '9999px' }}
+                    unoptimized
+                  />
+                </div>
                 <span
                   className="text-sm font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
@@ -39,28 +51,17 @@ export default async function ChainTOC() {
               {leader ? (
                 <span
                   className="text-sm font-mono font-medium tabular-nums"
-                  style={{ color: 'var(--color-blue-brand)' }}
+                  style={{ color: latencyColor(leader.p95) }}
                 >
                   {formatLatency(leader.p95)}
                 </span>
               ) : (
-                <span style={{ color: 'var(--color-text-tertiary)' }} className="text-xs font-mono">—</span>
+                <span className="text-xs font-mono" style={{ color: 'var(--color-text-tertiary)' }}>—</span>
               )}
             </div>
 
-            {/* Sparkline */}
-            <div style={{ marginTop: '8px' }}>
-              <Sparkline
-                values={leader?.trend ?? []}
-                height={32}
-                stroke="var(--color-blue-brand)"
-                strokeWidth={1.5}
-              />
-            </div>
-
-            {/* Provider count */}
             <div
-              className="text-xs font-mono mt-2"
+              className="mt-3 text-xs font-mono"
               style={{ color: 'var(--color-text-tertiary)' }}
             >
               {data.providers.length} providers
