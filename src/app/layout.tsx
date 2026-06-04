@@ -1,20 +1,16 @@
 // 'use client';
-import { Inter } from 'next/font/google';
 import './globals.css';
-import Head from 'next/head';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Chainstack Node performance tool',
   description:
-    'Test RPC node with various methods and get transparent preformance results.',
+    'Test RPC node with various methods and get transparent performance results.',
   openGraph: {
     type: 'website',
     url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN,
     title: 'Chainstack Node performance tool',
     description:
-      'Test RPC node with various methods and get transparent preformance results.',
+      'Test RPC node with various methods and get transparent performance results.',
     images: [
       {
         url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN + '/' + 'og-image.png',
@@ -45,7 +41,7 @@ export default function RootLayout({ children }: any) {
           }}
         ></script>
       </head>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
