@@ -8,8 +8,8 @@ export const REGION_MAP = {
 };
 
 export const REGION_LABEL = {
-  'us-east-1': 'US-East',
-  'eu-west-1': 'EU-West',
+  'us-east-1':      'US-East',
+  'eu-west-1':      'EU-West',
   'ap-southeast-1': 'APAC',
 };
 
@@ -45,6 +45,19 @@ export function severity(p) {
   return 'ok';
 }
 
+export function tailRiskLevel(tail) {
+  if (!Number.isFinite(tail)) return 'low';
+  if (tail < 75)  return 'low';
+  if (tail < 150) return 'medium';
+  return 'high';
+}
+
+export const TAIL_RISK_COLOR = {
+  low:    '#25B15F',
+  medium: '#FFDD33',
+  high:   '#FF294C',
+};
+
 export function enrichProviders(providers, regionList) {
   return providers.map(p => {
     const p95ms = Number.isFinite(p.p95) ? Math.round(p.p95 * 1000) : null;
@@ -58,6 +71,7 @@ export function enrichProviders(providers, regionList) {
       ...p,
       p95ms, p99ms, p50ms, availability,
       tail,
+      tailLevel: tailRiskLevel(tail),
       errorRate: Number.isFinite(availability) ? +(100 - availability).toFixed(4) : null,
       worstRegion: worst,
       bestRegion:  best,
@@ -74,8 +88,8 @@ export function computeScores(enriched) {
   const vals = key => enriched.map(p => p[key]).filter(Number.isFinite);
   const norm = (v, lo, hi) => hi === lo ? 1 : Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
 
-  const p95s   = vals('p95ms'),   [minP95,  maxP95]  = [Math.min(...p95s),   Math.max(...p95s)];
-  const tails  = vals('tail'),    [minTail, maxTail]  = [Math.min(...tails),  Math.max(...tails)];
+  const p95s   = vals('p95ms'),        [minP95,   maxP95]   = [Math.min(...p95s),   Math.max(...p95s)];
+  const tails  = vals('tail'),         [minTail,  maxTail]  = [Math.min(...tails),  Math.max(...tails)];
   const avails = vals('availability'), [minAvail, maxAvail] = [Math.min(...avails), Math.max(...avails)];
 
   return enriched.map(p => ({
@@ -88,24 +102,19 @@ export function computeScores(enriched) {
   }));
 }
 
-function lerpHex(a, b, t) {
-  const h = s => [parseInt(s.slice(1,3),16), parseInt(s.slice(3,5),16), parseInt(s.slice(5,7),16)];
-  const [ar,ag,ab] = h(a), [br,bg,bb] = h(b);
-  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
-}
-
-export function p95Color(ms) {
+export function p95Color(ms, isWinner) {
   if (!Number.isFinite(ms)) return '#656E80';
-  const t = Math.min(1, ms / 400);
-  return t <= 0.5
-    ? lerpHex('#25B15F', '#FFDD33', t * 2)
-    : lerpHex('#FFDD33', '#FF294C', (t - 0.5) * 2);
+  if (isWinner) return '#25B15F';
+  if (ms > 200) return '#FFDD33';
+  if (ms > 300) return '#FF294C';
+  return '#8D95A5';
 }
 
+// ≥99% green, ≥97% yellow, else red
 export function availColor(pct) {
   if (!Number.isFinite(pct)) return '#656E80';
-  if (pct >= 99.9) return '#8D95A5';
-  if (pct >= 99.5) return '#FFDD33';
+  if (pct >= 99) return '#25B15F';
+  if (pct >= 97) return '#FFDD33';
   return '#FF294C';
 }
 
@@ -120,11 +129,8 @@ export function generateSummary(useCase, view, chain, sorted, regionList) {
   const name = chain.name;
 
   if (useCase === 'compare') {
-    if (view === 'overview') {
+    if (view === 'overview' || view === 'latency') {
       return `${leader.name} ranks #1 for ${name}: ${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk.`;
-    }
-    if (view === 'latency') {
-      return `${leader.name} has the lowest latency for ${name}: P50 ${leader.p50ms} ms · P95 ${leader.p95ms} ms · tail +${leader.tail} ms.`;
     }
     if (view === 'regions') {
       const avgByRegion = (regionList ?? []).map(r => ({
@@ -135,7 +141,7 @@ export function generateSummary(useCase, view, chain, sorted, regionList) {
       const slowest = avgByRegion[avgByRegion.length - 1];
       const fl = REGION_LABEL[fastest?.r] ?? fastest?.r ?? '';
       const sl = REGION_LABEL[slowest?.r] ?? slowest?.r ?? '';
-      return fl && sl ? `${fl} is fastest for all providers. ${sl} is slowest for all providers.` : null;
+      return fl && sl ? `${fl} is fastest across all providers. ${sl} is slowest.` : null;
     }
   }
   if (useCase === 'reliability') {
@@ -143,8 +149,20 @@ export function generateSummary(useCase, view, chain, sorted, regionList) {
   }
   if (useCase === 'issues') {
     const issues = sorted.filter(p => p.severity !== 'ok');
-    if (!issues.length) return `No critical ${name} issues detected. All providers are healthy.`;
+    if (!issues.length) return `No critical ${name} issues detected. All providers healthy.`;
     return `${issues.length} provider${issues.length > 1 ? 's' : ''} with elevated risk: ${issues.map(p => p.name).join(', ')}.`;
   }
   return null;
+}
+
+export function regionInsight(sorted, regionList) {
+  const avgByRegion = (regionList ?? []).map(r => ({
+    r,
+    avg: sorted.reduce((sum, p) => sum + (p.regions?.[r] ?? 0), 0) / sorted.length,
+  })).sort((a, b) => a.avg - b.avg);
+  const fastest = avgByRegion[0];
+  const slowest = avgByRegion[avgByRegion.length - 1];
+  const fl = REGION_LABEL[fastest?.r] ?? '';
+  const sl = REGION_LABEL[slowest?.r] ?? '';
+  return fl && sl && fl !== sl ? `${fl} is fastest across all providers; ${sl} is slowest.` : null;
 }
