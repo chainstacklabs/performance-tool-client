@@ -3,40 +3,90 @@
 @tailwind utilities;
 
 :root {
-  --color-bg:                #0b0f1f;
-  --color-bg-elevated:       #1f2228;
-  --color-bg-elevated-contrast: #002150;
-  --color-bg-overlay:        rgba(0,0,0,0.64);
-  --color-text-primary:      #ffffff;
-  --color-text-secondary:    #9aa3ac;
-  --color-text-tertiary:     #606772;
-  --color-border:            rgba(255,255,255,0.08);
-  --color-border-hover:      rgba(255,255,255,0.16);
-  --color-blue-brand:        #007bff;
-  --color-blue-light:        #cce9ff;
-  --color-blue-dark:         #003399;
-  --color-blue-darkest:      #00204d;
-  --color-base-white:        #ffffff;
-  --color-base-black:        #1a1d23;
-  --color-status-success:    #22c55e;
-  --color-status-warning:    #f59e0b;
-  --color-status-error:      #ef4444;
+  /* bg */
+  --color-bg:                      #090A0B;
+  --color-bg-elevated:             #1F2228;
+  --color-bg-elevated-contrast:    #002150;
+  --color-bg-overlay:              rgba(9,10,11,0.5);
+  --color-bg-scrim:                rgba(2,2,3,0.6);
+
+  /* text */
+  --color-text-primary:            #F6F9FD;
+  --color-text-secondary:          #8D95A5;
+  --color-text-tertiary:           #656E80;
+
+  /* border */
+  --color-border-static:           #2E3338;
+  --color-border-default:          #40474E;
+  --color-border-hover:            #5E666E;
+
+  /* blue */
+  --color-blue-brand:              #007BFF;
+  --color-blue-dark:               #4DAFFF;
+  --color-blue-darkest:            #80C3FF;
+  --color-blue-light:              #004C9E;
+
+  /* base */
+  --color-base-white:              #FFFFFF;
+  --color-base-black:              #1A1D23;
+
+  /* icon */
+  --color-icon-default:            #73808C;
+  --color-icon-hover:              #DEE6ED;
+
+  /* button */
+  --color-button-primary:          #007BFF;
+  --color-button-primary-hover:    #005EE0;
+  --color-button-secondary:        #03264F;
+  --color-button-secondary-hover:  #043876;
+  --color-button-secondary-content:#007BFF;
+  --color-button-disabled:         #22252B;
+  --color-button-disabled-content: #54575F;
+
+  /* status — contrast (text/icon on dark bg) */
+  --color-status-success:          #25B15F;
+  --color-status-warning:          #FFDD33;
+  --color-status-error:            #FF294C;
+  --color-status-info:             #25A4FF;
+
+  /* status — surface (background of badge) */
+  --color-status-success-surface:  #124A24;
+  --color-status-warning-surface:  #563906;
+  --color-status-error-surface:    #591721;
+  --color-status-info-surface:     #0B3F65;
+
+  /* tag */
+  --color-tag-blue-surface:        #024156;
+  --color-tag-blue-content:        #8AD5EF;
+  --color-tag-purple-surface:      #5A116B;
+  --color-tag-purple-content:      #E9A8FA;
+  --color-tag-orange-surface:      #4C3203;
+  --color-tag-orange-content:      #F9C56C;
+  --color-tag-magenta-surface:     #570F3A;
+  --color-tag-magenta-content:     #F88FAA;
 }
 
 html, body {
   font-family: 'Suisse Int\'l', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* Space Mono for all monospace elements */
+.font-mono, code, kbd, pre {
+  font-family: var(--font-space-mono), 'Courier New', monospace !important;
+  letter-spacing: -0.3px;
+}
+
 .toc-card {
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-static);
   border-radius: 12px;
   padding: 16px;
   transition: border-color 0.15s ease;
   display: block;
+  text-decoration: none;
 }
 .toc-card:hover {
-  border-color: var(--color-border-hover);
+  border-color: var(--color-border-default);
 }
 
 .fix-input-bg { background-color: transparent !important; }
@@ -50,32 +100,19 @@ html, body {
 .text-accent { color: var(--color-blue-brand); }
 
 .custom-bento-card {
-  border-radius: var(--spacing-4, 16px);
-  border: var(--spacing-px, 1px) solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.16);
   background: radial-gradient(
       102.78% 100.22% at 21.68% 25.66%,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(0, 0, 0, 0) 38.9%,
-      rgba(255, 255, 255, 0.05) 85.47%
-    ),
-    rgba(0, 4, 26, 0.6);
+      rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 38.9%, rgba(255,255,255,0.05) 85.47%
+    ), rgba(0,4,26,0.6);
   backdrop-filter: blur(10px);
 }
 
 .custom-bento-card:hover {
   background: radial-gradient(
       21.68% 25.66% at 102.78% 100.22%,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(0, 0, 0, 0) 38.9%,
-      rgba(255, 255, 255, 0.05) 85.47%
-    ),
-    hsla(231, 100%, 7.5%, 0.6);
+      rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 38.9%, rgba(255,255,255,0.05) 85.47%
+    ), hsla(231,100%,7.5%,0.6);
   transition: all 0.5s ease;
-}
-
-.heading-gradient {
-  background: linear-gradient(85deg, #007bff 18.75%, #fff 84.9%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
