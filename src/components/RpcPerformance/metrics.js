@@ -1,19 +1,19 @@
 // Pure derived metric helpers — no React, no server-only imports
 
 export const REGION_MAP = {
-  'us-east-1': 'US', 'us-west-1': 'US', 'us-west-2': 'US',
-  'eu-west-1': 'EU', 'eu-central-1': 'EU', 'fra1': 'EU', 'ams3': 'EU',
+  'us-east-1': 'US-East', 'us-west-1': 'US-West', 'us-west-2': 'US-West',
+  'eu-west-1': 'EU-West', 'eu-central-1': 'EU-Central', 'fra1': 'EU', 'ams3': 'EU',
   'ap-southeast-1': 'APAC', 'ap-northeast-1': 'APAC', 'sgp1': 'SG', 'sin1': 'SG',
   'nyc1': 'US', 'nyc3': 'US', 'sfo3': 'US', 'lon1': 'UK',
 };
 
+export const REGION_LABEL = {
+  'us-east-1': 'US-East',
+  'eu-west-1': 'EU-West',
+  'ap-southeast-1': 'APAC',
+};
+
 export const regionShort = code => REGION_MAP[code] ?? code.split(/[-_]/)[0].toUpperCase();
-
-export const tail = (p99ms, p95ms) =>
-  Number.isFinite(p99ms) && Number.isFinite(p95ms) ? p99ms - p95ms : null;
-
-export const errorRate = avail =>
-  Number.isFinite(avail) ? +(100 - avail).toFixed(4) : null;
 
 export function worstRegion(regionsMap, regionList) {
   let worst = null, worstVal = -Infinity;
@@ -33,6 +33,12 @@ export function bestRegion(regionsMap, regionList) {
   return best;
 }
 
+export function regionalSpread(regionsMap, regionList) {
+  const vals = (regionList ?? []).map(r => regionsMap?.[r]).filter(Number.isFinite);
+  if (vals.length < 2) return null;
+  return Math.round((Math.max(...vals) - Math.min(...vals)) * 1000);
+}
+
 export function severity(p) {
   if ((p.incidents ?? 0) >= 3 || p.trendStatus === 'spiky') return 'error';
   if ((p.incidents ?? 0) >= 1 || p.trendStatus === 'down' || p.trendStatus === 'mixed') return 'warning';
@@ -47,15 +53,17 @@ export function enrichProviders(providers, regionList) {
     const availability = Number.isFinite(p.success) ? +(p.success * 100).toFixed(2) : null;
     const worst = worstRegion(p.regions, regionList);
     const best  = bestRegion(p.regions, regionList);
+    const tail  = Number.isFinite(p99ms) && Number.isFinite(p95ms) ? p99ms - p95ms : null;
     return {
       ...p,
       p95ms, p99ms, p50ms, availability,
-      tail: tail(p99ms, p95ms),
-      errorRate: errorRate(availability),
+      tail,
+      errorRate: Number.isFinite(availability) ? +(100 - availability).toFixed(4) : null,
       worstRegion: worst,
       bestRegion:  best,
       worstRegionMs: worst ? Math.round((p.regions[worst] ?? 0) * 1000) : null,
       bestRegionMs:  best  ? Math.round((p.regions[best]  ?? 0) * 1000) : null,
+      regionalSpread: regionalSpread(p.regions, regionList),
       severity: severity(p),
       score: 0,
     };
@@ -86,7 +94,6 @@ function lerpHex(a, b, t) {
   return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
 }
 
-// status-success-contrast, status-warning-contrast, status-error-contrast
 export function p95Color(ms) {
   if (!Number.isFinite(ms)) return '#656E80';
   const t = Math.min(1, ms / 400);
@@ -107,26 +114,37 @@ export const SEVERITY_LABEL = { ok: 'OK', warning: '⚠ warning', error: '✕ er
 export const severityColor = s => SEVERITY_COLOR[s] ?? '#8D95A5';
 export const severityLabel = s => SEVERITY_LABEL[s] ?? s;
 
-export function generateSummary(useCase, chain, sorted) {
+export function generateSummary(useCase, view, chain, sorted, regionList) {
   const leader = sorted[0];
   if (!leader) return null;
   const name = chain.name;
-  switch (useCase) {
-    case 'best-overall':
-      return `${leader.name} is currently #1 for ${name}: ${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk.`;
-    case 'fastest':
-      return `${leader.name} has the lowest global P95 latency for ${name}: ${leader.p95ms} ms.`;
-    case 'most-stable':
-      return `${leader.name} has the highest availability and the lowest P99 tail risk for ${name}.`;
-    case 'by-region': {
-      const worst = sorted[sorted.length - 1];
-      return `${leader.name} leads across tracked ${name} regions. ${worst?.worstRegion ? `${regionShort(worst.worstRegion)} is the slowest region overall.` : ''}`;
+
+  if (useCase === 'compare') {
+    if (view === 'overview') {
+      return `${leader.name} ranks #1 for ${name}: ${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk.`;
     }
-    case 'issues': {
-      const issues = sorted.filter(p => p.severity !== 'ok');
-      if (!issues.length) return `No critical ${name} issues detected. All providers are healthy.`;
-      return `${issues.length} provider${issues.length > 1 ? 's' : ''} with elevated risk: ${issues.map(p => p.name).join(', ')}.`;
+    if (view === 'latency') {
+      return `${leader.name} has the lowest latency for ${name}: P50 ${leader.p50ms} ms · P95 ${leader.p95ms} ms · tail +${leader.tail} ms.`;
     }
-    default: return null;
+    if (view === 'regions') {
+      const avgByRegion = (regionList ?? []).map(r => ({
+        r,
+        avg: sorted.reduce((sum, p) => sum + (p.regions?.[r] ?? 0), 0) / sorted.length,
+      })).sort((a, b) => a.avg - b.avg);
+      const fastest = avgByRegion[0];
+      const slowest = avgByRegion[avgByRegion.length - 1];
+      const fl = REGION_LABEL[fastest?.r] ?? fastest?.r ?? '';
+      const sl = REGION_LABEL[slowest?.r] ?? slowest?.r ?? '';
+      return fl && sl ? `${fl} is fastest for all providers. ${sl} is slowest for all providers.` : null;
+    }
   }
+  if (useCase === 'reliability') {
+    return `${leader.name} leads ${name} reliability: ${leader.availability?.toFixed(2)}% availability · ${leader.incidents ?? 0} incidents · tail +${leader.tail} ms.`;
+  }
+  if (useCase === 'issues') {
+    const issues = sorted.filter(p => p.severity !== 'ok');
+    if (!issues.length) return `No critical ${name} issues detected. All providers are healthy.`;
+    return `${issues.length} provider${issues.length > 1 ? 's' : ''} with elevated risk: ${issues.map(p => p.name).join(', ')}.`;
+  }
+  return null;
 }
