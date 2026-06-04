@@ -1,24 +1,25 @@
-// 'use client';
+import { Space_Mono } from 'next/font/google';
 import './globals.css';
+
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+});
 
 export const metadata = {
   title: 'Chainstack Node performance tool',
-  description:
-    'Test RPC node with various methods and get transparent performance results.',
+  description: 'Test RPC node with various methods and get transparent performance results.',
   openGraph: {
     type: 'website',
     url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN,
     title: 'Chainstack Node performance tool',
-    description:
-      'Test RPC node with various methods and get transparent performance results.',
-    images: [
-      {
-        url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN + '/' + 'og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Chainstack Node performance tool',
-      },
-    ],
+    description: 'Test RPC node with various methods and get transparent performance results.',
+    images: [{
+      url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN + '/' + 'og-image.png',
+      width: 1200, height: 630,
+      alt: 'Chainstack Node performance tool',
+    }],
   },
 };
 
@@ -26,8 +27,8 @@ export default function RootLayout({ children }: any) {
   return (
     <html
       lang="en"
-      className="dark-blue wg-antialiased"
-      style={{ background: '#000417' }}
+      className={`dark-blue wg-antialiased ${spaceMono.variable}`}
+      style={{ background: '#090A0B' }}
     >
       <head>
         <script
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: any) {
             }}();
             `,
           }}
-        ></script>
+        />
       </head>
       <body>{children}</body>
     </html>
