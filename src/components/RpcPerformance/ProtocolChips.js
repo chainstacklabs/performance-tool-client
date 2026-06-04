@@ -30,13 +30,13 @@ export default function ProtocolChips({ chains, active, onChange }) {
               background:   isActive ? '#1A2A3A' : 'transparent',
               border:       `1px solid ${isActive ? '#2E4A6A' : '#2E3338'}`,
               borderRadius: 8,
-              padding:      '6px 12px 6px 8px',
+              padding:      '4px 10px 4px 6px',
               cursor:       'pointer',
               transition:   'all 0.12s',
             }}
           >
             {logo && (
-              <div style={{ width: 28, height: 28, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
+              <div style={{ width: 22, height: 22, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
                 <Image
                   src={`/logos/${logo}.svg`}
                   alt={chain.name}
@@ -47,7 +47,7 @@ export default function ProtocolChips({ chains, active, onChange }) {
             )}
             <span
               style={{
-                fontSize:   13,
+                fontSize:   12,
                 fontWeight: isActive ? 500 : 400,
                 color:      isActive ? '#F6F9FD' : '#8D95A5',
                 whiteSpace: 'nowrap',
