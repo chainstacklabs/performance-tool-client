@@ -16,15 +16,9 @@ export default async function ChainTOC() {
           <a
             key={data.chain.promName}
             href={`#${chainAnchor(data.chain.promName)}`}
-            className="block rounded-xl p-4 transition-colors"
-            style={{
-              background: 'var(--color-bg-elevated)',
-              border: '1px solid var(--color-border)',
-            }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-border-hover)'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
+            className="toc-card"
           >
-            {/* Row: logo + name | min latency */}
+            {/* Logo + name | min p95 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image
@@ -32,8 +26,8 @@ export default async function ChainTOC() {
                   alt={data.chain.name}
                   width={32}
                   height={32}
-                  className="shrink-0"
                   style={{ borderRadius: '9999px' }}
+                  className="shrink-0"
                 />
                 <span
                   className="text-sm font-semibold"
@@ -50,20 +44,14 @@ export default async function ChainTOC() {
                   {formatLatency(leader.p95)}
                 </span>
               ) : (
-                <span
-                  className="text-xs font-mono"
-                  style={{ color: 'var(--color-text-tertiary)' }}
-                >
-                  —
-                </span>
+                <span style={{ color: 'var(--color-text-tertiary)' }} className="text-xs font-mono">—</span>
               )}
             </div>
 
             {/* Sparkline */}
-            <div className="mt-2">
+            <div style={{ marginTop: '8px' }}>
               <Sparkline
                 values={leader?.trend ?? []}
-                width="100%"
                 height={32}
                 stroke="var(--color-blue-brand)"
                 strokeWidth={1.5}
@@ -72,7 +60,7 @@ export default async function ChainTOC() {
 
             {/* Provider count */}
             <div
-              className="mt-2 text-xs font-mono"
+              className="text-xs font-mono mt-2"
               style={{ color: 'var(--color-text-tertiary)' }}
             >
               {data.providers.length} providers
