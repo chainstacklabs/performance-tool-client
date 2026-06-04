@@ -100,8 +100,8 @@ export default function RpcPerformancePage({ allChainsData, chains }) {
 
   return (
     <div>
-      {/* Use case — primary, full width */}
-      <div style={{ marginBottom: 20 }}>
+      {/* Use case — primary */}
+      <div style={{ marginBottom: 16 }}>
         <div style={{ color: '#4A5260', fontSize: 11, fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
           Use case
         </div>
@@ -109,7 +109,7 @@ export default function RpcPerformancePage({ allChainsData, chains }) {
       </div>
 
       {/* Protocol — chips with logo */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 20 }}>
         <div style={{ color: '#4A5260', fontSize: 11, fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
           Protocol
         </div>
@@ -123,7 +123,7 @@ export default function RpcPerformancePage({ allChainsData, chains }) {
             {contextLabel}
           </div>
           {summary && (
-            <div style={{ color: '#656E80', fontSize: 13 }}>{summary}</div>
+            <div style={{ color: '#8D95A5', fontSize: 14, marginTop: 2 }}>{summary}</div>
           )}
         </div>
         {dashboardUrl && (
@@ -139,7 +139,7 @@ export default function RpcPerformancePage({ allChainsData, chains }) {
       </div>
 
       {/* View tabs — outside table card */}
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 8 }}>
         <ViewTabs views={views} active={activeView} onChange={setActiveView} />
       </div>
 
