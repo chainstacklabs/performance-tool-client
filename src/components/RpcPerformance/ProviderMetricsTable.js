@@ -1,38 +1,56 @@
 'use client';
 
 import Sparkline from '@/components/Chain/Sparkline';
-import { p95Color, availColor, severityColor, severityLabel, regionShort } from './metrics';
+import { p95Color, availColor, severityColor, severityLabel, regionShort, REGION_LABEL } from './metrics';
 
 const CARD_BG = '#1F2228';
 
+const TREND_COLOR = { stable: '#25B15F', down: '#FF294C', mixed: '#FFDD33', spiky: '#FFDD33' };
+
 const TH = ({ children, align = 'right' }) => (
   <th
-    className={`font-normal py-2 px-3 whitespace-nowrap text-[11px] uppercase tracking-wider font-mono text-${align}`}
-    style={{ color: '#656E80' }}
+    style={{
+      color: '#656E80',
+      fontSize: 11,
+      fontFamily: 'var(--font-space-mono), monospace',
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      fontWeight: 400,
+      padding: '8px 12px',
+      textAlign: align,
+      whiteSpace: 'nowrap',
+      borderBottom: '1px solid #2E3338',
+    }}
   >
     {children}
   </th>
 );
 
-function TD({ children, align = 'right', style: s, mono = true, size = 13 }) {
+function TD({ children, align = 'right', mono = true, style: s, size = 13 }) {
   return (
     <td
-      className={`py-2.5 px-3 text-${align} ${mono ? 'font-mono tabular-nums' : ''}`}
-      style={{ fontSize: size, ...s }}
+      style={{
+        padding: '10px 12px',
+        textAlign: align,
+        fontSize: size,
+        fontFamily: mono ? 'var(--font-space-mono), monospace' : 'inherit',
+        letterSpacing: mono ? '-0.3px' : 'normal',
+        ...s,
+      }}
     >
       {children}
     </td>
   );
 }
 
-function getColumns(useCase, regionList, activeRegion) {
-  switch (useCase) {
-    case 'best-overall':
+function getColumns(useCase, view, regionList) {
+  if (useCase === 'compare') {
+    if (view === 'overview') {
       return [
         {
-          header: 'Score',
-          render: p => p.score,
-          style: p => ({ color: p.score >= 70 ? '#25B15F' : p.score >= 40 ? '#FFDD33' : '#FF294C', fontWeight: 600 }),
+          header: '#',
+          render: (p, i) => `#${i + 1}`,
+          style: (p, i) => ({ color: i === 0 ? '#4DAFFF' : '#656E80', fontWeight: i === 0 ? 600 : 400 }),
         },
         {
           header: 'Avail.',
@@ -41,57 +59,96 @@ function getColumns(useCase, regionList, activeRegion) {
         },
         {
           header: 'P95, ms',
-          size: 15,
           render: p => p.p95ms ?? '—',
-          style: p => ({ color: p95Color(p.p95ms), fontWeight: 600 }),
+          style: p => ({ color: p95Color(p.p95ms), fontWeight: 600, fontSize: 14 }),
         },
         {
-          header: 'P99 tail',
+          header: 'Tail risk',
           render: p => p.tail != null ? `+${p.tail}` : '—',
           style: () => ({ color: '#656E80' }),
         },
         {
-          header: 'Worst region',
-          render: p => p.worstRegion ? `${regionShort(p.worstRegion)} ${p.worstRegionMs}` : '—',
+          header: 'Best region',
+          render: p => p.bestRegion ? `${regionShort(p.bestRegion)} ${p.bestRegionMs}` : '—',
           style: () => ({ color: '#8D95A5' }),
         },
         {
-          header: '24h', align: 'center', mono: false,
-          render: p => <Sparkline values={p.trend ?? []} width={60} height={20} stroke="#73808C" strokeWidth={1.25} />,
+          header: 'Worst region',
+          render: p => p.worstRegion ? `${regionShort(p.worstRegion)} ${p.worstRegionMs}` : '—',
+          style: p => ({ color: (p.worstRegionMs ?? 0) > 200 ? '#FFDD33' : '#8D95A5' }),
+        },
+        {
+          header: '24h',
+          mono: false,
+          render: p => (
+            <span style={{ color: TREND_COLOR[p.trendStatus] ?? '#8D95A5', fontSize: 12 }}>
+              {p.trendStatus ?? 'stable'}
+            </span>
+          ),
         },
       ];
+    }
 
-    case 'fastest':
+    if (view === 'latency') {
       return [
-        {
-          header: 'P95, ms', size: 15,
-          render: p => p.p95ms ?? '—',
-          style: p => ({ color: p95Color(p.p95ms), fontWeight: 600 }),
-        },
         {
           header: 'P50, ms',
           render: p => p.p50ms ?? '—',
           style: () => ({ color: '#8D95A5' }),
         },
         {
-          header: 'P99 tail',
+          header: 'P95, ms',
+          render: p => p.p95ms ?? '—',
+          style: p => ({ color: p95Color(p.p95ms), fontWeight: 600, fontSize: 14 }),
+        },
+        {
+          header: 'P99, ms',
+          render: p => p.p99ms ?? '—',
+          style: () => ({ color: '#8D95A5' }),
+        },
+        {
+          header: 'Tail risk',
           render: p => p.tail != null ? `+${p.tail}` : '—',
-          style: () => ({ color: '#656E80' }),
+          style: p => ({ color: (p.tail ?? 0) > 150 ? '#FFDD33' : '#656E80' }),
         },
         {
-          header: '24h', align: 'center', mono: false,
-          render: p => <Sparkline values={p.trend ?? []} width={60} height={20} stroke="#73808C" strokeWidth={1.25} />,
-        },
-        {
-          header: 'Regions, P95 ms', align: 'left',
-          render: p => regionList
-            .filter(r => Number.isFinite(p.regions?.[r]))
-            .map(r => `${regionShort(r)} ${Math.round(p.regions[r] * 1000)}`).join(' · ') || '—',
-          style: () => ({ color: '#8D95A5', fontSize: 12 }),
+          header: '24h',
+          align: 'center',
+          mono: false,
+          render: p => (
+            <Sparkline
+              values={p.trend ?? []}
+              width={64}
+              height={20}
+              stroke="#73808C"
+              strokeWidth={1.25}
+            />
+          ),
         },
       ];
+    }
 
-    case 'most-stable':
+    if (view === 'regions') {
+      return [
+        ...(regionList ?? []).map(r => ({
+          header: REGION_LABEL[r] ?? regionShort(r),
+          render: p => Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : '—',
+          style: p => {
+            const ms = Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : null;
+            return { color: p95Color(ms) };
+          },
+        })),
+        {
+          header: 'Spread',
+          render: p => p.regionalSpread != null ? `+${p.regionalSpread}` : '—',
+          style: p => ({ color: (p.regionalSpread ?? 0) > 60 ? '#FFDD33' : '#656E80' }),
+        },
+      ];
+    }
+  }
+
+  if (useCase === 'reliability') {
+    if (view === 'overview') {
       return [
         {
           header: 'Avail.',
@@ -100,13 +157,13 @@ function getColumns(useCase, regionList, activeRegion) {
         },
         {
           header: 'Error rate',
-          render: p => p.errorRate != null ? `${p.errorRate.toFixed(2)}%` : '—',
+          render: p => p.errorRate != null ? `${p.errorRate.toFixed(4)}%` : '—',
           style: () => ({ color: '#656E80' }),
         },
         {
-          header: 'P99 tail',
+          header: 'Tail risk',
           render: p => p.tail != null ? `+${p.tail}` : '—',
-          style: p => ({ color: (p.tail ?? 0) > 200 ? '#FF294C' : (p.tail ?? 0) > 100 ? '#FFDD33' : '#8D95A5' }),
+          style: p => ({ color: (p.tail ?? 0) > 150 ? '#FFDD33' : '#8D95A5' }),
         },
         {
           header: 'Incidents',
@@ -114,94 +171,143 @@ function getColumns(useCase, regionList, activeRegion) {
           style: p => ({ color: (p.incidents ?? 0) > 0 ? '#FFDD33' : '#8D95A5' }),
         },
         {
-          header: '24h status', mono: false,
-          render: p => {
-            const colors = { stable: '#25B15F', down: '#FF294C', mixed: '#FFDD33', spiky: '#FFDD33' };
-            return (
-              <span style={{ color: colors[p.trendStatus] ?? '#8D95A5', textTransform: 'capitalize' }}>
-                {p.trendStatus ?? 'stable'}
-              </span>
-            );
-          },
+          header: '24h status',
+          mono: false,
+          render: p => (
+            <span style={{ color: TREND_COLOR[p.trendStatus] ?? '#8D95A5', fontSize: 12 }}>
+              {p.trendStatus ?? 'stable'}
+            </span>
+          ),
         },
       ];
+    }
 
-    case 'by-region':
-      return [
-        ...regionList.map(r => ({
-          header: regionShort(r),
-          render: p => Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : '—',
-          style: p => {
-            const ms = Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : null;
-            return { color: p95Color(ms), fontWeight: r === activeRegion ? 700 : 400 };
-          },
-        })),
-        {
-          header: 'Best',
-          render: p => p.bestRegion ? regionShort(p.bestRegion) : '—',
-          style: () => ({ color: '#25B15F' }),
-        },
-        {
-          header: 'Worst',
-          render: p => p.worstRegion ? regionShort(p.worstRegion) : '—',
-          style: () => ({ color: '#FF294C' }),
-        },
-      ];
-
-    case 'issues':
+    if (view === 'availability') {
       return [
         {
-          header: 'Status', mono: false,
-          render: p => severityLabel(p.severity),
-          style: p => ({ color: severityColor(p.severity), fontWeight: 500 }),
+          header: 'Avail.',
+          render: p => p.availability != null ? `${p.availability.toFixed(2)}%` : '—',
+          style: p => ({ color: availColor(p.availability), fontWeight: 600, fontSize: 14 }),
         },
         {
-          header: 'P95, ms', size: 15,
-          render: p => p.p95ms ?? '—',
-          style: p => ({ color: p95Color(p.p95ms), fontWeight: 600 }),
-        },
-        {
-          header: 'Δ 24h',
-          render: () => '—',
+          header: 'Error rate',
+          render: p => p.errorRate != null ? `${p.errorRate.toFixed(4)}%` : '—',
           style: () => ({ color: '#656E80' }),
         },
         {
-          header: 'P99 tail',
-          render: p => p.tail != null ? `+${p.tail}` : '—',
-          style: p => ({ color: (p.tail ?? 0) > 150 ? '#FF294C' : '#8D95A5' }),
+          header: 'Incidents',
+          render: p => p.incidents ?? 0,
+          style: p => ({ color: (p.incidents ?? 0) > 0 ? '#FFDD33' : '#8D95A5' }),
         },
+      ];
+    }
+
+    if (view === 'tail-risk') {
+      return [
         {
-          header: 'Worst region',
-          render: p => p.worstRegion ? `${regionShort(p.worstRegion)} ${p.worstRegionMs}` : '—',
+          header: 'P99, ms',
+          render: p => p.p99ms ?? '—',
           style: () => ({ color: '#8D95A5' }),
         },
         {
-          header: 'Notes', align: 'left', mono: false,
+          header: 'P95, ms',
+          render: p => p.p95ms ?? '—',
+          style: p => ({ color: p95Color(p.p95ms) }),
+        },
+        {
+          header: 'Tail risk',
+          render: p => p.tail != null ? `+${p.tail}` : '—',
+          style: p => ({ color: (p.tail ?? 0) > 150 ? '#FFDD33' : '#8D95A5', fontWeight: 600, fontSize: 14 }),
+        },
+      ];
+    }
+  }
+
+  if (useCase === 'issues') {
+    const baseColumns = [
+      {
+        header: 'Status',
+        mono: false,
+        render: p => severityLabel(p.severity),
+        style: p => ({ color: severityColor(p.severity), fontWeight: 500 }),
+      },
+      {
+        header: 'P95, ms',
+        render: p => p.p95ms ?? '—',
+        style: p => ({ color: p95Color(p.p95ms), fontWeight: 600, fontSize: 14 }),
+      },
+      {
+        header: 'Tail risk',
+        render: p => p.tail != null ? `+${p.tail}` : '—',
+        style: p => ({ color: (p.tail ?? 0) > 150 ? '#FF294C' : '#8D95A5' }),
+      },
+    ];
+
+    if (view === 'active-issues') {
+      return [
+        ...baseColumns,
+        {
+          header: 'Incidents',
+          render: p => p.incidents ?? 0,
+          style: p => ({ color: (p.incidents ?? 0) > 0 ? '#FFDD33' : '#8D95A5' }),
+        },
+        {
+          header: 'Notes',
+          align: 'left',
+          mono: false,
           render: p => {
             const notes = [];
             if ((p.tail ?? 0) > 150) notes.push('high tail');
             if (p.trendStatus === 'down') notes.push('degraded');
             if (p.trendStatus === 'spiky') notes.push('spiky');
             if ((p.incidents ?? 0) > 0) notes.push(`${p.incidents} incident${p.incidents > 1 ? 's' : ''}`);
-            return notes.join(', ') || '—';
+            return notes.join(' · ') || '—';
           },
           style: () => ({ color: '#656E80', fontSize: 12 }),
         },
       ];
+    }
 
-    default: return [];
+    if (view === 'latency-anomalies') {
+      return [
+        ...baseColumns,
+        {
+          header: 'Worst region',
+          render: p => p.worstRegion ? `${regionShort(p.worstRegion)} ${p.worstRegionMs}` : '—',
+          style: () => ({ color: '#8D95A5' }),
+        },
+      ];
+    }
+
+    if (view === 'regional-anomalies') {
+      return [
+        ...baseColumns,
+        {
+          header: 'Spread',
+          render: p => p.regionalSpread != null ? `+${p.regionalSpread}` : '—',
+          style: p => ({ color: (p.regionalSpread ?? 0) > 60 ? '#FFDD33' : '#8D95A5' }),
+        },
+        {
+          header: 'Worst region',
+          render: p => p.worstRegion ? `${regionShort(p.worstRegion)} ${p.worstRegionMs}` : '—',
+          style: () => ({ color: '#8D95A5' }),
+        },
+      ];
+    }
   }
+
+  return [];
 }
 
-export default function ProviderMetricsTable({ useCase, providers, regionList, activeRegion }) {
-  const columns = getColumns(useCase, regionList, activeRegion);
+export default function ProviderMetricsTable({ useCase, view, providers, regionList }) {
+  const columns = getColumns(useCase, view, regionList);
   if (!providers.length) {
-    return <div className="text-sm font-mono" style={{ color: '#656E80' }}>No data</div>;
+    return <div style={{ color: '#656E80', fontSize: 13, fontFamily: 'var(--font-space-mono)' }}>No data</div>;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-separate border-spacing-0">
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <TH align="left">Provider</TH>
@@ -212,13 +318,36 @@ export default function ProviderMetricsTable({ useCase, providers, regionList, a
         </thead>
         <tbody>
           {providers.map((p, i) => (
-            <tr key={p.name} style={{ borderTop: '1px solid #2E3338' }}>
-              <td className="sticky left-0 py-2.5 pr-6 font-mono" style={{ background: CARD_BG }}>
-                <span style={{ color: i === 0 ? '#F6F9FD' : '#8D95A5' }}>{p.name}</span>
+            <tr
+              key={p.name}
+              style={{
+                borderBottom: '1px solid #2E3338',
+                background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
+              }}
+            >
+              <td style={{ padding: '10px 12px', textAlign: 'left' }}>
+                <span
+                  style={{
+                    fontFamily: 'inherit',
+                    fontSize: 13,
+                    color: i === 0 ? '#F6F9FD' : '#8D95A5',
+                    fontWeight: i === 0 ? 500 : 400,
+                  }}
+                >
+                  {p.name}
+                </span>
                 {i === 0 && (
                   <span
-                    className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-mono"
-                    style={{ background: '#024156', color: '#8AD5EF' }}
+                    style={{
+                      marginLeft: 8,
+                      fontSize: 10,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: '#024156',
+                      color: '#8AD5EF',
+                      fontFamily: 'var(--font-space-mono), monospace',
+                      letterSpacing: '0.04em',
+                    }}
                   >
                     best
                   </span>
@@ -228,11 +357,11 @@ export default function ProviderMetricsTable({ useCase, providers, regionList, a
                 <TD
                   key={j}
                   align={col.align ?? 'right'}
-                  style={col.style?.(p)}
                   mono={col.mono !== false}
+                  style={col.style?.(p, i)}
                   size={col.size ?? 13}
                 >
-                  {col.render(p)}
+                  {col.render(p, i)}
                 </TD>
               ))}
             </tr>
