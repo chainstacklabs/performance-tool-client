@@ -1,16 +1,26 @@
 'use client';
 
 export const USE_CASES = [
-  { id: 'best-overall', label: 'Best overall' },
-  { id: 'fastest',      label: 'Fastest' },
-  { id: 'most-stable',  label: 'Most stable' },
-  { id: 'by-region',    label: 'By region' },
-  { id: 'issues',       label: 'Issues' },
+  { id: 'compare',     label: 'Compare providers',   desc: 'Choose the best provider for a protocol' },
+  { id: 'reliability', label: 'Monitor reliability', desc: 'Uptime, stability, and reliability risk' },
+  { id: 'issues',      label: 'Investigate issues',  desc: 'Current degradation and anomalies' },
 ];
+
+export const USE_CASE_VIEWS = {
+  compare:     ['overview', 'latency', 'regions'],
+  reliability: ['overview', 'availability', 'tail-risk'],
+  issues:      ['active-issues', 'latency-anomalies', 'regional-anomalies'],
+};
+
+export const DEFAULT_VIEW = {
+  compare:     'overview',
+  reliability: 'overview',
+  issues:      'active-issues',
+};
 
 export default function UseCaseSwitcher({ active, onChange }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
       {USE_CASES.map(uc => {
         const isActive = uc.id === active;
         return (
@@ -19,18 +29,17 @@ export default function UseCaseSwitcher({ active, onChange }) {
             onClick={() => onChange(uc.id)}
             style={{
               background:   isActive ? '#007BFF' : '#03264F',
-              color:        isActive ? '#FFFFFF'  : '#007BFF',
-              border:       `1px solid ${isActive ? '#007BFF' : '#03264F'}`,
-              borderRadius: '8px',
-              padding:      '8px 18px',
+              color:        isActive ? '#FFFFFF'  : '#4DAFFF',
+              border:       `1px solid ${isActive ? '#007BFF' : '#024B9A'}`,
+              borderRadius: '10px',
+              padding:      '10px 22px',
               fontSize:     '14px',
-              fontWeight:   isActive ? 500 : 400,
+              fontWeight:   isActive ? 600 : 400,
               fontFamily:   'inherit',
               cursor:       'pointer',
+              letterSpacing: '-0.1px',
               transition:   'all 0.15s',
             }}
-            onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = '#007BFF'; }}
-            onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = '#03264F'; }}
           >
             {uc.label}
           </button>
