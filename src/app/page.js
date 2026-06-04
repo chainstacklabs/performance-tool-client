@@ -9,6 +9,19 @@ import { CHAINS } from '@/lib/queries';
 
 export const revalidate = 60;
 
+const headingStyle = {
+  fontFamily: "'Suisse Int\'l', sans-serif",
+  fontWeight: 500,
+  fontSize: 'clamp(36px, 6vw, 56px)',
+  lineHeight: 1.21,
+  letterSpacing: '-0.02em',
+  textTransform: 'uppercase',
+  backgroundClip: 'text',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  display: 'block',
+};
+
 export default function Home() {
   return (
     <>
@@ -18,27 +31,39 @@ export default function Home() {
 
       <main>
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
-          <h1
-            className="text-center mt-16 mb-4"
-            style={{
-              fontFamily: "'Suisse Int\'l', sans-serif",
-              fontWeight: 500,
-              fontSize: '56px',
-              lineHeight: '68px',
-              letterSpacing: '-2%',
-              background: 'linear-gradient(180deg, #6699ff 0%, #cce0ff 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              textTransform: 'uppercase',
-            }}
-          >
-            RPC Provider
-            <br />
-            Performance Overview
-          </h1>
 
-          <div className="text-base mb-12 text-gray-400 text-center max-w-xl mx-auto">
+          {/* Hero heading — two layered copies blended together */}
+          <div className="relative text-center mt-16 mb-4 select-none">
+            <span
+              style={{
+                ...headingStyle,
+                background: 'radial-gradient(87.91% 179.45% at 81.17% -63.53%, #FFF 0%, #99CAFF 25.48%, #027BFF 62.02%, #002150 100%)',
+              }}
+            >
+              RPC Provider
+              <br />
+              Performance Overview
+            </span>
+            <span
+              aria-hidden="true"
+              style={{
+                ...headingStyle,
+                position: 'absolute',
+                inset: 0,
+                background: 'radial-gradient(109.24% 155.24% at -3.67% 116.54%, #002150 0%, #027BFF 37.98%, #B8DAFF 74.52%, #EBF4FF 100%), radial-gradient(87.91% 179.45% at 81.17% -63.53%, #FFF 0%, #99CAFF 25.48%, #027BFF 62.02%, #002150 100%)',
+                mixBlendMode: 'screen',
+              }}
+            >
+              RPC Provider
+              <br />
+              Performance Overview
+            </span>
+          </div>
+
+          <div
+            className="text-base mb-12 text-center max-w-xl mx-auto"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             Latency percentiles for public RPC providers
             <br />
             Last 24 hours, updated every minute
@@ -61,7 +86,10 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="text-center text-gray-500 font-mono text-sm mb-16">
+          <p
+            className="text-center font-mono text-sm mb-16"
+            style={{ color: 'var(--color-text-tertiary)' }}
+          >
             For per-method breakdowns, open any chain&apos;s Grafana dashboard.
           </p>
         </div>
