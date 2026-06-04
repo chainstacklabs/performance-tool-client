@@ -36,7 +36,7 @@ export default function ProtocolChips({ chains, active, onChange }) {
             }}
           >
             {logo && (
-              <div style={{ width: 20, height: 20, position: 'relative', flexShrink: 0 }}>
+              <div style={{ width: 28, height: 28, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
                 <Image
                   src={`/logos/${logo}.svg`}
                   alt={chain.name}
