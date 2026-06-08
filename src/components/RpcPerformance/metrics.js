@@ -8,9 +8,9 @@ export const REGION_MAP = {
 };
 
 export const REGION_LABEL = {
-  'us-east-1':      'US-East',
-  'eu-west-1':      'EU-West',
-  'ap-southeast-1': 'APAC',
+  'us-east-1':      '🇺🇸 US',
+  'eu-west-1':      '🇩🇪 DE',
+  'ap-southeast-1': '🇸🇬 SG',
 };
 
 export const regionShort = code => REGION_MAP[code] ?? code.split(/[-_]/)[0].toUpperCase();
@@ -53,9 +53,9 @@ export function tailRiskLevel(tail) {
 }
 
 export const TAIL_RISK_COLOR = {
-  low:    '#25B15F',
-  medium: '#FFDD33',
-  high:   '#FF294C',
+  low:    '#4A7A5A',
+  medium: '#656E80',
+  high:   '#FFDD33',
 };
 
 export function enrichProviders(providers, regionList) {
@@ -67,11 +67,14 @@ export function enrichProviders(providers, regionList) {
     const worst = worstRegion(p.regions, regionList);
     const best  = bestRegion(p.regions, regionList);
     const tail  = Number.isFinite(p99ms) && Number.isFinite(p95ms) ? p99ms - p95ms : null;
+    // delta vs expected baseline (p95 - p50 * 1.4 approximates expected spread)
+    const delta = p95ms != null && p50ms != null ? Math.round(p95ms - p50ms * 1.4) : null;
     return {
       ...p,
       p95ms, p99ms, p50ms, availability,
       tail,
       tailLevel: tailRiskLevel(tail),
+      delta,
       errorRate: Number.isFinite(availability) ? +(100 - availability).toFixed(4) : null,
       worstRegion: worst,
       bestRegion:  best,
@@ -102,15 +105,6 @@ export function computeScores(enriched) {
   }));
 }
 
-export function p95Color(ms, isWinner) {
-  if (!Number.isFinite(ms)) return '#656E80';
-  if (isWinner) return '#25B15F';
-  if (ms > 200) return '#FFDD33';
-  if (ms > 300) return '#FF294C';
-  return '#8D95A5';
-}
-
-// ≥99% green, ≥97% yellow, else red
 export function availColor(pct) {
   if (!Number.isFinite(pct)) return '#656E80';
   if (pct >= 99) return '#25B15F';
@@ -118,39 +112,48 @@ export function availColor(pct) {
   return '#FF294C';
 }
 
-export const SEVERITY_COLOR = { ok: '#8D95A5', warning: '#FFDD33', error: '#FF294C' };
-export const SEVERITY_LABEL = { ok: 'OK', warning: '⚠ warning', error: '✕ error' };
+export const SEVERITY_COLOR = { ok: '#25B15F', warning: '#FFDD33', error: '#FF294C' };
 export const severityColor = s => SEVERITY_COLOR[s] ?? '#8D95A5';
-export const severityLabel = s => SEVERITY_LABEL[s] ?? s;
 
-export function generateSummary(useCase, view, chain, sorted, regionList) {
+export function issueNotes(p) {
+  if (p.severity === 'ok') return 'no issues';
+  if (p.trendStatus === 'spiky' || p.tailLevel === 'high') return 'high latency tail';
+  if ((p.p95ms ?? 0) > 200) return 'elevated latency';
+  if (p.trendStatus === 'down') return 'trending down';
+  if (p.trendStatus === 'mixed') return 'mixed signals';
+  if ((p.incidents ?? 0) > 0) return 'mild degradation';
+  return 'no issues';
+}
+
+export function generateSummary(view, chain, sorted) {
   const leader = sorted[0];
   if (!leader) return null;
   const name = chain.name;
 
-  if (useCase === 'compare') {
-    if (view === 'overview' || view === 'latency') {
-      return `${leader.name} ranks #1 for ${name}: ${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk.`;
-    }
-    if (view === 'regions') {
-      const avgByRegion = (regionList ?? []).map(r => ({
-        r,
-        avg: sorted.reduce((sum, p) => sum + (p.regions?.[r] ?? 0), 0) / sorted.length,
-      })).sort((a, b) => a.avg - b.avg);
-      const fastest = avgByRegion[0];
-      const slowest = avgByRegion[avgByRegion.length - 1];
-      const fl = REGION_LABEL[fastest?.r] ?? fastest?.r ?? '';
-      const sl = REGION_LABEL[slowest?.r] ?? slowest?.r ?? '';
-      return fl && sl ? `${fl} is fastest across all providers. ${sl} is slowest.` : null;
-    }
+  if (view === 'overview' || view === 'latency') {
+    return {
+      headline: `${leader.name} ranks #1 for ${name}`,
+      detail:   `${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk among tracked providers`,
+    };
   }
-  if (useCase === 'reliability') {
-    return `${leader.name} leads ${name} reliability: ${leader.availability?.toFixed(2)}% availability · ${leader.incidents ?? 0} incidents · tail +${leader.tail} ms.`;
+  if (view === 'reliability') {
+    return {
+      headline: `${leader.name} leads ${name} reliability`,
+      detail:   `${leader.availability?.toFixed(2)}% availability · ${leader.incidents ?? 0} incidents · tail +${leader.tail} ms`,
+    };
   }
-  if (useCase === 'issues') {
+  if (view === 'regions') {
+    return null; // insight shown instead
+  }
+  if (view === 'issues') {
     const issues = sorted.filter(p => p.severity !== 'ok');
-    if (!issues.length) return `No critical ${name} issues detected. All providers healthy.`;
-    return `${issues.length} provider${issues.length > 1 ? 's' : ''} with elevated risk: ${issues.map(p => p.name).join(', ')}.`;
+    if (!issues.length) {
+      return { headline: `All providers healthy`, detail: `No critical ${name} issues detected.` };
+    }
+    return {
+      headline: `${issues.length} provider${issues.length > 1 ? 's' : ''} with elevated risk`,
+      detail:   issues.map(p => p.name).join(', '),
+    };
   }
   return null;
 }
@@ -164,5 +167,5 @@ export function regionInsight(sorted, regionList) {
   const slowest = avgByRegion[avgByRegion.length - 1];
   const fl = REGION_LABEL[fastest?.r] ?? '';
   const sl = REGION_LABEL[slowest?.r] ?? '';
-  return fl && sl && fl !== sl ? `${fl} is fastest across all providers; ${sl} is slowest.` : null;
+  return fl && sl && fl !== sl ? `${fl} fastest · ${sl} slowest` : null;
 }

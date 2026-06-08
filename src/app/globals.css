@@ -4,7 +4,7 @@
 
 :root {
   /* bg */
-  --color-bg:                      #090A0B;
+  --color-bg:                      #03070d;
   --color-bg-elevated:             #1F2228;
   --color-bg-elevated-contrast:    #002150;
   --color-bg-overlay:              rgba(9,10,11,0.5);
@@ -66,6 +66,73 @@
   --color-tag-magenta-content:     #F88FAA;
 }
 
+/* ── Typography tokens (Figma Design System 2.0, node 5812:2933) ── */
+:root {
+  /* font-size */
+  --font-size-hero:      56px;
+  --font-size-h1:        40px;
+  --font-size-h2:        32px;
+  --font-size-h3:        28px;
+  --font-size-h4:        24px;
+  --font-size-subtitle-l: 18px;
+  --font-size-subtitle-m: 16px;
+  --font-size-subtitle-s: 14px;
+  --font-size-body-l:    18px;
+  --font-size-body-m:    16px;
+  --font-size-body-s:    14px;
+  --font-size-body-xs:   12px;
+  --font-size-caption-m: 16px;
+  --font-size-caption-s: 14px;
+  --font-size-caption-xs:12px;
+  --font-size-btn-l:     15px;
+  --font-size-btn-m:     13px;
+
+  /* line-height */
+  --lh-hero:      68px;
+  --lh-h1:        48px;
+  --lh-h2:        38px;
+  --lh-h3:        34px;
+  --lh-h4:        28px;
+  --lh-subtitle-l: 24px;
+  --lh-subtitle-m: 20px;
+  --lh-subtitle-s: 18px;
+  --lh-body-l:    24px;
+  --lh-body-m:    20px;
+  --lh-body-s:    18px;
+  --lh-body-xs:   16px;
+  --lh-caption-m: 20px;
+  --lh-caption-s: 18px;
+  --lh-caption-xs:16px;
+  --lh-btn-l:     20px;
+  --lh-btn-m:     18px;
+
+  /* letter-spacing */
+  --ls-heading:   -2%;   /* applied via calc in JS — use JS constants */
+  --ls-subtitle:  -1%;
+  --ls-body:      0;
+  --ls-caption:   -1%;
+  --ls-btn:       1%;
+}
+
+/* Utility classes */
+.type-hero      { font-size: var(--font-size-hero);      line-height: var(--lh-hero);       font-weight: 500; letter-spacing: -1.12px; }
+.type-h1        { font-size: var(--font-size-h1);        line-height: var(--lh-h1);         font-weight: 500; letter-spacing: -0.8px;  }
+.type-h2        { font-size: var(--font-size-h2);        line-height: var(--lh-h2);         font-weight: 500; letter-spacing: -0.64px; }
+.type-h3        { font-size: var(--font-size-h3);        line-height: var(--lh-h3);         font-weight: 500; letter-spacing: -0.56px; }
+.type-h4        { font-size: var(--font-size-h4);        line-height: var(--lh-h4);         font-weight: 500; letter-spacing: -0.48px; }
+.type-subtitle-l{ font-size: var(--font-size-subtitle-l);line-height: var(--lh-subtitle-l); font-weight: 500; letter-spacing: -0.18px; }
+.type-subtitle-m{ font-size: var(--font-size-subtitle-m);line-height: var(--lh-subtitle-m); font-weight: 500; letter-spacing: -0.16px; }
+.type-subtitle-s{ font-size: var(--font-size-subtitle-s);line-height: var(--lh-subtitle-s); font-weight: 500; letter-spacing: -0.14px; }
+.type-body-l    { font-size: var(--font-size-body-l);    line-height: var(--lh-body-l);     font-weight: 400; letter-spacing: 0;       }
+.type-body-m    { font-size: var(--font-size-body-m);    line-height: var(--lh-body-m);     font-weight: 400; letter-spacing: 0;       }
+.type-body-s    { font-size: var(--font-size-body-s);    line-height: var(--lh-body-s);     font-weight: 400; letter-spacing: 0;       }
+.type-body-xs   { font-size: var(--font-size-body-xs);   line-height: var(--lh-body-xs);    font-weight: 400; letter-spacing: -0.12px; }
+.type-caption-m { font-size: var(--font-size-caption-m); line-height: var(--lh-caption-m);  font-weight: 450; letter-spacing: -0.16px; }
+.type-caption-s { font-size: var(--font-size-caption-s); line-height: var(--lh-caption-s);  font-weight: 450; letter-spacing: -0.14px; }
+.type-caption-xs{ font-size: var(--font-size-caption-xs);line-height: var(--lh-caption-xs); font-weight: 450; letter-spacing: -0.12px; }
+.type-btn-l     { font-size: var(--font-size-btn-l);     line-height: var(--lh-btn-l);      font-weight: 500; letter-spacing: 0.15px;  }
+.type-btn-m     { font-size: var(--font-size-btn-m);     line-height: var(--lh-btn-m);      font-weight: 500; letter-spacing: 0.13px;  }
+
 html, body {
   font-family: 'Suisse Int\'l', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -118,54 +185,50 @@ html, body {
 }
 
 
-/* ── Animated mesh gradient blobs ── */
-@keyframes blob1 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33%       { transform: translate(60px, -40px) scale(1.15); }
-  66%       { transform: translate(-30px, 30px) scale(0.9); }
-}
-@keyframes blob2 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33%       { transform: translate(-80px, 30px) scale(0.85); }
-  66%       { transform: translate(50px, -50px) scale(1.2); }
-}
-@keyframes blob3 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33%       { transform: translate(40px, 60px) scale(1.1); }
-  66%       { transform: translate(-60px, -20px) scale(0.95); }
-}
-@keyframes blob4 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33%       { transform: translate(-50px, -60px) scale(1.2); }
-  66%       { transform: translate(70px, 40px) scale(0.88); }
+/* ── Infra background ── */
+.infra-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(2, 123, 255, 0.23),  transparent 33%),
+    radial-gradient(circle at 85% 0%,  rgba(153, 202, 255, 0.14), transparent 28%),
+    radial-gradient(circle at 50% 100%,rgba(0, 33, 80, 0.48),    transparent 25%),
+    linear-gradient(180deg, #020713 0%, #010308 100%);
 }
 
-.mesh-blob {
+/* dot grid — scrolls with the page */
+.dot-grid {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(153, 202, 255, 0.37) 0.75px, transparent 0.75px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent 52%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent 52%);
 }
-.mesh-blob-1 {
-  width: 500px; height: 400px;
-  background: rgba(153, 202, 255, 0.18);
-  top: -150px; left: -80px;
-  animation: blob1 14s ease-in-out infinite;
+
+/* canvas grain — sits above all page content */
+.chunky-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  image-rendering: pixelated;
+  mix-blend-mode: screen;
 }
-.mesh-blob-2 {
-  width: 420px; height: 350px;
-  background: rgba(2, 123, 255, 0.14);
-  top: -80px; right: -60px;
-  animation: blob2 18s ease-in-out infinite;
+
+/* ── LiveDot ── */
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
 }
-.mesh-blob-3 {
-  width: 380px; height: 300px;
-  background: rgba(0, 33, 80, 0.5);
-  bottom: -60px; left: 30%;
-  animation: blob3 16s ease-in-out infinite;
-}
-.mesh-blob-4 {
-  width: 300px; height: 280px;
-  background: rgba(255, 255, 255, 0.04);
-  top: 20px; left: 50%;
-  animation: blob4 20s ease-in-out infinite;
+
+@keyframes tooltipFade {
+  0%   { opacity: 0; }
+  12%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
 }

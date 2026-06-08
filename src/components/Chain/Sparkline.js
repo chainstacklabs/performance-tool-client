@@ -4,6 +4,7 @@ export default function Sparkline({
   height = 24,
   stroke = '#64748b',
   strokeWidth = 1.5,
+  opacity = 1,
 }) {
   if (!values?.length || values.length < 2) {
     return <div style={{ width, height }} aria-hidden />;
@@ -29,6 +30,7 @@ export default function Sparkline({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
       aria-hidden
+      style={{ opacity }}
     >
       <polyline
         fill="none"

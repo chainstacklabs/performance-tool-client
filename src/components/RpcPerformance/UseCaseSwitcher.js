@@ -20,7 +20,7 @@ export const DEFAULT_VIEW = {
 
 export default function UseCaseSwitcher({ active, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #2E3338' }}>
+    <div style={{ display: 'flex', gap: 24 }}>
       {USE_CASES.map(uc => {
         const isActive = uc.id === active;
         return (
@@ -28,18 +28,16 @@ export default function UseCaseSwitcher({ active, onChange }) {
             key={uc.id}
             onClick={() => onChange(uc.id)}
             style={{
-              background:    'none',
-              border:        'none',
-              borderBottom:  `2px solid ${isActive ? '#007BFF' : 'transparent'}`,
-              color:         isActive ? '#F6F9FD' : '#606772',
-              padding:       '10px 20px',
-              marginBottom:  '-1px',
-              fontSize:      '14px',
-              fontWeight:    isActive ? 500 : 400,
-              fontFamily:    'inherit',
-              cursor:        'pointer',
-              whiteSpace:    'nowrap',
-              transition:    'color 0.15s, border-color 0.15s',
+              background:  'none',
+              border:      'none',
+              padding:     0,
+              color:       isActive ? '#F6F9FD' : '#606772',
+              fontSize:    '20px',
+              fontWeight:  500,
+              fontFamily:  'inherit',
+              cursor:      'pointer',
+              whiteSpace:  'nowrap',
+              transition:  'color 0.15s',
             }}
           >
             {uc.label}

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Logo from '@/components/Logo/Logo';
 
@@ -23,17 +25,19 @@ const Header = () => {
           color: '#FFFFFF',
           border: 'none',
           borderRadius: '8px',
-          padding: '10px 20px',
-          fontSize: '13px',
+          padding: '10px 24px',
+          fontSize: '15px',
           fontWeight: 500,
           fontFamily: "\"Suisse Int'l\", sans-serif",
-          letterSpacing: '1px',
+          lineHeight: '20px',
+          letterSpacing: '0.15px',
           textDecoration: 'none',
           cursor: 'pointer',
           whiteSpace: 'nowrap',
           transition: 'background 0.15s',
         }}
-        onMouseEnter={undefined}
+        onMouseEnter={e => e.currentTarget.style.background = '#005EE0'}
+        onMouseLeave={e => e.currentTarget.style.background = '#007BFF'}
       >
         Start for free
       </a>

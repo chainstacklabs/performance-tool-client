@@ -28,7 +28,7 @@ export default function RootLayout({ children }: any) {
     <html
       lang="en"
       className={`dark-blue wg-antialiased ${spaceMono.variable}`}
-      style={{ background: '#090A0B' }}
+      style={{ background: '#03070d' }}
     >
       <head>
         <script

@@ -13,12 +13,17 @@ const LOGO_MAP = {
   TON:         'ton',
 };
 
+import { BRAND, brandRgba } from './brandColors';
+
+const rgba = (c, a) => `rgba(${c.r},${c.g},${c.b},${a})`;
+
 export default function ProtocolChips({ chains, active, onChange }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {chains.map(chain => {
         const isActive = chain.promName === active;
         const logo = LOGO_MAP[chain.promName];
+        const brand = BRAND[chain.promName];
         return (
           <button
             key={chain.promName}
@@ -27,16 +32,22 @@ export default function ProtocolChips({ chains, active, onChange }) {
               display:      'flex',
               alignItems:   'center',
               gap:          8,
-              background:   isActive ? '#1A2A3A' : 'transparent',
-              border:       `1px solid ${isActive ? '#2E4A6A' : '#2E3338'}`,
+              background:   brand && isActive ? rgba(brand, 0.12) : 'transparent',
+              border:       `1px solid ${brand && isActive ? rgba(brand, 0.45) : '#2E3338'}`,
               borderRadius: 8,
-              padding:      '4px 10px 4px 6px',
+              padding:      '7px 14px 7px 10px',
               cursor:       'pointer',
-              transition:   'all 0.12s',
+              transition:   'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => {
+              if (!isActive) e.currentTarget.style.borderColor = '#4A5260';
+            }}
+            onMouseLeave={e => {
+              if (!isActive) e.currentTarget.style.borderColor = '#2E3338';
             }}
           >
             {logo && (
-              <div style={{ width: 22, height: 22, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
+              <div style={{ width: 26, height: 26, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
                 <Image
                   src={`/logos/${logo}.svg`}
                   alt={chain.name}
@@ -45,15 +56,25 @@ export default function ProtocolChips({ chains, active, onChange }) {
                 />
               </div>
             )}
-            <span
-              style={{
-                fontSize:   12,
-                fontWeight: isActive ? 500 : 400,
-                color:      isActive ? '#F6F9FD' : '#8D95A5',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {chain.name}
+            <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
+              {/* reserves width at max weight */}
+              <span style={{
+                fontSize: 14, lineHeight: '18px', fontWeight: 450,
+                letterSpacing: '-0.14px', visibility: 'hidden', userSelect: 'none',
+              }}>
+                {chain.name}
+              </span>
+              {/* visible text */}
+              <span style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center',
+                fontSize: 14, lineHeight: '18px',
+                fontWeight:    isActive ? 450 : 400,
+                letterSpacing: '-0.14px',
+                color:         isActive ? '#F6F9FD' : '#8D95A5',
+              }}>
+                {chain.name}
+              </span>
             </span>
           </button>
         );
