@@ -27,20 +27,30 @@ const STATUS_COLOR = {
   unknown:    '#4A5260',
 };
 
-// Realistic thresholds for RPC provider P95 latency
-// (values from public API are in the 400ms–4000ms range)
-function heatCell(ms) {
-  if (ms == null) return { bg: 'transparent', color: '#4A5260' };
-  if (ms < 500)  return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };   // fast
-  if (ms < 1200) return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };   // acceptable
-  return           { bg: 'rgba(160,50,50,0.30)',  color: '#D48080' };         // slow
+// Relative thresholds: compare against the best provider in the current table.
+// green  ≤ best × 1.5  — competitive
+// yellow ≤ best × 2.5  — moderately slower
+// red    > best × 2.5  — clearly degraded
+function relativeLevel(ms, bestMs) {
+  if (ms == null || bestMs == null) return 'unknown';
+  if (ms <= bestMs * 1.5) return 'good';
+  if (ms <= bestMs * 2.5) return 'warn';
+  return 'bad';
 }
 
-// Latency bar color based on absolute ms (same thresholds)
-function latencyColor(ms) {
+function heatCell(ms, bestMs) {
+  if (ms == null) return { bg: 'transparent', color: '#4A5260' };
+  const lvl = relativeLevel(ms, bestMs);
+  if (lvl === 'good') return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };
+  if (lvl === 'warn') return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };
+  return                     { bg: 'rgba(160,50,50,0.30)',  color: '#D48080' };
+}
+
+function latencyColor(ms, bestMs) {
   if (ms == null) return '#4A5260';
-  if (ms < 500)  return '#25B15F';
-  if (ms < 1200) return '#C4A45A';
+  const lvl = relativeLevel(ms, bestMs);
+  if (lvl === 'good') return '#25B15F';
+  if (lvl === 'warn') return '#C4A45A';
   return '#D48080';
 }
 
@@ -63,36 +73,42 @@ function groupRegions(regionsRaw) {
 
 /* ─── latency distribution column ────────────────────────── */
 
-function LatencyBar({ p50ms, p95ms, p99ms, maxVal }) {
-  const BAR_W = 180;
-  const ref   = maxVal || 1;
-  const accent = latencyColor(p95ms);
+function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
+  const BAR_W  = 180;
+  const ref    = maxVal || 1;
+  const accent = latencyColor(p95ms, bestP95ms);
 
-  const w50 = p50ms != null ? Math.max(2, Math.round(BAR_W * Math.min(1, p50ms / ref))) : 0;
-  const w95 = p95ms != null ? Math.max(w50 + 2, Math.round(BAR_W * Math.min(1, p95ms / ref))) : 0;
-  const w99 = p99ms != null ? Math.max(w95 + 2, Math.round(BAR_W * Math.min(1, p99ms / ref))) : 0;
+  const w50 = p50ms != null ? Math.round(BAR_W * Math.min(1, p50ms / ref)) : 0;
+  const w95 = p95ms != null ? Math.round(BAR_W * Math.min(1, p95ms / ref)) : 0;
+  const w99 = p99ms != null ? Math.round(BAR_W * Math.min(1, p99ms / ref)) : 0;
 
   return (
     <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, minWidth: 220 }}>
-      {/* distribution bar — taller */}
+      {/* Shared scale: P50/P95/P99 as segments of one color, decreasing opacity */}
       <div style={{ position: 'relative', width: BAR_W, height: 6, background: '#1E2328', borderRadius: 99 }}>
-        {/* P99 — faintest, same hue as accent */}
-        {w99 > 0 && (
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w99,
-            background: accent + '44', borderRadius: 99 }} />
+        {/* P95→P99: faintest tail */}
+        {w99 > w95 && (
+          <div style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: w99,
+            background: accent + '30', borderRadius: 99,
+          }} />
         )}
-        {/* P95 */}
+        {/* P50→P95: medium */}
         {w95 > 0 && (
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w95,
-            background: accent + 'AA', borderRadius: 99 }} />
+          <div style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: w95,
+            background: accent + '80', borderRadius: 99,
+          }} />
         )}
-        {/* P50 — brightest */}
+        {/* 0→P50: full brightness */}
         {w50 > 0 && (
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w50,
-            background: accent, borderRadius: 99 }} />
+          <div style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: w50,
+            background: accent, borderRadius: 99,
+          }} />
         )}
       </div>
-      {/* values: P50 / P95 / P99 — P95 slightly emphasized, all same color */}
+      {/* Values row: same color, P95 slightly emphasized */}
       <div style={{
         display: 'flex', alignItems: 'baseline', gap: 4,
         fontFamily: 'var(--font-space-mono), monospace',
@@ -117,6 +133,8 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
   }
 
   const maxP95ms = Math.max(...providers.map(p => p.p99ms ?? p.p95ms ?? 0), 1);
+  // Best (lowest) P95 in this table — used for relative color thresholds
+  const bestP95ms = Math.min(...providers.map(p => p.p95ms).filter(Number.isFinite));
 
   const regionMaps     = providers.map(p => groupRegions(p.regions));
   const presentRegions = REGION_ORDER.filter(r => regionMaps.some(m => m[r] != null));
@@ -206,7 +224,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
 
                 {/* Latency bar */}
                 <td style={{ padding: '0 16px' }}>
-                  <LatencyBar p50ms={p.p50ms} p95ms={p.p95ms} p99ms={p.p99ms} maxVal={maxP95ms} />
+                  <LatencyBar p50ms={p.p50ms} p95ms={p.p95ms} p99ms={p.p99ms} maxVal={maxP95ms} bestP95ms={bestP95ms} />
                 </td>
 
                 {/* P95 sparkline */}
@@ -221,7 +239,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 {/* Regional P95 heatmap */}
                 {presentRegions.map(r => {
                   const ms = regions[r] != null ? Math.round(regions[r] * 1000) : null;
-                  const { bg, color } = heatCell(ms);
+                  const { bg, color } = heatCell(ms, bestP95ms);
                   return (
                     <td key={r} style={{
                       padding: '0 8px', textAlign: 'center',
