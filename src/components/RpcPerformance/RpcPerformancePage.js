@@ -41,7 +41,7 @@ function HowWeRank() {
           left: '50%', transform: 'translateX(-50%)',
           background: '#1A1E24', border: '1px solid #2E3338',
           borderRadius: 8, padding: '10px 14px',
-          whiteSpace: 'nowrap', pointerEvents: 'none',
+          width: 'max-content', maxWidth: 340, pointerEvents: 'none',
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           zIndex: 50,
           animation: 'tooltipIn 0.15s ease',
