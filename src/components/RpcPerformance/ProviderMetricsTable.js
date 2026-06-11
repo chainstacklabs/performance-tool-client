@@ -1,364 +1,239 @@
 'use client';
 
 import Sparkline from '@/components/Chain/Sparkline';
-import {
-  availColor, severityColor, regionShort, REGION_LABEL,
-  TAIL_RISK_COLOR, issueNotes,
-} from './metrics';
 
-const TREND_COLOR = { stable: '#25B15F', down: '#FF294C', mixed: '#FFDD33', spiky: '#FF294C' };
-const TREND_LABEL = { stable: 'stable', down: 'down', mixed: 'mixed', spiky: 'spiky' };
+/* ─── helpers ─────────────────────────────────────────────── */
 
 function fmtMs(ms) {
-  if (ms == null) return '—';
-  if (ms < 1000) return `${ms} ms`;
-  return `${(ms / 1000).toFixed(2)} s`;
+  if (ms == null) return null;
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  return `${(ms / 1000).toFixed(2)}s`;
 }
 
+// Tier thresholds match metrics.js availTier()
+function availStatus(pct) {
+  if (!Number.isFinite(pct)) return 'unknown';
+  if (pct >= 99.9) return 'healthy';
+  if (pct >= 99.0) return 'acceptable';
+  if (pct >= 95.0) return 'degraded';
+  return 'unhealthy';
+}
+
+const STATUS_COLOR = {
+  healthy:    '#25B15F',
+  acceptable: '#6FC784',   // slightly muted green
+  degraded:   '#FFDD33',
+  unhealthy:  '#FF294C',
+  unknown:    '#4A5260',
+};
+
+// Realistic thresholds for RPC provider P95 latency
+// (values from public API are in the 400ms–4000ms range)
 function heatCell(ms) {
   if (ms == null) return { bg: 'transparent', color: '#4A5260' };
-  if (ms < 120)  return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };
-  if (ms < 200)  return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };
-  return           { bg: 'rgba(160,50,50,0.30)',  color: '#D48080' };
+  if (ms < 500)  return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };   // fast
+  if (ms < 1200) return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };   // acceptable
+  return           { bg: 'rgba(160,50,50,0.30)',  color: '#D48080' };         // slow
 }
 
-const TH = ({ children, align = 'right', padding = '0 12px', minWidth, width }) => (
-  <th style={{
-    color: '#606772', fontSize: 11,
-    fontFamily: 'var(--font-space-mono), monospace',
-    textTransform: 'uppercase', letterSpacing: '0.06em',
-    fontWeight: 400, padding,
-    textAlign: align, whiteSpace: 'nowrap',
-    borderBottom: '1px solid #252A30',
-    ...(minWidth ? { minWidth } : {}),
-    ...(width ? { width } : {}),
-  }}>
-    {children}
-  </th>
-);
-
-function TD({ children, align = 'right', mono = true, style: s, size = 13, padding = '0 12px' }) {
-  return (
-    <td style={{
-      padding, textAlign: align, fontSize: size,
-      fontFamily: mono ? 'var(--font-space-mono), monospace' : 'inherit',
-      letterSpacing: mono ? '-0.3px' : 'normal',
-      whiteSpace: 'nowrap',
-      color: '#8D95A5', ...s,
-    }}>
-      {children}
-    </td>
-  );
+// Latency bar color based on absolute ms (same thresholds)
+function latencyColor(ms) {
+  if (ms == null) return '#4A5260';
+  if (ms < 500)  return '#25B15F';
+  if (ms < 1200) return '#C4A45A';
+  return '#D48080';
 }
 
-function TailCell({ tail, level }) {
-  const valueColor = level === 'high' ? '#FFDD33' : level === 'low' ? '#25B15F' : '#8D95A5';
-  const labelColor = level === 'high' ? '#B8860B' : level === 'low' ? '#1A6B3A' : '#4A5260';
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 5 }}>
-      <span style={{ color: valueColor }}>+{tail}</span>
-      <span style={{ color: labelColor, fontSize: 11 }}>{level}</span>
-    </span>
-  );
-}
+const REGION_DISPLAY = {
+  fra1: 'DE', sfo1: 'US', sin1: 'SG', hnd1: 'JP',
+  'eu-west-1': 'DE', 'us-east-1': 'US', 'ap-southeast-1': 'SG', 'ap-northeast-1': 'JP',
+};
+const REGION_ORDER  = ['DE', 'US', 'SG', 'JP'];
+const REGION_EMOJI  = { DE: '🇩🇪', US: '🇺🇸', SG: '🇸🇬', JP: '🇯🇵' };
 
-function getColumns(view, regionList, accentColor) {
-  switch (view) {
-    case 'overview':
-      return [
-        {
-          header: '#',
-          render: (p, i) => `#${i + 1}`,
-          style:  (p, i) => ({ color: i === 0 ? '#4DAFFF' : '#8D95A5', fontWeight: 500 }),
-        },
-        {
-          header: 'Avail.',
-          render: p => p.availability != null ? `${p.availability.toFixed(2)}%` : '—',
-          style:  p => ({ color: availColor(p.availability) }),
-        },
-        {
-          header: 'P95, ms',
-          render: p => p.p95ms ?? '—',
-          style:  (p, i) => ({
-            color:      i === 0 ? '#25B15F' : (p.p95ms ?? 0) >= 200 ? '#FFDD33' : '#8D95A5',
-            fontWeight: i === 0 ? 600 : 400,
-            fontSize:   i === 0 ? 14 : 13,
-          }),
-        },
-        {
-          header: 'Tail risk',
-          align:  'left',
-          padding: '0 20px 0 48px',
-          render: p => p.tail != null ? <TailCell tail={p.tail} level={p.tailLevel} /> : '—',
-          mono:   false,
-        },
-        {
-          header: 'Spread, ms',
-          align:  'center',
-          render: p => p.regionalSpread != null ? `+${p.regionalSpread}` : '—',
-          style:  () => ({ color: '#8D95A5' }),
-        },
-        {
-          header: '24h',
-          mono:   false,
-          render: p => (
-            <span style={{ color: TREND_COLOR[p.trendStatus] ?? '#8D95A5', fontSize: 12 }}>
-              {TREND_LABEL[p.trendStatus] ?? 'stable'}
-            </span>
-          ),
-        },
-      ];
-
-    case 'latency':
-      return [
-        {
-          header:  'P50, ms',
-          width:   '1%',
-          render:  p => p.p50ms ?? '—',
-          style:   () => ({ color: '#8D95A5' }),
-        },
-        {
-          header:  'P95, ms',
-          width:   '1%',
-          render:  p => p.p95ms ?? '—',
-          style:   (p, i) => ({
-            color:      i === 0 ? '#25B15F' : (p.p95ms ?? 0) >= 200 ? '#FFDD33' : '#8D95A5',
-            fontWeight: i === 0 ? 600 : 400,
-            fontSize:   i === 0 ? 14 : 13,
-          }),
-        },
-        {
-          header:  'P99, ms',
-          width:   '1%',
-          render:  p => p.p99ms ?? '—',
-          style:   () => ({ color: '#8D95A5' }),
-        },
-        {
-          header:  'Tail risk',
-          align:   'left',
-          padding: '0 20px 0 72px',
-          render: p => p.tail != null ? <TailCell tail={p.tail} level={p.tailLevel} /> : '—',
-          mono:   false,
-        },
-        {
-          header: 'P95, 24h',
-          align:  'left',
-          mono:   false,
-          render: (p, i) => (
-            <Sparkline
-              values={p.trend ?? []}
-              width={64} height={20}
-              stroke={accentColor}
-              strokeWidth={1.5}
-              opacity={i === 0 ? 1 : 0.45}
-            />
-          ),
-        },
-      ];
-
-    case 'reliability':
-      return [
-        {
-          header: 'Avail.',
-          render: p => p.availability != null ? `${p.availability.toFixed(2)}%` : '—',
-          style:  (p, i) => ({ color: availColor(p.availability), fontWeight: i === 0 ? 600 : 400 }),
-        },
-        {
-          header: 'Error rate',
-          render: p => p.errorRate != null ? `${p.errorRate.toFixed(4)}%` : '—',
-          style:  () => ({ color: '#8D95A5' }),
-        },
-        {
-          header: 'Tail risk',
-          align:  'left',
-          padding: '0 20px',
-          render: p => p.tail != null ? <TailCell tail={p.tail} level={p.tailLevel} /> : '—',
-          mono:   false,
-        },
-        {
-          header: 'Incidents',
-          render: p => p.incidents ?? 0,
-          style:  p => ({ color: (p.incidents ?? 0) > 0 ? '#FFDD33' : '#8D95A5' }),
-        },
-        {
-          header: '24h',
-          mono:   false,
-          render: p => (
-            <span style={{ color: TREND_COLOR[p.trendStatus] ?? '#8D95A5', fontSize: 12 }}>
-              {TREND_LABEL[p.trendStatus] ?? 'stable'}
-            </span>
-          ),
-        },
-      ];
-
-    case 'regions':
-      return [
-        ...(regionList ?? []).map(r => ({
-          header: (() => {
-            const label = REGION_LABEL[r] ?? regionShort(r);
-            const parts = label.split(' ');
-            const hasFlag = parts.length > 1;
-            return hasFlag
-              ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 16, lineHeight: 1 }}>{parts[0]}</span>
-                  <span>{parts.slice(1).join(' ')}</span>
-                </span>
-              : label;
-          })(),
-          width:  '1%',
-          align:  'center',
-          padding: '0 16px',
-          render: p => {
-            const ms = Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : null;
-            return fmtMs(ms);
-          },
-          style: p => {
-            const ms = Number.isFinite(p.regions?.[r]) ? Math.round(p.regions[r] * 1000) : null;
-            const { bg, color } = heatCell(ms);
-            return { background: bg, color };
-          },
-        })),
-        {
-          header: 'Spread, ms',
-          align:  'center',
-          render: p => p.regionalSpread != null ? `+${p.regionalSpread}` : '—',
-          style:  p => ({ color: (p.regionalSpread ?? 0) > 80 ? '#C4893A' : '#8D95A5', fontWeight: 500 }),
-        },
-      ];
-
-    case 'issues':
-      return [
-        {
-          header: 'Status',
-          align:  'left',
-          mono:   false,
-          render: p => p.severity === 'ok' ? 'healthy' : p.severity,
-          style:  p => ({
-            color:      severityColor(p.severity),
-            fontWeight: 500,
-            fontSize:   12,
-          }),
-        },
-        {
-          header: 'P95, ms',
-          render: p => p.p95ms ?? '—',
-          style:  (p, i) => ({
-            color:      (p.p95ms ?? 0) >= 200 ? '#FFDD33' : p.severity === 'ok' ? '#8D95A5' : '#8D95A5',
-            fontWeight: p.severity !== 'ok' ? 500 : 400,
-          }),
-        },
-        {
-          header: 'Δ baseline',
-          render: p => {
-            if (p.delta == null) return '—';
-            return p.delta >= 0 ? `+${p.delta}` : `${p.delta}`;
-          },
-          style:  p => ({ color: (p.delta ?? 0) > 30 ? '#FFDD33' : (p.delta ?? 0) < 0 ? '#25B15F' : '#8D95A5' }),
-        },
-        {
-          header: 'Tail risk',
-          align:  'left',
-          padding: '0 20px 0 48px',
-          render: p => p.tail != null ? <TailCell tail={p.tail} level={p.tailLevel} /> : '—',
-          mono:   false,
-        },
-        {
-          header: 'Worst region',
-          align:  'left',
-          render: p => p.worstRegion ? `${REGION_LABEL[p.worstRegion] ?? regionShort(p.worstRegion)}  ${fmtMs(p.worstRegionMs)}` : '—',
-          style:  p => ({ color: (p.worstRegionMs ?? 0) >= 200 ? '#FFDD33' : '#8D95A5' }),
-        },
-        {
-          header: 'Notes',
-          align:  'left',
-          mono:   false,
-          render: p => issueNotes(p),
-          style:  p => ({ color: p.severity === 'ok' ? '#25B15F' : '#8D95A5', fontSize: 12 }),
-        },
-      ];
-
-    default: return [];
+function groupRegions(regionsRaw) {
+  const out = {};
+  for (const [code, val] of Object.entries(regionsRaw ?? {})) {
+    const label = REGION_DISPLAY[code];
+    if (!label || !Number.isFinite(val)) continue;
+    if (out[label] == null || val < out[label]) out[label] = val;
   }
+  return out;
 }
 
-export default function ProviderMetricsTable({ view, providers, regionList, accentColor = '#40474E' }) {
-  const columns = getColumns(view, regionList, accentColor);
+/* ─── latency distribution column ────────────────────────── */
+
+function LatencyBar({ p50ms, p95ms, p99ms, maxVal }) {
+  const BAR_W = 180;
+  const ref   = maxVal || 1;
+  const accent = latencyColor(p95ms);
+
+  const w50 = p50ms != null ? Math.max(2, Math.round(BAR_W * Math.min(1, p50ms / ref))) : 0;
+  const w95 = p95ms != null ? Math.max(w50 + 2, Math.round(BAR_W * Math.min(1, p95ms / ref))) : 0;
+  const w99 = p99ms != null ? Math.max(w95 + 2, Math.round(BAR_W * Math.min(1, p99ms / ref))) : 0;
+
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, minWidth: 220 }}>
+      {/* distribution bar — taller */}
+      <div style={{ position: 'relative', width: BAR_W, height: 6, background: '#1E2328', borderRadius: 99 }}>
+        {/* P99 — faintest, same hue as accent */}
+        {w99 > 0 && (
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w99,
+            background: accent + '44', borderRadius: 99 }} />
+        )}
+        {/* P95 */}
+        {w95 > 0 && (
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w95,
+            background: accent + 'AA', borderRadius: 99 }} />
+        )}
+        {/* P50 — brightest */}
+        {w50 > 0 && (
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: w50,
+            background: accent, borderRadius: 99 }} />
+        )}
+      </div>
+      {/* values: P50 / P95 / P99 — P95 slightly emphasized, all same color */}
+      <div style={{
+        display: 'flex', alignItems: 'baseline', gap: 4,
+        fontFamily: 'var(--font-space-mono), monospace',
+        fontSize: 11, whiteSpace: 'nowrap',
+        color: '#606772',
+      }}>
+        <span>{fmtMs(p50ms) ?? '—'}</span>
+        <span style={{ color: '#3E4552' }}>/</span>
+        <span style={{ fontWeight: 600, fontSize: 12, color: '#7A8494' }}>{fmtMs(p95ms) ?? '—'}</span>
+        <span style={{ color: '#3E4552' }}>/</span>
+        <span>{fmtMs(p99ms) ?? '—'}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── main table ──────────────────────────────────────────── */
+
+export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }) {
   if (!providers.length) {
     return <div style={{ padding: '20px 16px', color: '#4A5260', fontSize: 13 }}>No data</div>;
   }
 
+  const maxP95ms = Math.max(...providers.map(p => p.p99ms ?? p.p95ms ?? 0), 1);
+
+  const regionMaps     = providers.map(p => groupRegions(p.regions));
+  const presentRegions = REGION_ORDER.filter(r => regionMaps.some(m => m[r] != null));
+
+  // Total region section is always 240px — each column gets an equal share.
+  // 4 cols → 60px, 3 cols → 80px, 2 cols → 120px
+  const regionColW = presentRegions.length > 0 ? Math.round(240 / presentRegions.length) : 80;
+
+  const TH = ({ children, align = 'left', style: s }) => (
+    <th style={{
+      color: '#606772', fontSize: 12,
+      fontFamily: 'var(--font-space-mono), monospace',
+      textTransform: 'uppercase', letterSpacing: '0.05em',
+      fontWeight: 400, padding: '0 16px', height: 44,
+      textAlign: align, whiteSpace: 'nowrap',
+      borderBottom: '1px solid #252A30',
+      background: '#0E1115',
+      ...s,
+    }}>{children}</th>
+  );
+
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table style={{
-        width: '100%',
-        minWidth: view === 'latency' ? 640 : view === 'regions' ? 560 : view === 'issues' ? 700 : 520,
-        borderCollapse: 'collapse',
-        tableLayout: view === 'regions' || view === 'latency' ? 'fixed' : 'auto',
-      }}>
-        {view === 'latency' && (
-          <colgroup>
-            <col style={{ width: '34%' }} />
-            <col style={{ width: '9%' }} />
-            <col style={{ width: '9%' }} />
-            <col style={{ width: '9%' }} />
-            <col style={{ width: '22%' }} />
-            <col style={{ width: '17%' }} />
-          </colgroup>
-        )}
-        {view === 'regions' && regionList?.length > 0 && (() => {
-          const dataCols = regionList.length + 1; // regions + spread
-          const providerPct = 28;
-          const colPct = Math.floor((100 - providerPct) / dataCols);
-          return (
-            <colgroup>
-              <col style={{ width: `${providerPct}%` }} />
-              {Array.from({ length: dataCols }).map((_, i) => <col key={i} style={{ width: `${colPct}%` }} />)}
-            </colgroup>
-          );
-        })()}
+      <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: 160 }} />
+          <col style={{ width: 130 }} />
+          <col style={{ width: 220 }} />
+          <col style={{ width: 140 }} />
+          {presentRegions.map(r => <col key={r} style={{ width: regionColW }} />)}
+        </colgroup>
         <thead>
-          <tr style={{ height: 40, background: '#0E1115' }}>
-            <TH align="left" minWidth={160}>Provider</TH>
-            {columns.map((col, i) => (
-              <TH key={i} align={col.align ?? 'right'} padding={col.padding}>{col.header}</TH>
+
+          <tr>
+            <TH>Provider</TH>
+            <TH>Availability</TH>
+            <TH>P50 / P95 / P99</TH>
+            <TH>P95, 24h</TH>
+            {presentRegions.map(r => (
+              <TH key={r} align="center">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 15, lineHeight: 1 }}>{REGION_EMOJI[r]}</span>
+                  <span>{r}</span>
+                </span>
+              </TH>
             ))}
           </tr>
         </thead>
         <tbody>
           {providers.map((p, i) => {
-            const isBest = i === 0 && view !== 'issues';
-            const rowBg = isBest ? accentColor.replace('rgb(', 'rgba(').replace(')', ', 0.04)') : 'transparent';
+            const avail   = p.availability;
+            const status  = availStatus(avail);
+            const regions = regionMaps[i];
+
             return (
-            <tr
-              key={p.name}
-              style={{ height: 52, borderBottom: '1px solid #1E2328', background: rowBg, transition: 'background 0.12s' }}
-              onMouseEnter={e => e.currentTarget.style.background = isBest
-                ? accentColor.replace('rgb(', 'rgba(').replace(')', ', 0.07)')
-                : 'rgba(255,255,255,0.03)'}
-              onMouseLeave={e => e.currentTarget.style.background = rowBg}
-            >
-              <td style={{ padding: '0 12px', textAlign: 'left', whiteSpace: 'nowrap', minWidth: 160 }}>
-                <span style={{ fontSize: 13, color: isBest ? '#F6F9FD' : '#8D95A5', fontWeight: isBest ? 500 : 400 }}>
-                  {p.name}
-                </span>
-                {isBest && (
-                  <span style={{
-                    marginLeft: 8, fontSize: 10, padding: '2px 7px', borderRadius: 999,
-                    background: accentColor.replace('rgb(', 'rgba(').replace(')', ', 0.18)'),
-                    color: accentColor,
-                    fontFamily: 'inherit',
-                    fontWeight: 500,
-                  }}>
-                    Best
-                  </span>
-                )}
-              </td>
-              {columns.map((col, j) => (
-                <TD key={j} align={col.align ?? 'right'} mono={col.mono !== false} style={col.style?.(p, i)} size={col.size ?? 13} padding={col.padding}>
-                  {col.render(p, i)}
-                </TD>
-              ))}
-            </tr>
+              <tr
+                key={p.name}
+                style={{
+                  height: 68, borderBottom: '1px solid #1E2328', transition: 'background 0.12s',
+                  background: i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.05)') : 'transparent',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.10)') : 'rgba(255,255,255,0.025)'}
+                onMouseLeave={e => e.currentTarget.style.background = i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.05)') : 'transparent'}
+              >
+                {/* Provider */}
+                <td style={{ padding: '0 16px', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span className="type-subtitle-s" style={{ color: '#F6F9FD' }}>{p.name}</span>
+                  </div>
+                </td>
+
+                {/* Availability */}
+                <td style={{ padding: '0 16px', whiteSpace: 'nowrap' }}>
+                  {Number.isFinite(avail) ? (
+                    <span style={{
+                      fontSize: 14, fontWeight: 500,
+                      color: STATUS_COLOR[status],
+                      fontFamily: 'var(--font-space-mono), monospace',
+                      letterSpacing: '-0.3px',
+                    }}>
+                      {avail.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span style={{ color: '#4A5260', fontSize: 13 }}>—</span>
+                  )}
+                </td>
+
+                {/* Latency bar */}
+                <td style={{ padding: '0 16px' }}>
+                  <LatencyBar p50ms={p.p50ms} p95ms={p.p95ms} p99ms={p.p99ms} maxVal={maxP95ms} />
+                </td>
+
+                {/* P95 sparkline */}
+                <td style={{ padding: '0 16px' }}>
+                  {p.trend?.length ? (
+                    <Sparkline values={p.trend} width={120} height={24} stroke={accentColor} strokeWidth={1.5} opacity={1} />
+                  ) : (
+                    <span style={{ color: '#4A5260', fontSize: 13 }}>—</span>
+                  )}
+                </td>
+
+                {/* Regional P95 heatmap */}
+                {presentRegions.map(r => {
+                  const ms = regions[r] != null ? Math.round(regions[r] * 1000) : null;
+                  const { bg, color } = heatCell(ms);
+                  return (
+                    <td key={r} style={{
+                      padding: '0 8px', textAlign: 'center',
+                      background: bg, color,
+                      fontFamily: 'var(--font-space-mono), monospace',
+                      fontSize: 12, letterSpacing: '-0.2px', whiteSpace: 'nowrap',
+                    }}>
+                      {ms != null ? fmtMs(ms) : <span style={{ color: '#4A5260' }}>—</span>}
+                    </td>
+                  );
+                })}
+              </tr>
             );
           })}
         </tbody>

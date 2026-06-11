@@ -32,10 +32,10 @@ export default function ProtocolChips({ chains, active, onChange }) {
               display:      'flex',
               alignItems:   'center',
               gap:          8,
-              background:   brand && isActive ? rgba(brand, 0.12) : 'transparent',
-              border:       `1px solid ${brand && isActive ? rgba(brand, 0.45) : '#2E3338'}`,
-              borderRadius: 8,
-              padding:      '7px 14px 7px 10px',
+              background:   brand && isActive ? rgba(brand, 0.15) : 'transparent',
+              border:       `1.5px solid ${isActive ? (brand ? rgba(brand, 0.65) : '#4DAFFF') : '#2E3338'}`,
+              borderRadius: 10,
+              padding:      '9px 18px 9px 12px',
               cursor:       'pointer',
               transition:   'background 0.15s, border-color 0.15s',
             }}
@@ -47,7 +47,7 @@ export default function ProtocolChips({ chains, active, onChange }) {
             }}
           >
             {logo && (
-              <div style={{ width: 26, height: 26, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
+              <div style={{ width: 30, height: 30, position: 'relative', flexShrink: 0, borderRadius: 9999, overflow: 'hidden' }}>
                 <Image
                   src={`/logos/${logo}.svg`}
                   alt={chain.name}
@@ -59,7 +59,7 @@ export default function ProtocolChips({ chains, active, onChange }) {
             <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
               {/* reserves width at max weight */}
               <span style={{
-                fontSize: 14, lineHeight: '18px', fontWeight: 450,
+                fontSize: 15, lineHeight: '20px', fontWeight: 450,
                 letterSpacing: '-0.14px', visibility: 'hidden', userSelect: 'none',
               }}>
                 {chain.name}
@@ -68,10 +68,10 @@ export default function ProtocolChips({ chains, active, onChange }) {
               <span style={{
                 position: 'absolute', inset: 0,
                 display: 'flex', alignItems: 'center',
-                fontSize: 14, lineHeight: '18px',
-                fontWeight:    isActive ? 450 : 400,
+                fontSize: 15, lineHeight: '20px',
+                fontWeight:    isActive ? 500 : 400,
                 letterSpacing: '-0.14px',
-                color:         isActive ? '#F6F9FD' : '#8D95A5',
+                color:         isActive ? '#FFFFFF' : '#8D95A5',
               }}>
                 {chain.name}
               </span>

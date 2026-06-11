@@ -8,9 +8,14 @@ export const REGION_MAP = {
 };
 
 export const REGION_LABEL = {
+  // AWS regions
   'us-east-1':      '🇺🇸 US',
   'eu-west-1':      '🇩🇪 DE',
   'ap-southeast-1': '🇸🇬 SG',
+  // DigitalOcean regions used in public Grafana dashboards
+  'fra1':           '🇩🇪 EU',
+  'sfo1':           '🇺🇸 US',
+  'sin1':           '🇸🇬 SG',
 };
 
 export const regionShort = code => REGION_MAP[code] ?? code.split(/[-_]/)[0].toUpperCase();
@@ -87,22 +92,44 @@ export function enrichProviders(providers, regionList) {
   });
 }
 
+/**
+ * Availability tiers — reliability is checked FIRST, latency second.
+ *
+ *  healthy    >= 99.9% → fully eligible for #1
+ *  acceptable  99.0–99.9% → eligible with penalty
+ *  degraded    95.0–99.0% → cannot be #1
+ *  unhealthy   < 95.0%  → excluded from best-provider ranking
+ */
+export function availTier(pct) {
+  if (!Number.isFinite(pct)) return 'unknown';
+  if (pct >= 99.9) return 'healthy';
+  if (pct >= 99.0) return 'acceptable';
+  if (pct >= 95.0) return 'degraded';
+  return 'unhealthy';
+}
+
+const TIER_RANK = { healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknown: 4 };
+
 export function computeScores(enriched) {
-  const vals = key => enriched.map(p => p[key]).filter(Number.isFinite);
-  const norm = (v, lo, hi) => hi === lo ? 1 : Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
-
-  const p95s   = vals('p95ms'),        [minP95,   maxP95]   = [Math.min(...p95s),   Math.max(...p95s)];
-  const tails  = vals('tail'),         [minTail,  maxTail]  = [Math.min(...tails),  Math.max(...tails)];
-  const avails = vals('availability'), [minAvail, maxAvail] = [Math.min(...avails), Math.max(...avails)];
-
   return enriched.map(p => ({
     ...p,
-    score: Math.round(
-      (1 - norm(p.p95ms ?? maxP95,   minP95,  maxP95))  * 40 +
-      norm(p.availability ?? minAvail, minAvail, maxAvail) * 40 +
-      (1 - norm(p.tail ?? maxTail,   minTail, maxTail))  * 20
-    ),
+    availTier: availTier(p.availability),
   }));
+}
+
+/**
+ * Sort providers: reliability first, then latency.
+ * healthy/acceptable → sorted by P95 ascending
+ * degraded           → after eligible, sorted by P95
+ * unhealthy/unknown  → last, sorted by P95
+ */
+export function sortByReliabilityThenLatency(providers) {
+  return [...providers].sort((a, b) => {
+    const ta = TIER_RANK[a.availTier ?? 'unknown'];
+    const tb = TIER_RANK[b.availTier ?? 'unknown'];
+    if (ta !== tb) return ta - tb;
+    return (a.p95ms ?? Infinity) - (b.p95ms ?? Infinity);
+  });
 }
 
 export function availColor(pct) {
@@ -131,9 +158,46 @@ export function generateSummary(view, chain, sorted) {
   const name = chain.name;
 
   if (view === 'overview' || view === 'latency') {
+    const tier   = leader.availTier ?? availTier(leader.availability);
+    const avPct  = Number.isFinite(leader.availability) ? `${leader.availability.toFixed(2)}%` : null;
+    const p95str = leader.p95ms != null ? `${leader.p95ms} ms P95` : null;
+
+    // Find the fastest provider by raw P95 (ignoring tier) to call out if degraded
+    const fastestRaw = [...sorted].sort((a, b) => (a.p95ms ?? Infinity) - (b.p95ms ?? Infinity))[0];
+    const fastestIsDifferent = fastestRaw && fastestRaw.name !== leader.name;
+
+    if (tier === 'unhealthy') {
+      const eligible = sorted.find(p => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
+      if (eligible) {
+        return {
+          headline: `${eligible.name} leads ${name} — reliable & fast`,
+          detail:   `${eligible.p95ms} ms P95 · ${eligible.availability?.toFixed(2)}% availability · ${leader.name} has lower latency but only ${avPct} uptime`,
+        };
+      }
+      return {
+        headline: `No fully reliable provider for ${name}`,
+        detail:   `${leader.name} has ${p95str ?? '—'} but only ${avPct ?? '?'} availability`,
+      };
+    }
+
+    if (tier === 'degraded') {
+      const eligible = sorted.find(p => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
+      if (eligible) {
+        return {
+          headline: `${eligible.name} ranks #1 for ${name}`,
+          detail:   `${eligible.p95ms} ms P95 · ${eligible.availability?.toFixed(2)}% availability · ${leader.name} excluded — degraded uptime (${avPct})`,
+        };
+      }
+    }
+
+    const detail = [
+      avPct  ? `${avPct} availability` : null,
+      p95str ?? null,
+    ].filter(Boolean).join(' · ');
+
     return {
       headline: `${leader.name} ranks #1 for ${name}`,
-      detail:   `${leader.p95ms} ms P95 · ${leader.availability?.toFixed(2)}% availability · lowest tail risk among tracked providers`,
+      detail,
     };
   }
   if (view === 'reliability') {

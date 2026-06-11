@@ -2,7 +2,7 @@
 
 export default function LiveDot() {
   return (
-    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 8, height: 8, flexShrink: 0 }}>
+    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 9, height: 9, flexShrink: 0 }}>
       <span style={{
         position: 'absolute',
         inset: 0,

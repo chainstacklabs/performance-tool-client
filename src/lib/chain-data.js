@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { runPromQuery, runPromRangeQuery } from './grafana';
-import { getMockChainData } from './mock-data';
+import { fetchPublicChainData } from './grafana-public';
 import {
   providerByRegionQuery,
   providerTrendQuery,
@@ -71,7 +71,7 @@ function trendToMap(rows) {
 
 export const fetchChainData = cache(async (chain) => {
   if (!process.env.GRAFANA_API_TOKEN) {
-    return getMockChainData(chain);
+    return fetchPublicChainData(chain);
   }
 
   const end = minuteAlignedEnd();
