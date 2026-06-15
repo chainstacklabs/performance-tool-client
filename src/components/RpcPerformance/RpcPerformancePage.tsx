@@ -125,11 +125,15 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     if (!chainData?.providers?.length) return [];
     const enriched = enrichProviders(chainData.providers);
     const scored = computeScores(enriched);
-    const sorted = sortByScore(scored);
-    // Cache provider count per protocol for skeleton sizing
-    try { localStorage.setItem(`rpc_rows_${activeProtocol}`, String(sorted.length)); } catch {}
-    return sorted;
-  }, [chainData]); // eslint-disable-line react-hooks/exhaustive-deps
+    return sortByScore(scored);
+  }, [chainData]);
+
+  // Cache provider count per protocol for skeleton sizing. Kept out of the
+  // useMemo above so the write stays a side effect, not memoized computation.
+  useEffect(() => {
+    if (!sortedProviders.length) return;
+    try { localStorage.setItem(`rpc_rows_${activeProtocol}`, String(sortedProviders.length)); } catch {}
+  }, [activeProtocol, sortedProviders.length]);
 
   const summary = useMemo(
     () => chainData ? generateSummary(chainData.chain, sortedProviders) : null,

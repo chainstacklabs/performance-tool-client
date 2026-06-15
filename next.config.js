@@ -41,7 +41,7 @@ const nextConfig = {
       { source: '/dashboard', destination: GRAFANA_DASHBOARD_URL, permanent: true },
     ];
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
 };
 
 const withMDX = require('@next/mdx')({
