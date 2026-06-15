@@ -10,15 +10,16 @@ import ProtocolChips from '@/components/RpcPerformance/ProtocolChips';
 import TimeRangeSwitcher from '@/components/RpcPerformance/TimeRangeSwitcher';
 import TableSkeleton from '@/components/RpcPerformance/TableSkeleton';
 import { CHAINS } from '@/lib/queries';
+import type { TimeRange } from '@/lib/types';
 
 export default function Loading() {
   const activeProtocol = useMemo(() => {
     if (typeof window === 'undefined') return CHAINS[0].promName;
     const p = new URLSearchParams(window.location.search).get('protocol');
-    return CHAINS.find(c => c.promName.toLowerCase() === p?.toLowerCase())?.promName ?? CHAINS[0].promName;
+    return CHAINS.find((c) => c.promName.toLowerCase() === p?.toLowerCase())?.promName ?? CHAINS[0].promName;
   }, []);
 
-  const timeRange = useMemo(() => {
+  const timeRange = useMemo<TimeRange>(() => {
     if (typeof window === 'undefined') return '24h';
     return new URLSearchParams(window.location.search).get('range') === '7d' ? '7d' : '24h';
   }, []);

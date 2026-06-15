@@ -1,9 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { BRAND } from './brandColors';
+import type { CSSProperties } from 'react';
+import { BRAND, type Rgb } from './brandColors';
+import type { Chain } from '@/lib/types';
 
-const LOGO_MAP = {
+const LOGO_MAP: Record<string, string> = {
   Ethereum:    'ethereum',
   Arbitrum:    'arbitrum',
   Base:        'base',
@@ -14,9 +16,15 @@ const LOGO_MAP = {
   TON:         'ton',
 };
 
-const rgba = (c, a) => `rgba(${c.r},${c.g},${c.b},${a})`;
+const rgba = (c: Rgb, a: number) => `rgba(${c.r},${c.g},${c.b},${a})`;
 
-export default function ProtocolChips({ chains, active, onChange }) {
+interface ProtocolChipsProps {
+  chains: Chain[];
+  active: string;
+  onChange?: (promName: string) => void;
+}
+
+export default function ProtocolChips({ chains, active, onChange }: ProtocolChipsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {chains.map((chain) => {
@@ -26,10 +34,10 @@ export default function ProtocolChips({ chains, active, onChange }) {
 
         // Brand colors are per-protocol → passed as CSS variables
         const style = isActive
-          ? {
+          ? ({
               '--chip-bd': brand ? rgba(brand, 0.65) : '#4DAFFF',
               ...(brand ? { '--chip-bg': rgba(brand, 0.15) } : {}),
-            }
+            } as CSSProperties)
           : undefined;
 
         return (

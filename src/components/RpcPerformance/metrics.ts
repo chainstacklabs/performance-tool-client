@@ -1,12 +1,20 @@
 // Pure derived metric helpers — no React, no server-only imports
+import type {
+  Chain,
+  Provider,
+  EnrichedProvider,
+  ScoredProvider,
+  AvailTier,
+  Summary,
+} from '@/lib/types';
 
-export function enrichProviders(providers) {
-  return providers.map(p => ({
+export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
+  return providers.map((p) => ({
     ...p,
-    p95ms: Number.isFinite(p.p95) ? Math.round(p.p95 * 1000) : null,
-    p99ms: Number.isFinite(p.p99) ? Math.round(p.p99 * 1000) : null,
-    p50ms: Number.isFinite(p.p50) ? Math.round(p.p50 * 1000) : null,
-    availability: Number.isFinite(p.success) ? +(p.success * 100).toFixed(2) : null,
+    p95ms: Number.isFinite(p.p95) ? Math.round((p.p95 as number) * 1000) : null,
+    p99ms: Number.isFinite(p.p99) ? Math.round((p.p99 as number) * 1000) : null,
+    p50ms: Number.isFinite(p.p50) ? Math.round((p.p50 as number) * 1000) : null,
+    availability: Number.isFinite(p.success) ? +((p.success as number) * 100).toFixed(2) : null,
   }));
 }
 
@@ -18,15 +26,17 @@ export function enrichProviders(providers) {
  *  degraded    95.0–99.0% → cannot be #1
  *  unhealthy   < 95.0%  → excluded from best-provider ranking
  */
-export function availTier(pct) {
+export function availTier(pct: number | null): AvailTier {
   if (!Number.isFinite(pct)) return 'unknown';
-  if (pct >= 99.9) return 'healthy';
-  if (pct >= 99.0) return 'acceptable';
-  if (pct >= 95.0) return 'degraded';
+  if ((pct as number) >= 99.9) return 'healthy';
+  if ((pct as number) >= 99.0) return 'acceptable';
+  if ((pct as number) >= 95.0) return 'degraded';
   return 'unhealthy';
 }
 
-const TIER_RANK = { healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknown: 4 };
+const TIER_RANK: Record<AvailTier, number> = {
+  healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknown: 4,
+};
 
 /**
  * Grafana scoring formula:
@@ -40,38 +50,38 @@ const TIER_RANK = { healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknow
  * every provider to Infinity and destroy the ordering. The partial-data state
  * is surfaced separately in the UI.
  */
-function grafanaScore(p) {
+function grafanaScore(p: Provider): number {
   const rt = p.p95; // response time in seconds
-  if (!Number.isFinite(rt) || rt <= 0) return Infinity;
+  if (!Number.isFinite(rt) || (rt as number) <= 0) return Infinity;
   const sr = p.success;
-  if (sr == null) return rt;   // success unknown → latency-only ranking
-  if (sr <= 0) return Infinity; // genuinely 0% success → worst
-  return rt / Math.pow(sr, 3);
+  if (sr == null) return rt as number;   // success unknown → latency-only ranking
+  if (sr <= 0) return Infinity;           // genuinely 0% success → worst
+  return (rt as number) / Math.pow(sr, 3);
 }
 
-export function computeScores(enriched) {
-  return enriched.map(p => ({
+export function computeScores(enriched: EnrichedProvider[]): ScoredProvider[] {
+  return enriched.map((p) => ({
     ...p,
     availTier:    availTier(p.availability),
     grafanaScore: grafanaScore(p),
   }));
 }
 
-export function sortByReliabilityThenLatency(providers) {
+export function sortByReliabilityThenLatency(providers: ScoredProvider[]): ScoredProvider[] {
   return [...providers].sort((a, b) => (a.grafanaScore ?? Infinity) - (b.grafanaScore ?? Infinity));
 }
 
-export function generateSummary(chain, sorted) {
+export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary | null {
   const leader = sorted[0];
   if (!leader) return null;
   const name = chain.name;
 
   const tier   = leader.availTier ?? availTier(leader.availability);
-  const avPct  = Number.isFinite(leader.availability) ? `${leader.availability.toFixed(2)}%` : null;
+  const avPct  = Number.isFinite(leader.availability) ? `${(leader.availability as number).toFixed(2)}%` : null;
   const p95str = leader.p95ms != null ? `${leader.p95ms} ms P95` : null;
 
   if (tier === 'unhealthy') {
-    const eligible = sorted.find(p => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
+    const eligible = sorted.find((p) => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
     if (eligible) {
       return {
         headline: `${eligible.name} leads ${name} — reliable & fast`,
@@ -85,7 +95,7 @@ export function generateSummary(chain, sorted) {
   }
 
   if (tier === 'degraded') {
-    const eligible = sorted.find(p => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
+    const eligible = sorted.find((p) => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
     if (eligible) {
       return {
         headline: `${eligible.name} ranks #1 for ${name}`,

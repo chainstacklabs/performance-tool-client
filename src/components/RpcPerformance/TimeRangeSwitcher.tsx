@@ -2,16 +2,22 @@
 
 import { useTransition, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { TimeRange } from '@/lib/types';
 
-const RANGES = [
+const RANGES: { value: TimeRange; label: string }[] = [
   { value: '24h', label: '24h' },
   { value: '7d',  label: '7d'  },
 ];
 
-export default function TimeRangeSwitcher({ current, onLoadingChange }) {
+interface TimeRangeSwitcherProps {
+  current: TimeRange;
+  onLoadingChange?: (loading: boolean) => void;
+}
+
+export default function TimeRangeSwitcher({ current, onLoadingChange }: TimeRangeSwitcherProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [optimistic, setOptimistic] = useState(current);
+  const [optimistic, setOptimistic] = useState<TimeRange>(current);
 
   // Sync back if server overrides (e.g. on back/forward navigation)
   useEffect(() => { setOptimistic(current); }, [current]);
@@ -20,11 +26,12 @@ export default function TimeRangeSwitcher({ current, onLoadingChange }) {
     onLoadingChange?.(isPending);
   }, [isPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleChange(value) {
+  function handleChange(value: TimeRange) {
     setOptimistic(value); // instant visual switch
     const cur = new URLSearchParams(window.location.search);
     const ordered = new URLSearchParams();
-    if (cur.get('protocol')) ordered.set('protocol', cur.get('protocol'));
+    const protocol = cur.get('protocol');
+    if (protocol) ordered.set('protocol', protocol);
     ordered.set('range', value);
     startTransition(() => {
       router.replace(`?${ordered.toString()}`, { scroll: false });

@@ -1,4 +1,5 @@
 import { Space_Mono } from 'next/font/google';
+import type { ReactNode } from 'react';
 import './globals.css';
 
 const spaceMono = Space_Mono({
@@ -23,7 +24,7 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }: any) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"

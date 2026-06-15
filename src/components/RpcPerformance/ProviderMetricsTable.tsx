@@ -1,21 +1,25 @@
 'use client';
 
+import type { CSSProperties, ReactNode } from 'react';
 import Sparkline from '@/components/Chain/Sparkline';
 import { availTier } from './metrics';
+import type { AvailTier, ScoredProvider } from '@/lib/types';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 
-function fmtMs(ms) {
+function fmtMs(ms: number | null): string | null {
   if (ms == null) return null;
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
+type RelLevel = 'good' | 'warn' | 'bad' | 'unknown';
+
 // Relative thresholds: compare against the best provider in the current table.
 // green  ≤ best × 1.5  — competitive
 // yellow ≤ best × 2.5  — moderately slower
 // red    > best × 2.5  — clearly degraded
-function relativeLevel(ms, bestMs) {
+function relativeLevel(ms: number | null, bestMs: number | null): RelLevel {
   if (ms == null || bestMs == null) return 'unknown';
   if (ms <= bestMs * 1.5) return 'good';
   if (ms <= bestMs * 2.5) return 'warn';
@@ -23,7 +27,7 @@ function relativeLevel(ms, bestMs) {
 }
 
 // Heatmap cell background+text as Tailwind classes (static per level).
-function heatCellClass(ms, bestMs) {
+function heatCellClass(ms: number | null, bestMs: number): string {
   if (ms == null) return 'text-fg-ghost';
   const lvl = relativeLevel(ms, bestMs);
   if (lvl === 'good') return 'bg-[rgba(46,140,70,0.28)] text-[#7DCFA0]';
@@ -32,7 +36,7 @@ function heatCellClass(ms, bestMs) {
 }
 
 // Bar accent — returns a hex value because it's composed with alpha suffixes.
-function latencyColorHex(ms, bestMs) {
+function latencyColorHex(ms: number | null, bestMs: number): string {
   if (ms == null) return '#4A5260';
   const lvl = relativeLevel(ms, bestMs);
   if (lvl === 'good') return '#25B15F';
@@ -40,7 +44,7 @@ function latencyColorHex(ms, bestMs) {
   return '#D48080';
 }
 
-const TIER_TEXT_CLASS = {
+const TIER_TEXT_CLASS: Record<AvailTier, string> = {
   healthy:    'text-tier-healthy',
   acceptable: 'text-tier-acceptable',
   degraded:   'text-tier-degraded',
@@ -48,15 +52,15 @@ const TIER_TEXT_CLASS = {
   unknown:    'text-tier-unknown',
 };
 
-const REGION_DISPLAY = {
+const REGION_DISPLAY: Record<string, string> = {
   fra1: 'DE', sfo1: 'US', sin1: 'SG', hnd1: 'JP',
   'eu-west-1': 'DE', 'us-east-1': 'US', 'ap-southeast-1': 'SG', 'ap-northeast-1': 'JP',
 };
-const REGION_ORDER  = ['DE', 'US', 'SG', 'JP'];
-const REGION_EMOJI  = { DE: '🇩🇪', US: '🇺🇸', SG: '🇸🇬', JP: '🇯🇵' };
+const REGION_ORDER: string[] = ['DE', 'US', 'SG', 'JP'];
+const REGION_EMOJI: Record<string, string> = { DE: '🇩🇪', US: '🇺🇸', SG: '🇸🇬', JP: '🇯🇵' };
 
-function groupRegions(regionsRaw) {
-  const out = {};
+function groupRegions(regionsRaw: Record<string, number> | undefined): Record<string, number> {
+  const out: Record<string, number> = {};
   for (const [code, val] of Object.entries(regionsRaw ?? {})) {
     const label = REGION_DISPLAY[code];
     if (!label || !Number.isFinite(val)) continue;
@@ -66,11 +70,19 @@ function groupRegions(regionsRaw) {
 }
 
 // Convert a brand "rgb(r,g,b)" string to "rgba(r,g,b,a)"
-const toRgba = (rgb, a) => rgb.replace('rgb(', 'rgba(').replace(')', `,${a})`);
+const toRgba = (rgb: string, a: number) => rgb.replace('rgb(', 'rgba(').replace(')', `,${a})`);
 
 /* ─── latency distribution column ────────────────────────── */
 
-function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
+interface LatencyBarProps {
+  p50ms: number | null;
+  p95ms: number | null;
+  p99ms: number | null;
+  maxVal: number;
+  bestP95ms: number;
+}
+
+function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }: LatencyBarProps) {
   const BAR_W  = 180;
   const ref    = maxVal || 1;
   const accent = latencyColorHex(p95ms, bestP95ms);
@@ -104,23 +116,30 @@ function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
 
 /* ─── main table ──────────────────────────────────────────── */
 
-const TH = ({ children, align = 'left' }) => (
+const TH = ({ children, align = 'left' }: { children: ReactNode; align?: 'left' | 'center' }) => (
   <th className={`text-fg-faint text-xs font-mono uppercase tracking-[0.05em] font-normal px-4 h-11 whitespace-nowrap border-b border-panel-border bg-panel-head ${
     align === 'center' ? 'text-center' : 'text-left'
   }`}>{children}</th>
 );
 
-export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }) {
+interface ProviderMetricsTableProps {
+  providers: ScoredProvider[];
+  accentColor?: string;
+}
+
+export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }: ProviderMetricsTableProps) {
   if (!providers.length) {
     return <div className="px-4 py-5 text-fg-ghost text-[13px]">No data</div>;
   }
 
-  const maxP95ms = Math.max(...providers.map(p => p.p99ms ?? p.p95ms ?? 0), 1);
+  const maxP95ms = Math.max(...providers.map((p) => p.p99ms ?? p.p95ms ?? 0), 1);
   // Best (lowest) P95 in this table — used for relative color thresholds
-  const bestP95ms = Math.min(...providers.map(p => p.p95ms).filter(Number.isFinite));
+  const bestP95ms = Math.min(
+    ...providers.map((p) => p.p95ms).filter((v): v is number => Number.isFinite(v)),
+  );
 
-  const regionMaps     = providers.map(p => groupRegions(p.regions));
-  const presentRegions = REGION_ORDER.filter(r => regionMaps.some(m => m[r] != null));
+  const regionMaps     = providers.map((p) => groupRegions(p.regions));
+  const presentRegions = REGION_ORDER.filter((r) => regionMaps.some((m) => m[r] != null));
 
   // Total region section is always 240px — each column gets an equal share.
   const regionColW = presentRegions.length > 0 ? Math.round(240 / presentRegions.length) : 80;
@@ -133,7 +152,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
           <col className="w-[130px]" />
           <col className="w-[220px]" />
           <col className="w-[140px]" />
-          {presentRegions.map(r => <col key={r} style={{ width: regionColW }} />)}
+          {presentRegions.map((r) => <col key={r} style={{ width: regionColW }} />)}
         </colgroup>
         <thead>
           <tr>
@@ -141,7 +160,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
             <TH>Availability</TH>
             <TH>P50 / P95 / P99</TH>
             <TH>P95, 24h</TH>
-            {presentRegions.map(r => (
+            {presentRegions.map((r) => (
               <TH key={r} align="center">
                 <span className="inline-flex items-center gap-1">
                   <span className="text-[15px] leading-none">{REGION_EMOJI[r]}</span>
@@ -161,7 +180,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
             const rowVars = {
               '--row-bg':       i === 0 ? toRgba(accentColor, 0.05) : 'transparent',
               '--row-bg-hover': i === 0 ? toRgba(accentColor, 0.10) : 'rgba(255,255,255,0.025)',
-            };
+            } as CSSProperties;
 
             return (
               <tr
@@ -180,7 +199,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 <td className="px-4 whitespace-nowrap">
                   {Number.isFinite(avail) ? (
                     <span className={`text-sm font-medium font-mono tracking-[-0.3px] ${TIER_TEXT_CLASS[status]}`}>
-                      {avail.toFixed(2)}%
+                      {(avail as number).toFixed(2)}%
                     </span>
                   ) : (
                     <span className="text-fg-ghost text-[13px]">—</span>
@@ -202,7 +221,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 </td>
 
                 {/* Regional P95 heatmap */}
-                {presentRegions.map(r => {
+                {presentRegions.map((r) => {
                   const ms = regions[r] != null ? Math.round(regions[r] * 1000) : null;
                   return (
                     <td key={r} className={`px-2 text-center font-mono text-xs tracking-[-0.2px] whitespace-nowrap ${heatCellClass(ms, bestP95ms)}`}>

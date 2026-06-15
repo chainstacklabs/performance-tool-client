@@ -9,6 +9,7 @@ import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
 import { enrichProviders, computeScores, sortByReliabilityThenLatency, generateSummary } from './metrics';
 import { brandHex } from './brandColors';
+import type { Chain, ChainData, TimeRange } from '@/lib/types';
 
 function HowWeRank() {
   const [visible, setVisible] = useState(false);
@@ -38,7 +39,7 @@ function HowWeRank() {
   );
 }
 
-function ShareButton({ protocol }) {
+function ShareButton({ protocol }: { protocol: string }) {
   const [copied, setCopied] = useState(false);
   async function handleShare() {
     const url = new URL(window.location.href);
@@ -75,12 +76,18 @@ function ShareButton({ protocol }) {
   );
 }
 
-export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h' }) {
+interface RpcPerformancePageProps {
+  allChainsData: ChainData[];
+  chains: Chain[];
+  timeRange?: TimeRange;
+}
+
+export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h' }: RpcPerformancePageProps) {
   const searchParams = useSearchParams();
   const [isTimeRangeLoading, setIsTimeRangeLoading] = useState(false);
   const defaultProtocol = chains[0]?.promName ?? '';
-  const resolveProtocol = (param) =>
-    chains.find(c => c.promName.toLowerCase() === param?.toLowerCase())?.promName ?? defaultProtocol;
+  const resolveProtocol = (param: string | null) =>
+    chains.find((c) => c.promName.toLowerCase() === param?.toLowerCase())?.promName ?? defaultProtocol;
 
   const [activeProtocol, setActiveProtocol] = useState(() =>
     resolveProtocol(searchParams.get('protocol'))
@@ -100,7 +107,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     setActiveProtocol(resolveProtocol(searchParams.get('protocol')));
   }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleProtocolChange(p) {
+  function handleProtocolChange(p: string) {
     setActiveProtocol(p);
     const cur = new URLSearchParams(window.location.search);
     const ordered = new URLSearchParams();
@@ -110,7 +117,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
   }
 
   const chainData = useMemo(
-    () => allChainsData.find(d => d.chain.promName === activeProtocol),
+    () => allChainsData.find((d) => d.chain.promName === activeProtocol),
     [allChainsData, activeProtocol]
   );
 
@@ -120,9 +127,9 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     const scored = computeScores(enriched);
     const sorted = sortByReliabilityThenLatency(scored);
     // Cache provider count per protocol for skeleton sizing
-    try { localStorage.setItem(`rpc_rows_${activeProtocol}`, sorted.length); } catch {}
+    try { localStorage.setItem(`rpc_rows_${activeProtocol}`, String(sorted.length)); } catch {}
     return sorted;
-  }, [chainData]);
+  }, [chainData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const summary = useMemo(
     () => chainData ? generateSummary(chainData.chain, sortedProviders) : null,

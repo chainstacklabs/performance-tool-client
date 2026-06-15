@@ -1,4 +1,10 @@
-export const BRAND = {
+export interface Rgb {
+  r: number;
+  g: number;
+  b: number;
+}
+
+export const BRAND: Record<string, Rgb> = {
   Ethereum:    { r: 98,  g: 126, b: 234 },
   Arbitrum:    { r: 40,  g: 160, b: 240 },
   Base:        { r: 0,   g: 82,  b: 255 },
@@ -9,13 +15,13 @@ export const BRAND = {
   TON:         { r: 0,   g: 152, b: 234 },
 };
 
-export function brandRgba(chain, alpha) {
+export function brandRgba(chain: string, alpha: number): string | null {
   const c = BRAND[chain];
   if (!c) return null;
   return `rgba(${c.r},${c.g},${c.b},${alpha})`;
 }
 
-export function brandHex(chain) {
+export function brandHex(chain: string): string {
   const c = BRAND[chain];
   if (!c) return '#4DAFFF';
   return `rgb(${c.r},${c.g},${c.b})`;

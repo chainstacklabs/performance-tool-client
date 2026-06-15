@@ -3,10 +3,15 @@
 import React, { useState, useCallback } from 'react';
 import Logo from '@/components/Logo/Logo';
 
-const Header = () => {
-  const [popover, setPopover] = useState(null); // { x, y } or null
+interface PopoverPos {
+  x: number;
+  y: number;
+}
 
-  const handleMouseMove = useCallback((e) => {
+const Header = () => {
+  const [popover, setPopover] = useState<PopoverPos | null>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     setPopover({ x: e.clientX, y: e.clientY });
   }, []);
 

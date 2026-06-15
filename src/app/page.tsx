@@ -5,15 +5,20 @@ import LiveDot from '@/components/LiveDot';
 import RpcPerformancePage from '@/components/RpcPerformance/RpcPerformancePage';
 import PageBackground from '@/components/PageBackground';
 import DotGrid from '@/components/DotGrid';
+import type { ChainData, TimeRange } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-function fetchAllChains(timeRange) {
-  return Promise.all(CHAINS.map(chain => fetchChainData(chain, timeRange)));
+function fetchAllChains(timeRange: TimeRange): Promise<ChainData[]> {
+  return Promise.all(CHAINS.map((chain) => fetchChainData(chain, timeRange)));
 }
 
-export default async function Home({ searchParams }) {
-  const timeRange = searchParams?.range === '7d' ? '7d' : '24h';
+interface HomeProps {
+  searchParams?: { range?: string };
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const timeRange: TimeRange = searchParams?.range === '7d' ? '7d' : '24h';
   const allChainsData = await fetchAllChains(timeRange);
 
   return (

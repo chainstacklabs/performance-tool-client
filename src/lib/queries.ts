@@ -1,7 +1,9 @@
+import type { Chain, TimeRange } from './types';
+
 // promName matches the `blockchain` label in Prometheus.
 // publicToken is the access token for the chain's public Grafana dashboard,
 // audited from the dashboards themselves on 2026-05-22.
-export const CHAINS = [
+export const CHAINS: Chain[] = [
   { name: 'Ethereum',    promName: 'Ethereum',    publicToken: '65c0fcb02f994faf845d4ec095771bd0' },
   { name: 'Solana',      promName: 'Solana',      publicToken: '254601572d9a4b7a90122e46248f82b0' },
   { name: 'BNB Chain',   promName: 'BNB',         publicToken: '059a680a502a4d8782e93fcc1f2f1be9' },
@@ -12,21 +14,21 @@ export const CHAINS = [
   { name: 'Monad',       promName: 'Monad',       publicToken: 'ae4e8ccc089b460f95d5d2f29dd0d022' },
 ];
 
-const baseSelector = (chain) =>
+const baseSelector = (chain: string): string =>
   `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*"}`;
 
 // Inner subquery window/resolution per time range. The coarser 5m step for 7d
 // keeps the sample count manageable (~2016 pts/series vs ~10k at 1m).
-const RANGE_SUBQUERY = {
+const RANGE_SUBQUERY: Record<TimeRange, { window: string; step: string }> = {
   '24h': { window: '24h', step: '1m' },
   '7d':  { window: '7d',  step: '5m' },
 };
-const subquery = (range) => RANGE_SUBQUERY[range] ?? RANGE_SUBQUERY['24h'];
+const subquery = (range: TimeRange) => RANGE_SUBQUERY[range] ?? RANGE_SUBQUERY['24h'];
 
 // Per-provider, per-region quantile latency over the selected range. Aggregating
 // by `avg by (provider)` on the result gives the global per-provider number
 // (matches the source dashboard's regional p95 panel aggregation).
-export const providerByRegionQuery = (chain, q, range = '24h') => {
+export const providerByRegionQuery = (chain: string, q: number, range: TimeRange = '24h'): string => {
   const { window, step } = subquery(range);
   return `
 avg by (provider, source_region) (
@@ -37,7 +39,7 @@ avg by (provider, source_region) (
 };
 
 // Per-provider success rate over the selected range (successful / all samples).
-export const providerSuccessQuery = (chain, range = '24h') => {
+export const providerSuccessQuery = (chain: string, range: TimeRange = '24h'): string => {
   const { window } = subquery(range);
   return `
 sum by (provider) (count_over_time(response_latency_seconds{
@@ -57,7 +59,7 @@ sum by (provider) (count_over_time(response_latency_seconds{
 // Per-provider p95 latency, evaluated at each step over a time range.
 // Used for inline sparklines — each point is p95 over a trailing 1h window;
 // the 24h range at a 1h step yields ~24 points.
-export const providerTrendQuery = (chain) => `
+export const providerTrendQuery = (chain: string): string => `
 avg by (provider) (
   quantile_over_time(0.95,
     (${baseSelector(chain)} > 0)[1h:1m]

@@ -1,23 +1,30 @@
 const ROW_H = 68;
 const HEADER_H = 44;
 
-const LEFT_COLS  = [
+interface ColSpec {
+  w: number;
+  hh: number;
+  dh: number;
+  dw: string;
+}
+
+const LEFT_COLS: ColSpec[] = [
   { w: 160, hh: 10, dh: 12, dw: '75%' },
   { w: 130, hh: 10, dh: 12, dw: '65%' },
   { w: 220, hh: 10, dh: 8,  dw: '80%' },
   { w: 140, hh: 10, dh: 24, dw: '100%' },
 ];
-const RIGHT_COLS = [
+const RIGHT_COLS: ColSpec[] = [
   { w: 80, hh: 10, dh: 12, dw: '65%' },
   { w: 80, hh: 10, dh: 12, dw: '65%' },
   { w: 80, hh: 10, dh: 12, dw: '65%' },
 ];
 
-const Bar = ({ h, w }) => (
+const Bar = ({ h, w }: { h: number | string; w: number | string }) => (
   <div className="rounded bg-white/[0.07] shrink-0" style={{ height: h, width: w }} />
 );
 
-function Row({ isHeader, delay, lastRow }) {
+function Row({ isHeader, delay, lastRow }: { isHeader?: boolean; delay?: number; lastRow?: boolean }) {
   return (
     <div
       className={`flex items-center px-4 ${isHeader ? '' : 'animate-skeletonPulse'} ${
@@ -40,7 +47,7 @@ function Row({ isHeader, delay, lastRow }) {
   );
 }
 
-export default function TableSkeleton({ rowCount = 5 }) {
+export default function TableSkeleton({ rowCount = 5 }: { rowCount?: number }) {
   return (
     <div className="bg-panel border border-panel-border rounded-[10px] overflow-hidden">
       <Row isHeader />

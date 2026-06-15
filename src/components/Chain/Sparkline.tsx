@@ -1,3 +1,12 @@
+interface SparklineProps {
+  values: number[];
+  width?: number;
+  height?: number;
+  stroke?: string;
+  strokeWidth?: number;
+  opacity?: number;
+}
+
 export default function Sparkline({
   values,
   width = 80,
@@ -5,7 +14,7 @@ export default function Sparkline({
   stroke = '#64748b',
   strokeWidth = 1.5,
   opacity = 1,
-}) {
+}: SparklineProps) {
   if (!values?.length || values.length < 2) {
     return <div style={{ width, height }} aria-hidden />;
   }

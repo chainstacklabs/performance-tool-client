@@ -2,8 +2,18 @@
 
 import { useEffect, useRef } from 'react';
 
-export default function ChunkyGrainBackground({ grainSize = 2.5, frameDelay = 120, opacity = 0.035 }) {
-  const canvasRef = useRef(null);
+interface ChunkyGrainBackgroundProps {
+  grainSize?: number;
+  frameDelay?: number;
+  opacity?: number;
+}
+
+export default function ChunkyGrainBackground({
+  grainSize = 2.5,
+  frameDelay = 120,
+  opacity = 0.035,
+}: ChunkyGrainBackgroundProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -13,7 +23,7 @@ export default function ChunkyGrainBackground({ grainSize = 2.5, frameDelay = 12
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let timeoutId;
+    let timeoutId: number | undefined;
 
     const resize = () => {
       canvas.width  = Math.floor(window.innerWidth  / grainSize);
