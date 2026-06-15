@@ -69,9 +69,9 @@ function trendToMap(rows) {
   return m;
 }
 
-export const fetchChainData = cache(async (chain) => {
+export const fetchChainData = cache(async (chain, timeRange = '24h') => {
   if (!process.env.GRAFANA_API_TOKEN) {
-    return fetchPublicChainData(chain);
+    return fetchPublicChainData(chain, timeRange);
   }
 
   const end = minuteAlignedEnd();

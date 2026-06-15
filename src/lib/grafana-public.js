@@ -25,14 +25,16 @@ const PANEL_TREND_TIMESERIES  = 3;  // eth_call P95 timeseries per provider+regi
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function queryPublicPanel(accessToken, panelId, retries = 3) {
-  const url  = `${GRAFANA_URL}/api/public/dashboards/${accessToken}/panels/${panelId}/query`;
-  const toMs = Date.now();
-  const fromMs = toMs - 7 * 24 * 3600 * 1000;
+async function queryPublicPanel(accessToken, panelId, timeRange = '24h', retries = 3) {
+  const url   = `${GRAFANA_URL}/api/public/dashboards/${accessToken}/panels/${panelId}/query`;
+  const toMs  = Date.now();
+  const is7d  = timeRange === '7d';
+  const fromMs      = toMs - (is7d ? 7 : 1) * 24 * 3600 * 1000;
+  const maxDataPoints = is7d ? 168 : 24;
   const body = JSON.stringify({
     timeRange:     { from: String(fromMs), to: String(toMs) },
     intervalMs:    3_600_000,
-    maxDataPoints: 168,
+    maxDataPoints,
     timezone:      'utc',
   });
 
@@ -118,16 +120,16 @@ function avgMap(regionMap) {
   return n ? sum / n : null;
 }
 
-export async function fetchPublicChainData(chain) {
+export async function fetchPublicChainData(chain, timeRange = '24h') {
   const token = chain.publicToken;
   if (!token) throw new Error(`No publicToken for chain ${chain.name}`);
 
   // Sequential to avoid 429 rate-limiting (3 panels × 8 chains = 24 requests)
-  const p95Data      = await queryPublicPanel(token, PANEL_P95_BY_REGION);
+  const p95Data      = await queryPublicPanel(token, PANEL_P95_BY_REGION, timeRange);
   await sleep(200);
-  const successData  = await queryPublicPanel(token, PANEL_SUCCESS_BY_REGION);
+  const successData  = await queryPublicPanel(token, PANEL_SUCCESS_BY_REGION, timeRange);
   await sleep(200);
-  const trendData    = await queryPublicPanel(token, PANEL_TREND_TIMESERIES);
+  const trendData    = await queryPublicPanel(token, PANEL_TREND_TIMESERIES, timeRange);
 
   const p95Map     = parseInstant(p95Data);
   const successMap = parseInstant(successData);
