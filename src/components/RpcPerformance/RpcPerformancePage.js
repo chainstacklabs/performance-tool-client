@@ -47,10 +47,10 @@ function HowWeRank() {
           animation: 'tooltipIn 0.15s ease',
         }}>
           <div style={{ color: '#F6F9FD', fontSize: 13, lineHeight: '18px', fontWeight: 500, marginBottom: 6 }}>
-            Best overall = Availability first, P95 second.
+            We evaluate RPC providers based on their speed (response time) and reliability (success rate) across three regions.
           </div>
-          <div style={{ color: '#8D95A5', fontSize: 13, lineHeight: '18px' }}>
-            Providers below 99.9% Availability get a reliability penalty and cannot be #1 in the default ranking.
+          <div style={{ color: '#8D95A5', fontSize: 13, lineHeight: '18px', fontFamily: 'var(--font-space-mono), monospace' }}>
+            Score = 1 / ((1/ResponseTime) × (SuccessRate³))
           </div>
         </div>
       )}

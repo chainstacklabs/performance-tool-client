@@ -10,6 +10,7 @@ const PROVIDER_NAME_MAP = {
   'Chainstack':            'Chainstack',
   'dRPC':                  'dRPC',
   'TonCenter-WithAPIKey':  'TonCenter',
+  'Helius-Developer':      'Helius',
 };
 function normalizeName(raw) {
   if (PROVIDER_NAME_MAP[raw]) return PROVIDER_NAME_MAP[raw];

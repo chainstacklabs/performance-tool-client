@@ -110,26 +110,31 @@ export function availTier(pct) {
 
 const TIER_RANK = { healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknown: 4 };
 
+/**
+ * Grafana scoring formula:
+ *   score = ResponseTime / SuccessRate³
+ *
+ * Lower score = better (faster + more reliable).
+ * A fast but unreliable provider scores worse than a slightly slower but fully reliable one.
+ */
+function grafanaScore(p) {
+  const rt = p.p95;                          // response time in seconds
+  const sr = Number.isFinite(p.success) ? p.success : 0;
+  if (!Number.isFinite(rt) || rt <= 0) return Infinity;
+  if (sr <= 0) return Infinity;
+  return rt / Math.pow(sr, 3);
+}
+
 export function computeScores(enriched) {
   return enriched.map(p => ({
     ...p,
-    availTier: availTier(p.availability),
+    availTier:    availTier(p.availability),
+    grafanaScore: grafanaScore(p),
   }));
 }
 
-/**
- * Sort providers: reliability first, then latency.
- * healthy/acceptable → sorted by P95 ascending
- * degraded           → after eligible, sorted by P95
- * unhealthy/unknown  → last, sorted by P95
- */
 export function sortByReliabilityThenLatency(providers) {
-  return [...providers].sort((a, b) => {
-    const ta = TIER_RANK[a.availTier ?? 'unknown'];
-    const tb = TIER_RANK[b.availTier ?? 'unknown'];
-    if (ta !== tb) return ta - tb;
-    return (a.p95ms ?? Infinity) - (b.p95ms ?? Infinity);
-  });
+  return [...providers].sort((a, b) => (a.grafanaScore ?? Infinity) - (b.grafanaScore ?? Infinity));
 }
 
 export function availColor(pct) {
