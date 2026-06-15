@@ -23,7 +23,7 @@ const RANGE_SUBQUERY: Record<TimeRange, { window: string; step: string }> = {
   '24h': { window: '24h', step: '1m' },
   '7d':  { window: '7d',  step: '5m' },
 };
-const subquery = (range: TimeRange) => RANGE_SUBQUERY[range] ?? RANGE_SUBQUERY['24h'];
+const subquery = (range: TimeRange) => RANGE_SUBQUERY[range];
 
 // Per-provider, per-region quantile latency over the selected range. Aggregating
 // by `avg by (provider)` on the result gives the global per-provider number
@@ -38,18 +38,20 @@ avg by (provider, source_region) (
 )`.trim();
 };
 
-// Per-provider success rate over the selected range (successful / all samples).
+// Per-provider, per-region success rate over the selected range
+// (successful samples / all samples). Per-region so the ranking score can
+// combine speed and reliability per region — matching the compare dashboard.
 export const providerSuccessQuery = (chain: string, range: TimeRange = '24h'): string => {
   const { window } = subquery(range);
   return `
-sum by (provider) (count_over_time(response_latency_seconds{
+sum by (provider, source_region) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   response_status="success",
   provider!~"TEST_.*"
 }[${window}]))
 /
-sum by (provider) (count_over_time(response_latency_seconds{
+sum by (provider, source_region) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   provider!~"TEST_.*"

@@ -125,9 +125,10 @@ const TH = ({ children, align = 'left' }: { children: ReactNode; align?: 'left' 
 interface ProviderMetricsTableProps {
   providers: ScoredProvider[];
   accentColor?: string;
+  rangeLabel?: string;
 }
 
-export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }: ProviderMetricsTableProps) {
+export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF', rangeLabel = '24h' }: ProviderMetricsTableProps) {
   if (!providers.length) {
     return <div className="px-4 py-5 text-fg-ghost text-[13px]">No data</div>;
   }
@@ -159,7 +160,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
             <TH>Provider</TH>
             <TH>Availability</TH>
             <TH>P50 / P95 / P99</TH>
-            <TH>P95, 24h</TH>
+            <TH>P95, {rangeLabel}</TH>
             {presentRegions.map((r) => (
               <TH key={r} align="center">
                 <span className="inline-flex items-center gap-1">

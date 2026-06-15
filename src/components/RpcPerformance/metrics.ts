@@ -19,12 +19,14 @@ export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
 }
 
 /**
- * Availability tiers — reliability is checked FIRST, latency second.
+ * Availability tiers — DISPLAY ONLY (color the availability %, and add a uptime
+ * caveat to the summary). They do NOT gate ranking: ordering is purely by
+ * grafanaScore, matching the compare dashboard's score panel.
  *
- *  healthy    >= 99.9% → fully eligible for #1
- *  acceptable  99.0–99.9% → eligible with penalty
- *  degraded    95.0–99.0% → cannot be #1
- *  unhealthy   < 95.0%  → excluded from best-provider ranking
+ *  healthy     >= 99.9%
+ *  acceptable  99.0–99.9%
+ *  degraded    95.0–99.0%
+ *  unhealthy   < 95.0%
  */
 export function availTier(pct: number | null): AvailTier {
   if (!Number.isFinite(pct)) return 'unknown';
@@ -34,29 +36,32 @@ export function availTier(pct: number | null): AvailTier {
   return 'unhealthy';
 }
 
-const TIER_RANK: Record<AvailTier, number> = {
-  healthy: 0, acceptable: 1, degraded: 2, unhealthy: 3, unknown: 4,
-};
-
 /**
- * Grafana scoring formula:
- *   score = ResponseTime / SuccessRate³
+ * Ranking score — matches the compare dashboard's "Provider score" panel:
  *
- * Lower score = better (faster + more reliable).
- * A fast but unreliable provider scores worse than a slightly slower but fully reliable one.
+ *   score = 1 / mean_over_regions( (1 / p95_region) × successRate_region³ )
  *
- * When success rate is unknown (the success query failed), we rank by latency
- * alone rather than treating it as 0% — a missing metric must not silently sink
- * every provider to Infinity and destroy the ordering. The partial-data state
- * is surfaced separately in the UI.
+ * The speed×reliability term is computed PER REGION, then averaged, then
+ * inverted. Lower score = better. SuccessRate³ makes even small reliability
+ * drops (99% vs 97%) move the score noticeably. Single-region case reduces to
+ * the displayed formula `1 / ((1/rt) × sr³)` = `rt / sr³`.
+ *
+ * If a provider has no region with both a p95 and a success rate, it is
+ * unscoreable and returns Infinity (ranks last). We do NOT substitute a
+ * latency-only number — that would silently change the ranking. A wholesale
+ * success-query failure surfaces via the partial-data banner instead.
  */
 function grafanaScore(p: Provider): number {
-  const rt = p.p95; // response time in seconds
-  if (!Number.isFinite(rt) || (rt as number) <= 0) return Infinity;
-  const sr = p.success;
-  if (sr == null) return rt as number;   // success unknown → latency-only ranking
-  if (sr <= 0) return Infinity;           // genuinely 0% success → worst
-  return (rt as number) / Math.pow(sr, 3);
+  const terms: number[] = [];
+  for (const [region, p95r] of Object.entries(p.regions)) {
+    const srr = p.regionSuccess[region];
+    if (!Number.isFinite(p95r) || p95r <= 0) continue;
+    if (!Number.isFinite(srr)) continue; // no reliability data for this region
+    terms.push((1 / p95r) * Math.pow(srr, 3));
+  }
+  if (terms.length === 0) return Infinity;
+  const mean = terms.reduce((a, b) => a + b, 0) / terms.length;
+  return mean > 0 ? 1 / mean : Infinity;
 }
 
 export function computeScores(enriched: EnrichedProvider[]): ScoredProvider[] {
@@ -76,37 +81,17 @@ export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary
   if (!leader) return null;
   const name = chain.name;
 
+  // The headline always names the actual #1 row (sorted[0]) — no swapping in a
+  // different provider. Tier only adds a uptime caveat to the detail line.
   const tier   = leader.availTier ?? availTier(leader.availability);
   const avPct  = Number.isFinite(leader.availability) ? `${(leader.availability as number).toFixed(2)}%` : null;
   const p95str = leader.p95ms != null ? `${leader.p95ms} ms P95` : null;
 
-  if (tier === 'unhealthy') {
-    const eligible = sorted.find((p) => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
-    if (eligible) {
-      return {
-        headline: `${eligible.name} leads ${name} — reliable & fast`,
-        detail:   `${eligible.p95ms} ms P95 · ${eligible.availability?.toFixed(2)}% availability · ${leader.name} has lower latency but only ${avPct} uptime`,
-      };
-    }
-    return {
-      headline: `No fully reliable provider for ${name}`,
-      detail:   `${leader.name} has ${p95str ?? '—'} but only ${avPct ?? '?'} availability`,
-    };
-  }
-
-  if (tier === 'degraded') {
-    const eligible = sorted.find((p) => TIER_RANK[p.availTier ?? 'unknown'] <= 1);
-    if (eligible) {
-      return {
-        headline: `${eligible.name} ranks #1 for ${name}`,
-        detail:   `${eligible.p95ms} ms P95 · ${eligible.availability?.toFixed(2)}% availability · ${leader.name} excluded — degraded uptime (${avPct})`,
-      };
-    }
-  }
-
   const detail = [
     avPct  ? `${avPct} availability` : null,
-    p95str ?? null,
+    p95str,
+    tier === 'unhealthy' ? 'low uptime — check availability' :
+    tier === 'degraded'  ? 'degraded uptime' : null,
   ].filter(Boolean).join(' · ');
 
   return {

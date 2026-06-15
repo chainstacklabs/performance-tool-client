@@ -12,11 +12,13 @@ export interface Provider {
   p50: number | null;
   p95: number | null;
   p99: number | null;
-  /** region code → latency in seconds */
+  /** region code → p95 latency in seconds */
   regions: Record<string, number>;
+  /** region code → success rate 0–1 */
+  regionSuccess: Record<string, number>;
   /** p95 trend points in seconds */
   trend: number[];
-  /** success rate 0–1, or null when unknown */
+  /** mean success rate 0–1 across regions, or null when unknown (display only) */
   success: number | null;
 }
 

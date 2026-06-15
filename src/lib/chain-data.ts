@@ -52,15 +52,6 @@ function avgOfMap(regionMap: Map<string, number> | undefined): number | null {
   return n ? sum / n : null;
 }
 
-function successByProviderToMap(rows: PromInstantResult[] | undefined): Map<string, number> {
-  const m = new Map<string, number>();
-  for (const r of rows ?? []) {
-    const v = parseFloat(r.value[1]);
-    if (Number.isFinite(v)) m.set(r.metric.provider, v);
-  }
-  return m;
-}
-
 function trendToMap(rows: PromRangeResult[] | undefined): Map<string, number[]> {
   const m = new Map<string, number[]>();
   for (const r of rows ?? []) {
@@ -74,16 +65,15 @@ function trendToMap(rows: PromRangeResult[] | undefined): Map<string, number[]> 
 }
 
 export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = '24h'): Promise<ChainData> => {
-  const range: TimeRange = TREND_RANGE[timeRange] ? timeRange : '24h';
-  const { windowSeconds, stepSeconds } = TREND_RANGE[range];
+  const { windowSeconds, stepSeconds } = TREND_RANGE[timeRange];
   const end = minuteAlignedEnd();
   const start = end - windowSeconds;
 
   const [p50, p95, p99, success, trend] = await Promise.all([
-    safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5, range))),
-    safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95, range))),
-    safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99, range))),
-    safe('success', runPromQuery(providerSuccessQuery(chain.promName, range))),
+    safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5, timeRange))),
+    safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95, timeRange))),
+    safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99, timeRange))),
+    safe('success', runPromQuery(providerSuccessQuery(chain.promName, timeRange))),
     safe(
       'trend',
       runPromRangeQuery(providerTrendQuery(chain.promName), {
@@ -103,7 +93,7 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
   const p95Map = p95.ok ? quantileByRegionToMap(p95.value) : new Map();
   const p99Map = p99.ok ? quantileByRegionToMap(p99.value) : new Map();
   const trendMap = trend.ok ? trendToMap(trend.value) : new Map<string, number[]>();
-  const successMap = success.ok ? successByProviderToMap(success.value) : new Map<string, number>();
+  const successMap: RegionMap = success.ok ? quantileByRegionToMap(success.value) : new Map();
 
   const providerNames = new Set<string>([
     ...p50Map.keys(),
@@ -125,8 +115,9 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
       p95: avgOfMap(p95Map.get(name)),
       p99: avgOfMap(p99Map.get(name)),
       regions: Object.fromEntries(p95Map.get(name) ?? []) as Record<string, number>,
+      regionSuccess: Object.fromEntries(successMap.get(name) ?? []) as Record<string, number>,
       trend: trendMap.get(name) ?? [],
-      success: successMap.get(name) ?? null,
+      success: avgOfMap(successMap.get(name)),
     }))
     .filter((p) => p.p95 !== null)
     .sort((a, b) => (a.p95 as number) - (b.p95 as number));
