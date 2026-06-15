@@ -10,6 +10,7 @@ import ProtocolChips from '@/components/RpcPerformance/ProtocolChips';
 import TimeRangeSwitcher from '@/components/RpcPerformance/TimeRangeSwitcher';
 import TableSkeleton from '@/components/RpcPerformance/TableSkeleton';
 import { CHAINS } from '@/lib/queries';
+import { TEXT } from '@/lib/theme';
 
 export default function Loading() {
   const activeProtocol = useMemo(() => {
@@ -43,11 +44,11 @@ export default function Loading() {
           <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
 
             <div style={{ paddingTop: 24, paddingBottom: 40 }}>
-              <div className="type-h2" style={{ color: '#F6F9FD' }}>
+              <div className="type-h2" style={{ color: TEXT.primary }}>
                 RPC provider performance
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <span style={{ color: '#8D95A5', fontSize: 15, lineHeight: '20px', fontWeight: 400 }}>Updated every minute</span>
+                <span style={{ color: TEXT.muted, fontSize: 15, lineHeight: '20px', fontWeight: 400 }}>Updated every minute</span>
                 <LiveDot />
               </div>
             </div>

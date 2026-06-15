@@ -9,6 +9,7 @@ import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
 import { enrichProviders, computeScores, sortByReliabilityThenLatency, generateSummary } from './metrics';
 import { brandHex } from './brandColors';
+import { TEXT, SIGNAL } from '@/lib/theme';
 
 const skeletonStyle = `
   @keyframes skeletonPulse {
@@ -35,12 +36,12 @@ function HowWeRank() {
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: 'transparent', border: 'none', padding: 0,
-          cursor: 'pointer', color: '#4A5260', fontSize: 14,
+          cursor: 'pointer', color: TEXT.ghost, fontSize: 14,
           fontFamily: 'inherit', fontWeight: 400,
           transition: 'color 0.15s',
         }}
         onMouseEnterCapture={e => e.currentTarget.style.color = '#6B7585'}
-        onMouseLeaveCapture={e => e.currentTarget.style.color = '#4A5260'}
+        onMouseLeaveCapture={e => e.currentTarget.style.color = TEXT.ghost}
       >
         <Question size={14} weight="regular" />
         How ranking works
@@ -56,10 +57,10 @@ function HowWeRank() {
           zIndex: 50,
           animation: 'tooltipIn 0.15s ease',
         }}>
-          <div style={{ color: '#F6F9FD', fontSize: 13, lineHeight: '18px', fontWeight: 500, marginBottom: 6 }}>
+          <div style={{ color: TEXT.primary, fontSize: 13, lineHeight: '18px', fontWeight: 500, marginBottom: 6 }}>
             We evaluate RPC providers based on their speed (response time) and reliability (success rate) across three regions.
           </div>
-          <div style={{ color: '#8D95A5', fontSize: 13, lineHeight: '18px', fontFamily: 'var(--font-space-mono), monospace' }}>
+          <div style={{ color: TEXT.muted, fontSize: 13, lineHeight: '18px', fontFamily: 'var(--font-space-mono), monospace' }}>
             Score = 1 / ((1/ResponseTime) × (SuccessRate³))
           </div>
         </div>
@@ -96,12 +97,12 @@ function ShareButton({ protocol }) {
           background: 'transparent',
           border: 'none',
           borderRadius: 8, padding: '0 14px', height: 34,
-          cursor: 'pointer', color: '#8D95A5', fontSize: 14,
+          cursor: 'pointer', color: TEXT.muted, fontSize: 14,
           fontFamily: 'inherit', fontWeight: 500,
           transition: 'color 0.15s',
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#F6F9FD'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = '#8D95A5'; }}
+        onMouseEnter={e => { e.currentTarget.style.color = TEXT.primary; }}
+        onMouseLeave={e => { e.currentTarget.style.color = TEXT.muted; }}
       >
         <Export size={14} weight="regular" />
         Share
@@ -112,7 +113,7 @@ function ShareButton({ protocol }) {
           transform: 'translateX(-50%)', background: '#1A1E24',
           border: '1px solid #2E3338',
           borderRadius: 6, padding: '4px 10px',
-          color: '#F6F9FD', fontSize: 12, fontWeight: 500,
+          color: TEXT.primary, fontSize: 12, fontWeight: 500,
           whiteSpace: 'nowrap', pointerEvents: 'none',
           zIndex: 50,
         }}>Copied</div>
@@ -199,11 +200,11 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
           </div>
         ) : summary?.headline ? (
           <div>
-            <div style={{ color: '#F6F9FD', fontSize: 18, lineHeight: '24px', fontWeight: 500, letterSpacing: '-0.2px' }}>
+            <div style={{ color: TEXT.primary, fontSize: 18, lineHeight: '24px', fontWeight: 500, letterSpacing: '-0.2px' }}>
               {summary.headline}
             </div>
             {summary.detail && (
-              <div style={{ color: '#656E80', fontSize: 14, lineHeight: '18px', marginTop: 4 }}>
+              <div style={{ color: TEXT.dim, fontSize: 14, lineHeight: '18px', marginTop: 4 }}>
                 {summary.detail}
               </div>
             )}
@@ -221,7 +222,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
       ) : (
         <div style={{ background: '#161A1E', border: '1px solid #252A30', borderRadius: 10, overflow: 'hidden' }}>
           {chainData?.error ? (
-            <div style={{ padding: '20px 16px', color: '#FF294C', fontSize: 13 }}>Data unavailable</div>
+            <div style={{ padding: '20px 16px', color: SIGNAL.bad, fontSize: 13 }}>Data unavailable</div>
           ) : (
             <ProviderMetricsTable providers={sortedProviders} accentColor={accentColor} />
           )}
@@ -231,7 +232,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
         <HowWeRank />
         {dashboardUrl && (
-          <span style={{ color: '#4A5260', fontSize: 14 }}>
+          <span style={{ color: TEXT.ghost, fontSize: 14 }}>
             Per-method breakdowns available in{' '}
             <a href={dashboardUrl} target="_blank" rel="noopener noreferrer"
               style={{ color: '#4DAFFF', textDecoration: 'none', opacity: 0.7, transition: 'opacity 0.15s' }}

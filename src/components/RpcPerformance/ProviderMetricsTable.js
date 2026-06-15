@@ -1,6 +1,8 @@
 'use client';
 
 import Sparkline from '@/components/Chain/Sparkline';
+import { availTier } from './metrics';
+import { TEXT, TIER_COLOR, ACCENT } from '@/lib/theme';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 
@@ -9,23 +11,6 @@ function fmtMs(ms) {
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(2)}s`;
 }
-
-// Tier thresholds match metrics.js availTier()
-function availStatus(pct) {
-  if (!Number.isFinite(pct)) return 'unknown';
-  if (pct >= 99.9) return 'healthy';
-  if (pct >= 99.0) return 'acceptable';
-  if (pct >= 95.0) return 'degraded';
-  return 'unhealthy';
-}
-
-const STATUS_COLOR = {
-  healthy:    '#25B15F',
-  acceptable: '#6FC784',   // slightly muted green
-  degraded:   '#FFDD33',
-  unhealthy:  '#FF294C',
-  unknown:    '#4A5260',
-};
 
 // Relative thresholds: compare against the best provider in the current table.
 // green  ≤ best × 1.5  — competitive
@@ -39,7 +24,7 @@ function relativeLevel(ms, bestMs) {
 }
 
 function heatCell(ms, bestMs) {
-  if (ms == null) return { bg: 'transparent', color: '#4A5260' };
+  if (ms == null) return { bg: 'transparent', color: TEXT.ghost };
   const lvl = relativeLevel(ms, bestMs);
   if (lvl === 'good') return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };
   if (lvl === 'warn') return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };
@@ -47,7 +32,7 @@ function heatCell(ms, bestMs) {
 }
 
 function latencyColor(ms, bestMs) {
-  if (ms == null) return '#4A5260';
+  if (ms == null) return TEXT.ghost;
   const lvl = relativeLevel(ms, bestMs);
   if (lvl === 'good') return '#25B15F';
   if (lvl === 'warn') return '#C4A45A';
@@ -113,7 +98,7 @@ function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
         display: 'flex', alignItems: 'baseline', gap: 4,
         fontFamily: 'var(--font-space-mono), monospace',
         fontSize: 11, whiteSpace: 'nowrap',
-        color: '#606772',
+        color: TEXT.faint,
       }}>
         <span>{fmtMs(p50ms) ?? '—'}</span>
         <span style={{ color: '#3E4552' }}>/</span>
@@ -127,9 +112,9 @@ function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
 
 /* ─── main table ──────────────────────────────────────────── */
 
-export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }) {
+export default function ProviderMetricsTable({ providers, accentColor = ACCENT }) {
   if (!providers.length) {
-    return <div style={{ padding: '20px 16px', color: '#4A5260', fontSize: 13 }}>No data</div>;
+    return <div style={{ padding: '20px 16px', color: TEXT.ghost, fontSize: 13 }}>No data</div>;
   }
 
   const maxP95ms = Math.max(...providers.map(p => p.p99ms ?? p.p95ms ?? 0), 1);
@@ -145,7 +130,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
 
   const TH = ({ children, align = 'left', style: s }) => (
     <th style={{
-      color: '#606772', fontSize: 12,
+      color: TEXT.faint, fontSize: 12,
       fontFamily: 'var(--font-space-mono), monospace',
       textTransform: 'uppercase', letterSpacing: '0.05em',
       fontWeight: 400, padding: '0 16px', height: 44,
@@ -186,7 +171,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
         <tbody>
           {providers.map((p, i) => {
             const avail   = p.availability;
-            const status  = availStatus(avail);
+            const status  = availTier(avail);
             const regions = regionMaps[i];
 
             return (
@@ -202,7 +187,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 {/* Provider */}
                 <td style={{ padding: '0 16px', whiteSpace: 'nowrap' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span className="type-subtitle-s" style={{ color: '#F6F9FD' }}>{p.name}</span>
+                    <span className="type-subtitle-s" style={{ color: TEXT.primary }}>{p.name}</span>
                   </div>
                 </td>
 
@@ -211,14 +196,14 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                   {Number.isFinite(avail) ? (
                     <span style={{
                       fontSize: 14, fontWeight: 500,
-                      color: STATUS_COLOR[status],
+                      color: TIER_COLOR[status],
                       fontFamily: 'var(--font-space-mono), monospace',
                       letterSpacing: '-0.3px',
                     }}>
                       {avail.toFixed(2)}%
                     </span>
                   ) : (
-                    <span style={{ color: '#4A5260', fontSize: 13 }}>—</span>
+                    <span style={{ color: TEXT.ghost, fontSize: 13 }}>—</span>
                   )}
                 </td>
 
@@ -232,7 +217,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                   {p.trend?.length ? (
                     <Sparkline values={p.trend} width={120} height={24} stroke={accentColor} strokeWidth={1.5} opacity={1} />
                   ) : (
-                    <span style={{ color: '#4A5260', fontSize: 13 }}>—</span>
+                    <span style={{ color: TEXT.ghost, fontSize: 13 }}>—</span>
                   )}
                 </td>
 
@@ -247,7 +232,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                       fontFamily: 'var(--font-space-mono), monospace',
                       fontSize: 12, letterSpacing: '-0.2px', whiteSpace: 'nowrap',
                     }}>
-                      {ms != null ? fmtMs(ms) : <span style={{ color: '#4A5260' }}>—</span>}
+                      {ms != null ? fmtMs(ms) : <span style={{ color: TEXT.ghost }}>—</span>}
                     </td>
                   );
                 })}

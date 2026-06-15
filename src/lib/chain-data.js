@@ -1,15 +1,17 @@
 import 'server-only';
 import { cache } from 'react';
 import { runPromQuery, runPromRangeQuery } from './grafana';
-import { fetchPublicChainData } from './grafana-public';
 import {
   providerByRegionQuery,
   providerTrendQuery,
   providerSuccessQuery,
 } from './queries';
 
-const TREND_STEP_SECONDS = 3600;
-const TREND_WINDOW_SECONDS = 24 * 3600;
+// Trend (sparkline) span per range. Step is sized to keep ~168 points either way.
+const TREND_RANGE = {
+  '24h': { windowSeconds: 24 * 3600,     stepSeconds: 3600 },
+  '7d':  { windowSeconds: 7 * 24 * 3600, stepSeconds: 3600 },
+};
 
 function minuteAlignedEnd() {
   return Math.floor(Date.now() / 60000) * 60;
@@ -70,24 +72,22 @@ function trendToMap(rows) {
 }
 
 export const fetchChainData = cache(async (chain, timeRange = '24h') => {
-  if (!process.env.GRAFANA_API_TOKEN) {
-    return fetchPublicChainData(chain, timeRange);
-  }
-
+  const range = TREND_RANGE[timeRange] ? timeRange : '24h';
+  const { windowSeconds, stepSeconds } = TREND_RANGE[range];
   const end = minuteAlignedEnd();
-  const start = end - TREND_WINDOW_SECONDS;
+  const start = end - windowSeconds;
 
   const [p50, p95, p99, success, trend] = await Promise.all([
-    safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5))),
-    safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95))),
-    safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99))),
-    safe('success', runPromQuery(providerSuccessQuery(chain.promName))),
+    safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5, range))),
+    safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95, range))),
+    safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99, range))),
+    safe('success', runPromQuery(providerSuccessQuery(chain.promName, range))),
     safe(
       'trend',
       runPromRangeQuery(providerTrendQuery(chain.promName), {
         start,
         end,
-        step: TREND_STEP_SECONDS,
+        step: stepSeconds,
       })
     ),
   ]);

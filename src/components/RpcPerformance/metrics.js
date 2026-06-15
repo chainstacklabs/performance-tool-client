@@ -1,24 +1,5 @@
 // Pure derived metric helpers — no React, no server-only imports
-
-export const REGION_MAP = {
-  'us-east-1': 'US-East', 'us-west-1': 'US-West', 'us-west-2': 'US-West',
-  'eu-west-1': 'EU-West', 'eu-central-1': 'EU-Central', 'fra1': 'EU', 'ams3': 'EU',
-  'ap-southeast-1': 'APAC', 'ap-northeast-1': 'APAC', 'sgp1': 'SG', 'sin1': 'SG',
-  'nyc1': 'US', 'nyc3': 'US', 'sfo3': 'US', 'lon1': 'UK',
-};
-
-export const REGION_LABEL = {
-  // AWS regions
-  'us-east-1':      '🇺🇸 US',
-  'eu-west-1':      '🇩🇪 DE',
-  'ap-southeast-1': '🇸🇬 SG',
-  // DigitalOcean regions used in public Grafana dashboards
-  'fra1':           '🇩🇪 EU',
-  'sfo1':           '🇺🇸 US',
-  'sin1':           '🇸🇬 SG',
-};
-
-export const regionShort = code => REGION_MAP[code] ?? code.split(/[-_]/)[0].toUpperCase();
+import { SIGNAL } from '@/lib/theme';
 
 export function worstRegion(regionsMap, regionList) {
   let worst = null, worstVal = -Infinity;
@@ -60,7 +41,7 @@ export function tailRiskLevel(tail) {
 export const TAIL_RISK_COLOR = {
   low:    '#4A7A5A',
   medium: '#656E80',
-  high:   '#FFDD33',
+  high:   SIGNAL.warn,
 };
 
 export function enrichProviders(providers, regionList) {
@@ -139,12 +120,12 @@ export function sortByReliabilityThenLatency(providers) {
 
 export function availColor(pct) {
   if (!Number.isFinite(pct)) return '#656E80';
-  if (pct >= 99) return '#25B15F';
-  if (pct >= 97) return '#FFDD33';
-  return '#FF294C';
+  if (pct >= 99) return SIGNAL.ok;
+  if (pct >= 97) return SIGNAL.warn;
+  return SIGNAL.bad;
 }
 
-export const SEVERITY_COLOR = { ok: '#25B15F', warning: '#FFDD33', error: '#FF294C' };
+export const SEVERITY_COLOR = { ok: SIGNAL.ok, warning: SIGNAL.warn, error: SIGNAL.bad };
 export const severityColor = s => SEVERITY_COLOR[s] ?? '#8D95A5';
 
 export function issueNotes(p) {
@@ -225,16 +206,4 @@ export function generateSummary(view, chain, sorted) {
     };
   }
   return null;
-}
-
-export function regionInsight(sorted, regionList) {
-  const avgByRegion = (regionList ?? []).map(r => ({
-    r,
-    avg: sorted.reduce((sum, p) => sum + (p.regions?.[r] ?? 0), 0) / sorted.length,
-  })).sort((a, b) => a.avg - b.avg);
-  const fastest = avgByRegion[0];
-  const slowest = avgByRegion[avgByRegion.length - 1];
-  const fl = REGION_LABEL[fastest?.r] ?? '';
-  const sl = REGION_LABEL[slowest?.r] ?? '';
-  return fl && sl && fl !== sl ? `${fl} fastest · ${sl} slowest` : null;
 }

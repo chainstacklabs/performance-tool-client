@@ -53,7 +53,6 @@ const Header = () => {
         target="_blank"
         rel="noopener noreferrer"
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
         style={{
           display: 'inline-flex',
           alignItems: 'center',

@@ -15,30 +15,44 @@ export const CHAINS = [
 const baseSelector = (chain) =>
   `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*"}`;
 
-// Per-provider, per-region quantile latency over 24h. Aggregating by
-// `avg by (provider)` on the result gives the global per-provider number
+// Inner subquery window/resolution per time range. The coarser 5m step for 7d
+// keeps the sample count manageable (~2016 pts/series vs ~10k at 1m).
+const RANGE_SUBQUERY = {
+  '24h': { window: '24h', step: '1m' },
+  '7d':  { window: '7d',  step: '5m' },
+};
+const subquery = (range) => RANGE_SUBQUERY[range] ?? RANGE_SUBQUERY['24h'];
+
+// Per-provider, per-region quantile latency over the selected range. Aggregating
+// by `avg by (provider)` on the result gives the global per-provider number
 // (matches the source dashboard's regional p95 panel aggregation).
-export const providerByRegionQuery = (chain, q) => `
+export const providerByRegionQuery = (chain, q, range = '24h') => {
+  const { window, step } = subquery(range);
+  return `
 avg by (provider, source_region) (
   quantile_over_time(${q},
-    (${baseSelector(chain)} > 0)[24h:1m]
+    (${baseSelector(chain)} > 0)[${window}:${step}]
   )
 )`.trim();
+};
 
-// Per-provider success rate over 24h (successful samples / all samples).
-export const providerSuccessQuery = (chain) => `
+// Per-provider success rate over the selected range (successful / all samples).
+export const providerSuccessQuery = (chain, range = '24h') => {
+  const { window } = subquery(range);
+  return `
 sum by (provider) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   response_status="success",
   provider!~"TEST_.*"
-}[24h]))
+}[${window}]))
 /
 sum by (provider) (count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   provider!~"TEST_.*"
-}[24h]))`.trim();
+}[${window}]))`.trim();
+};
 
 // Per-provider p95 latency, evaluated at each step over a time range.
 // Used for inline sparklines — each point is p95 over a trailing 1h window;
