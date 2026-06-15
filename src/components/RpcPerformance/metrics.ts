@@ -72,7 +72,7 @@ export function computeScores(enriched: EnrichedProvider[]): ScoredProvider[] {
   }));
 }
 
-export function sortByReliabilityThenLatency(providers: ScoredProvider[]): ScoredProvider[] {
+export function sortByScore(providers: ScoredProvider[]): ScoredProvider[] {
   return [...providers].sort((a, b) => (a.grafanaScore ?? Infinity) - (b.grafanaScore ?? Infinity));
 }
 

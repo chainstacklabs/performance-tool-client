@@ -7,7 +7,7 @@ import ProtocolChips from './ProtocolChips';
 import ProviderMetricsTable from './ProviderMetricsTable';
 import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
-import { enrichProviders, computeScores, sortByReliabilityThenLatency, generateSummary } from './metrics';
+import { enrichProviders, computeScores, sortByScore, generateSummary } from './metrics';
 import { brandHex } from './brandColors';
 import type { Chain, ChainData, TimeRange } from '@/lib/types';
 
@@ -125,7 +125,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     if (!chainData?.providers?.length) return [];
     const enriched = enrichProviders(chainData.providers);
     const scored = computeScores(enriched);
-    const sorted = sortByReliabilityThenLatency(scored);
+    const sorted = sortByScore(scored);
     // Cache provider count per protocol for skeleton sizing
     try { localStorage.setItem(`rpc_rows_${activeProtocol}`, String(sorted.length)); } catch {}
     return sorted;
