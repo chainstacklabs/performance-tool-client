@@ -1,4 +1,5 @@
 // Pure derived metric helpers — no React, no server-only imports
+import { providerDisplayName } from './providerName';
 import type {
   Chain,
   Provider,
@@ -11,6 +12,7 @@ import type {
 export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
   return providers.map((p) => ({
     ...p,
+    displayName: providerDisplayName(p.name),
     p95ms: Number.isFinite(p.p95) ? Math.round((p.p95 as number) * 1000) : null,
     p99ms: Number.isFinite(p.p99) ? Math.round((p.p99 as number) * 1000) : null,
     p50ms: Number.isFinite(p.p50) ? Math.round((p.p50 as number) * 1000) : null,
@@ -95,7 +97,7 @@ export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary
   ].filter(Boolean).join(' · ');
 
   return {
-    headline: `${leader.name} ranks #1 for ${name}`,
+    headline: `${leader.displayName} ranks #1 for ${name}`,
     detail,
   };
 }

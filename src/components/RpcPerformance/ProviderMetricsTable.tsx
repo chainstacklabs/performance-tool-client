@@ -192,7 +192,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 {/* Provider */}
                 <td className="px-4 whitespace-nowrap">
                   <div className="flex flex-col gap-0.5">
-                    <span className="type-subtitle-s text-fg-primary">{p.name}</span>
+                    <span className="type-subtitle-s text-fg-primary">{p.displayName}</span>
                   </div>
                 </td>
 

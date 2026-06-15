@@ -41,6 +41,8 @@ export type AvailTier = 'healthy' | 'acceptable' | 'degraded' | 'unhealthy' | 'u
 
 /** Provider after enrichProviders() — latencies in ms. */
 export interface EnrichedProvider extends Provider {
+  /** brand name for display (raw `name` stays the identity/key) */
+  displayName: string;
   p95ms: number | null;
   p99ms: number | null;
   p50ms: number | null;
