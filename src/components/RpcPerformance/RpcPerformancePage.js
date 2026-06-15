@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Export, Question } from '@phosphor-icons/react';
+import { Export, Question, Warning } from '@phosphor-icons/react';
 import ProtocolChips from './ProtocolChips';
 import ProviderMetricsTable from './ProviderMetricsTable';
 import TimeRangeSwitcher from './TimeRangeSwitcher';
@@ -163,7 +163,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
 
   const sortedProviders = useMemo(() => {
     if (!chainData?.providers?.length) return [];
-    const enriched = enrichProviders(chainData.providers, chainData.regions);
+    const enriched = enrichProviders(chainData.providers);
     const scored = computeScores(enriched);
     const sorted = sortByReliabilityThenLatency(scored);
     // Cache provider count per protocol for skeleton sizing
@@ -172,7 +172,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
   }, [chainData]);
 
   const summary = useMemo(
-    () => chainData ? generateSummary('latency', chainData.chain, sortedProviders) : null,
+    () => chainData ? generateSummary(chainData.chain, sortedProviders) : null,
     [chainData, sortedProviders]
   );
 
@@ -215,6 +215,19 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
           <TimeRangeSwitcher current={timeRange} onLoadingChange={setIsTimeRangeLoading} />
         </div>
       </div>
+
+      {/* Partial-data warning — some metrics failed but we still have providers */}
+      {!isTimeRangeLoading && chainData?.partial && !chainData?.error && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          marginBottom: 12, padding: '8px 12px',
+          background: 'rgba(255,221,51,0.08)', border: '1px solid rgba(255,221,51,0.25)',
+          borderRadius: 8, color: SIGNAL.warn, fontSize: 13,
+        }}>
+          <Warning size={14} weight="fill" />
+          Partial data{chainData.degradedMetrics?.length ? ` — ${chainData.degradedMetrics.join(', ')} unavailable` : ''}; ranking may be affected.
+        </div>
+      )}
 
       {/* Table */}
       {isTimeRangeLoading ? (

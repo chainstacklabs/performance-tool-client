@@ -92,7 +92,10 @@ export const fetchChainData = cache(async (chain, timeRange = '24h') => {
     ),
   ]);
 
-  const hadError = [p50, p95, p99, success, trend].some((r) => !r.ok);
+  const degradedMetrics = Object.entries({ p50, p95, p99, success, trend })
+    .filter(([, r]) => !r.ok)
+    .map(([name]) => name);
+  const hadError = degradedMetrics.length > 0;
 
   const p50Map = p50.ok ? quantileByRegionToMap(p50.value) : new Map();
   const p95Map = p95.ok ? quantileByRegionToMap(p95.value) : new Map();
@@ -132,5 +135,9 @@ export const fetchChainData = cache(async (chain, timeRange = '24h') => {
     regions: [...regions].sort(),
     leader: providers[0] ?? null,
     error: providers.length === 0 && hadError,
+    // Some queries failed but we still have providers — data is incomplete and
+    // the ranking may be affected. Surfaced in the UI rather than hidden.
+    partial: providers.length > 0 && hadError,
+    degradedMetrics,
   };
 });
