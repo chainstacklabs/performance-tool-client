@@ -9,58 +9,27 @@ import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
 import { enrichProviders, computeScores, sortByReliabilityThenLatency, generateSummary } from './metrics';
 import { brandHex } from './brandColors';
-import { TEXT, SIGNAL } from '@/lib/theme';
-
-const skeletonStyle = `
-  @keyframes skeletonPulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
-  }
-`;
 
 function HowWeRank() {
   const [visible, setVisible] = useState(false);
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
-      <style>{`
-        @keyframes tooltipIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(4px); }
-          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-      `}</style>
+    <div className="relative inline-flex">
       <button
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
         onFocus={() => setVisible(true)}
         onBlur={() => setVisible(false)}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'transparent', border: 'none', padding: 0,
-          cursor: 'pointer', color: TEXT.ghost, fontSize: 14,
-          fontFamily: 'inherit', fontWeight: 400,
-          transition: 'color 0.15s',
-        }}
-        onMouseEnterCapture={e => e.currentTarget.style.color = '#6B7585'}
-        onMouseLeaveCapture={e => e.currentTarget.style.color = TEXT.ghost}
+        className="inline-flex items-center gap-1.5 bg-transparent border-none p-0 cursor-pointer text-fg-ghost hover:text-[#6B7585] text-sm font-[inherit] font-normal transition-colors"
       >
         <Question size={14} weight="regular" />
         How ranking works
       </button>
       {visible && (
-        <div style={{
-          position: 'absolute', bottom: 'calc(100% + 8px)', top: 'auto',
-          left: '50%', transform: 'translateX(-50%)',
-          background: '#1A1E24', border: '1px solid #2E3338',
-          borderRadius: 8, padding: '10px 14px',
-          width: 'max-content', maxWidth: 340, pointerEvents: 'none',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-          zIndex: 50,
-          animation: 'tooltipIn 0.15s ease',
-        }}>
-          <div style={{ color: TEXT.primary, fontSize: 13, lineHeight: '18px', fontWeight: 500, marginBottom: 6 }}>
+        <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-[#1A1E24] border border-[#2E3338] rounded-lg px-3.5 py-2.5 w-max max-w-[340px] pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.4)] z-50 animate-tooltipIn">
+          <div className="text-fg-primary text-[13px] leading-[18px] font-medium mb-1.5">
             We evaluate RPC providers based on their speed (response time) and reliability (success rate) across three regions.
           </div>
-          <div style={{ color: TEXT.muted, fontSize: 13, lineHeight: '18px', fontFamily: 'var(--font-space-mono), monospace' }}>
+          <div className="text-fg-muted text-[13px] leading-[18px] font-mono">
             Score = 1 / ((1/ResponseTime) × (SuccessRate³))
           </div>
         </div>
@@ -89,34 +58,18 @@ function ShareButton({ protocol }) {
     setTimeout(() => setCopied(false), 1600);
   }
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
+    <div className="relative inline-flex">
       <button
         onClick={handleShare}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'transparent',
-          border: 'none',
-          borderRadius: 8, padding: '0 14px', height: 34,
-          cursor: 'pointer', color: TEXT.muted, fontSize: 14,
-          fontFamily: 'inherit', fontWeight: 500,
-          transition: 'color 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = TEXT.primary; }}
-        onMouseLeave={e => { e.currentTarget.style.color = TEXT.muted; }}
+        className="inline-flex items-center gap-1.5 bg-transparent border-none rounded-lg px-3.5 h-[34px] cursor-pointer text-fg-muted hover:text-fg-primary text-sm font-[inherit] font-medium transition-colors"
       >
         <Export size={14} weight="regular" />
         Share
       </button>
       {copied && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: '50%',
-          transform: 'translateX(-50%)', background: '#1A1E24',
-          border: '1px solid #2E3338',
-          borderRadius: 6, padding: '4px 10px',
-          color: TEXT.primary, fontSize: 12, fontWeight: 500,
-          whiteSpace: 'nowrap', pointerEvents: 'none',
-          zIndex: 50,
-        }}>Copied</div>
+        <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 bg-[#1A1E24] border border-[#2E3338] rounded-md px-2.5 py-1 text-fg-primary text-xs font-medium whitespace-nowrap pointer-events-none z-50">
+          Copied
+        </div>
       )}
     </div>
   );
@@ -176,7 +129,6 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     [chainData, sortedProviders]
   );
 
-
   const accentColor = brandHex(activeProtocol);
   const grafanaFrom = timeRange === '7d' ? 'now-7d' : 'now-24h';
   const dashboardUrl = chainData
@@ -185,32 +137,31 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
 
   return (
     <div>
-      <style>{skeletonStyle}</style>
       {/* Protocol chips */}
-      <div style={{ marginBottom: 24 }}>
+      <div className="mb-6">
         <ProtocolChips chains={chains} active={activeProtocol} onChange={handleProtocolChange} />
       </div>
 
       {/* Summary + actions */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20, minHeight: 40 }}>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 min-h-10">
         {isTimeRangeLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ width: 280, height: 18, borderRadius: 5, background: 'rgba(255,255,255,0.07)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
-            <div style={{ width: 200, height: 13, borderRadius: 4, background: 'rgba(255,255,255,0.07)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
+          <div className="flex flex-col gap-1.5">
+            <div className="w-[280px] h-[18px] rounded-[5px] bg-white/[0.07] animate-skeletonPulse" />
+            <div className="w-[200px] h-[13px] rounded bg-white/[0.07] animate-skeletonPulse" />
           </div>
         ) : summary?.headline ? (
           <div>
-            <div style={{ color: TEXT.primary, fontSize: 18, lineHeight: '24px', fontWeight: 500, letterSpacing: '-0.2px' }}>
+            <div className="text-fg-primary text-lg leading-6 font-medium tracking-[-0.2px]">
               {summary.headline}
             </div>
             {summary.detail && (
-              <div style={{ color: TEXT.dim, fontSize: 14, lineHeight: '18px', marginTop: 4 }}>
+              <div className="text-fg-dim text-sm leading-[18px] mt-1">
                 {summary.detail}
               </div>
             )}
           </div>
         ) : <div />}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div className="flex items-center gap-2 shrink-0">
           <ShareButton protocol={activeProtocol} />
           <TimeRangeSwitcher current={timeRange} onLoadingChange={setIsTimeRangeLoading} />
         </div>
@@ -218,12 +169,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
 
       {/* Partial-data warning — some metrics failed but we still have providers */}
       {!isTimeRangeLoading && chainData?.partial && !chainData?.error && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          marginBottom: 12, padding: '8px 12px',
-          background: 'rgba(255,221,51,0.08)', border: '1px solid rgba(255,221,51,0.25)',
-          borderRadius: 8, color: SIGNAL.warn, fontSize: 13,
-        }}>
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-signal-warn/[0.08] border border-signal-warn/[0.25] rounded-lg text-signal-warn text-[13px]">
           <Warning size={14} weight="fill" />
           Partial data{chainData.degradedMetrics?.length ? ` — ${chainData.degradedMetrics.join(', ')} unavailable` : ''}; ranking may be affected.
         </div>
@@ -233,24 +179,22 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
       {isTimeRangeLoading ? (
         <TableSkeleton rowCount={sortedProviders.length || 5} />
       ) : (
-        <div style={{ background: '#161A1E', border: '1px solid #252A30', borderRadius: 10, overflow: 'hidden' }}>
+        <div className="bg-panel border border-panel-border rounded-[10px] overflow-hidden">
           {chainData?.error ? (
-            <div style={{ padding: '20px 16px', color: SIGNAL.bad, fontSize: 13 }}>Data unavailable</div>
+            <div className="px-4 py-5 text-signal-bad text-[13px]">Data unavailable</div>
           ) : (
             <ProviderMetricsTable providers={sortedProviders} accentColor={accentColor} />
           )}
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+      <div className="flex items-center justify-between flex-wrap gap-2 mt-4">
         <HowWeRank />
         {dashboardUrl && (
-          <span style={{ color: TEXT.ghost, fontSize: 14 }}>
+          <span className="text-fg-ghost text-sm">
             Per-method breakdowns available in{' '}
             <a href={dashboardUrl} target="_blank" rel="noopener noreferrer"
-              style={{ color: '#4DAFFF', textDecoration: 'none', opacity: 0.7, transition: 'opacity 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}
+              className="text-accent no-underline opacity-70 hover:opacity-100 transition-opacity"
             >Grafana ↗</a>
           </span>
         )}

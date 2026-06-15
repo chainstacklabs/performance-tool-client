@@ -32,33 +32,18 @@ export default function TimeRangeSwitcher({ current, onLoadingChange }) {
   }
 
   return (
-    <div style={{
-      display: 'inline-flex', gap: 2, padding: 3,
-      background: '#0E1115',
-      border: '1px solid #252A30',
-      borderRadius: 10,
-    }}>
+    <div className="inline-flex gap-0.5 p-[3px] bg-panel-head border border-panel-border rounded-[10px]">
       {RANGES.map(({ value, label }) => {
         const isActive = optimistic === value;
         return (
           <button
             key={value}
             onClick={() => handleChange(value)}
-            style={{
-              height: 28,
-              padding: '0 14px',
-              borderRadius: 7,
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: isActive ? 500 : 400,
-              fontFamily: 'inherit',
-              background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-              color: isActive ? '#F6F9FD' : '#8D95A5',
-              transition: 'background 0.12s, color 0.12s',
-            }}
-            onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = '#C0C8D4'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; } }}
-            onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = '#8D95A5'; e.currentTarget.style.background = 'transparent'; } }}
+            className={`h-7 px-3.5 rounded-[7px] border-none cursor-pointer text-sm font-[inherit] transition-colors ${
+              isActive
+                ? 'font-medium bg-white/[0.12] text-fg-primary'
+                : 'font-normal bg-transparent text-fg-muted hover:text-[#C0C8D4] hover:bg-white/[0.05]'
+            }`}
           >
             {label}
           </button>

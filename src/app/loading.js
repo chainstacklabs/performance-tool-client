@@ -10,7 +10,6 @@ import ProtocolChips from '@/components/RpcPerformance/ProtocolChips';
 import TimeRangeSwitcher from '@/components/RpcPerformance/TimeRangeSwitcher';
 import TableSkeleton from '@/components/RpcPerformance/TableSkeleton';
 import { CHAINS } from '@/lib/queries';
-import { TEXT } from '@/lib/theme';
 
 export default function Loading() {
   const activeProtocol = useMemo(() => {
@@ -33,47 +32,40 @@ export default function Loading() {
   }, [activeProtocol]);
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh' }}>
+    <div className="relative min-h-screen">
       <PageBackground />
       <DotGrid />
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div className="relative z-[1]">
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
           <Header />
         </div>
         <main>
           <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
 
-            <div style={{ paddingTop: 24, paddingBottom: 40 }}>
-              <div className="type-h2" style={{ color: TEXT.primary }}>
+            <div className="pt-6 pb-10">
+              <div className="type-h2 text-fg-primary">
                 RPC provider performance
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <span style={{ color: TEXT.muted, fontSize: 15, lineHeight: '20px', fontWeight: 400 }}>Updated every minute</span>
+              <div className="flex items-center gap-1.5 mt-3">
+                <span className="text-fg-muted text-[15px] leading-5 font-normal">Updated every minute</span>
                 <LiveDot />
               </div>
             </div>
 
-            <div style={{ paddingBottom: 32 }}>
+            <div className="pb-8">
               {/* Protocol chips */}
-              <div style={{ marginBottom: 24 }}>
+              <div className="mb-6">
                 <ProtocolChips chains={CHAINS} active={activeProtocol} onChange={() => {}} />
               </div>
 
               {/* Summary skeleton + actions */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20, minHeight: 40 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ width: 280, height: 18, borderRadius: 5, background: 'rgba(255,255,255,0.07)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
-                  <div style={{ width: 200, height: 13, borderRadius: 4, background: 'rgba(255,255,255,0.07)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-5 min-h-10">
+                <div className="flex flex-col gap-1.5">
+                  <div className="w-[280px] h-[18px] rounded-[5px] bg-white/[0.07] animate-skeletonPulse" />
+                  <div className="w-[200px] h-[13px] rounded bg-white/[0.07] animate-skeletonPulse" />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                  <button style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'transparent',
-                    border: 'none',
-                    borderRadius: 8, padding: '0 14px', height: 34,
-                    cursor: 'default', color: '#8D95A5', fontSize: 14,
-                    fontFamily: 'inherit', fontWeight: 500,
-                  }}>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button className="inline-flex items-center gap-1.5 bg-transparent border-none rounded-lg px-3.5 h-[34px] cursor-default text-fg-muted text-sm font-[inherit] font-medium">
                     <Export size={14} weight="regular" />
                     Share
                   </button>
@@ -81,7 +73,6 @@ export default function Loading() {
                 </div>
               </div>
 
-              <style>{`@keyframes skeletonPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
               <TableSkeleton rowCount={rowCount} />
             </div>
 

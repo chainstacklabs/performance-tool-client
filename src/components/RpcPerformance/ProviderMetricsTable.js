@@ -2,7 +2,6 @@
 
 import Sparkline from '@/components/Chain/Sparkline';
 import { availTier } from './metrics';
-import { TEXT, TIER_COLOR, ACCENT } from '@/lib/theme';
 
 /* ─── helpers ─────────────────────────────────────────────── */
 
@@ -23,21 +22,31 @@ function relativeLevel(ms, bestMs) {
   return 'bad';
 }
 
-function heatCell(ms, bestMs) {
-  if (ms == null) return { bg: 'transparent', color: TEXT.ghost };
+// Heatmap cell background+text as Tailwind classes (static per level).
+function heatCellClass(ms, bestMs) {
+  if (ms == null) return 'text-fg-ghost';
   const lvl = relativeLevel(ms, bestMs);
-  if (lvl === 'good') return { bg: 'rgba(46,140,70,0.28)',  color: '#7DCFA0' };
-  if (lvl === 'warn') return { bg: 'rgba(150,110,20,0.28)', color: '#C4A45A' };
-  return                     { bg: 'rgba(160,50,50,0.30)',  color: '#D48080' };
+  if (lvl === 'good') return 'bg-[rgba(46,140,70,0.28)] text-[#7DCFA0]';
+  if (lvl === 'warn') return 'bg-[rgba(150,110,20,0.28)] text-[#C4A45A]';
+  return 'bg-[rgba(160,50,50,0.30)] text-[#D48080]';
 }
 
-function latencyColor(ms, bestMs) {
-  if (ms == null) return TEXT.ghost;
+// Bar accent — returns a hex value because it's composed with alpha suffixes.
+function latencyColorHex(ms, bestMs) {
+  if (ms == null) return '#4A5260';
   const lvl = relativeLevel(ms, bestMs);
   if (lvl === 'good') return '#25B15F';
   if (lvl === 'warn') return '#C4A45A';
   return '#D48080';
 }
+
+const TIER_TEXT_CLASS = {
+  healthy:    'text-tier-healthy',
+  acceptable: 'text-tier-acceptable',
+  degraded:   'text-tier-degraded',
+  unhealthy:  'text-tier-unhealthy',
+  unknown:    'text-tier-unknown',
+};
 
 const REGION_DISPLAY = {
   fra1: 'DE', sfo1: 'US', sin1: 'SG', hnd1: 'JP',
@@ -56,54 +65,37 @@ function groupRegions(regionsRaw) {
   return out;
 }
 
+// Convert a brand "rgb(r,g,b)" string to "rgba(r,g,b,a)"
+const toRgba = (rgb, a) => rgb.replace('rgb(', 'rgba(').replace(')', `,${a})`);
+
 /* ─── latency distribution column ────────────────────────── */
 
 function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
   const BAR_W  = 180;
   const ref    = maxVal || 1;
-  const accent = latencyColor(p95ms, bestP95ms);
+  const accent = latencyColorHex(p95ms, bestP95ms);
 
   const w50 = p50ms != null ? Math.round(BAR_W * Math.min(1, p50ms / ref)) : 0;
   const w95 = p95ms != null ? Math.round(BAR_W * Math.min(1, p95ms / ref)) : 0;
   const w99 = p99ms != null ? Math.round(BAR_W * Math.min(1, p99ms / ref)) : 0;
 
+  // Segment colors/widths are data-derived → inline. Layout is class-based.
+  const seg = 'absolute left-0 top-0 bottom-0 rounded-full';
+
   return (
-    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, minWidth: 220 }}>
+    <div className="inline-flex flex-col gap-1.5 min-w-[220px]">
       {/* Shared scale: P50/P95/P99 as segments of one color, decreasing opacity */}
-      <div style={{ position: 'relative', width: BAR_W, height: 6, background: '#1E2328', borderRadius: 99 }}>
-        {/* P95→P99: faintest tail */}
-        {w99 > w95 && (
-          <div style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: w99,
-            background: accent + '30', borderRadius: 99,
-          }} />
-        )}
-        {/* P50→P95: medium */}
-        {w95 > 0 && (
-          <div style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: w95,
-            background: accent + '80', borderRadius: 99,
-          }} />
-        )}
-        {/* 0→P50: full brightness */}
-        {w50 > 0 && (
-          <div style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: w50,
-            background: accent, borderRadius: 99,
-          }} />
-        )}
+      <div className="relative w-[180px] h-1.5 bg-panel-row rounded-full">
+        {w99 > w95 && <div className={seg} style={{ width: w99, background: accent + '30' }} />}
+        {w95 > 0     && <div className={seg} style={{ width: w95, background: accent + '80' }} />}
+        {w50 > 0     && <div className={seg} style={{ width: w50, background: accent }} />}
       </div>
       {/* Values row: same color, P95 slightly emphasized */}
-      <div style={{
-        display: 'flex', alignItems: 'baseline', gap: 4,
-        fontFamily: 'var(--font-space-mono), monospace',
-        fontSize: 11, whiteSpace: 'nowrap',
-        color: TEXT.faint,
-      }}>
+      <div className="flex items-baseline gap-1 font-mono text-[11px] whitespace-nowrap text-fg-faint">
         <span>{fmtMs(p50ms) ?? '—'}</span>
-        <span style={{ color: '#3E4552' }}>/</span>
-        <span style={{ fontWeight: 600, fontSize: 12, color: '#7A8494' }}>{fmtMs(p95ms) ?? '—'}</span>
-        <span style={{ color: '#3E4552' }}>/</span>
+        <span className="text-[#3E4552]">/</span>
+        <span className="font-semibold text-xs text-[#7A8494]">{fmtMs(p95ms) ?? '—'}</span>
+        <span className="text-[#3E4552]">/</span>
         <span>{fmtMs(p99ms) ?? '—'}</span>
       </div>
     </div>
@@ -112,9 +104,15 @@ function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }) {
 
 /* ─── main table ──────────────────────────────────────────── */
 
-export default function ProviderMetricsTable({ providers, accentColor = ACCENT }) {
+const TH = ({ children, align = 'left' }) => (
+  <th className={`text-fg-faint text-xs font-mono uppercase tracking-[0.05em] font-normal px-4 h-11 whitespace-nowrap border-b border-panel-border bg-panel-head ${
+    align === 'center' ? 'text-center' : 'text-left'
+  }`}>{children}</th>
+);
+
+export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF' }) {
   if (!providers.length) {
-    return <div style={{ padding: '20px 16px', color: TEXT.ghost, fontSize: 13 }}>No data</div>;
+    return <div className="px-4 py-5 text-fg-ghost text-[13px]">No data</div>;
   }
 
   const maxP95ms = Math.max(...providers.map(p => p.p99ms ?? p.p95ms ?? 0), 1);
@@ -125,34 +123,19 @@ export default function ProviderMetricsTable({ providers, accentColor = ACCENT }
   const presentRegions = REGION_ORDER.filter(r => regionMaps.some(m => m[r] != null));
 
   // Total region section is always 240px — each column gets an equal share.
-  // 4 cols → 60px, 3 cols → 80px, 2 cols → 120px
   const regionColW = presentRegions.length > 0 ? Math.round(240 / presentRegions.length) : 80;
 
-  const TH = ({ children, align = 'left', style: s }) => (
-    <th style={{
-      color: TEXT.faint, fontSize: 12,
-      fontFamily: 'var(--font-space-mono), monospace',
-      textTransform: 'uppercase', letterSpacing: '0.05em',
-      fontWeight: 400, padding: '0 16px', height: 44,
-      textAlign: align, whiteSpace: 'nowrap',
-      borderBottom: '1px solid #252A30',
-      background: '#0E1115',
-      ...s,
-    }}>{children}</th>
-  );
-
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] border-collapse table-fixed">
         <colgroup>
-          <col style={{ width: 160 }} />
-          <col style={{ width: 130 }} />
-          <col style={{ width: 220 }} />
-          <col style={{ width: 140 }} />
+          <col className="w-40" />
+          <col className="w-[130px]" />
+          <col className="w-[220px]" />
+          <col className="w-[140px]" />
           {presentRegions.map(r => <col key={r} style={{ width: regionColW }} />)}
         </colgroup>
         <thead>
-
           <tr>
             <TH>Provider</TH>
             <TH>Availability</TH>
@@ -160,8 +143,8 @@ export default function ProviderMetricsTable({ providers, accentColor = ACCENT }
             <TH>P95, 24h</TH>
             {presentRegions.map(r => (
               <TH key={r} align="center">
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 15, lineHeight: 1 }}>{REGION_EMOJI[r]}</span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-[15px] leading-none">{REGION_EMOJI[r]}</span>
                   <span>{r}</span>
                 </span>
               </TH>
@@ -174,65 +157,56 @@ export default function ProviderMetricsTable({ providers, accentColor = ACCENT }
             const status  = availTier(avail);
             const regions = regionMaps[i];
 
+            // Row highlight is brand-derived → CSS variables; hover via class.
+            const rowVars = {
+              '--row-bg':       i === 0 ? toRgba(accentColor, 0.05) : 'transparent',
+              '--row-bg-hover': i === 0 ? toRgba(accentColor, 0.10) : 'rgba(255,255,255,0.025)',
+            };
+
             return (
               <tr
                 key={p.name}
-                style={{
-                  height: 68, borderBottom: '1px solid #1E2328', transition: 'background 0.12s',
-                  background: i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.05)') : 'transparent',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.10)') : 'rgba(255,255,255,0.025)'}
-                onMouseLeave={e => e.currentTarget.style.background = i === 0 ? accentColor.replace('rgb(', 'rgba(').replace(')', ',0.05)') : 'transparent'}
+                style={rowVars}
+                className="h-[68px] border-b border-panel-row transition-colors bg-[var(--row-bg)] hover:bg-[var(--row-bg-hover)]"
               >
                 {/* Provider */}
-                <td style={{ padding: '0 16px', whiteSpace: 'nowrap' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span className="type-subtitle-s" style={{ color: TEXT.primary }}>{p.name}</span>
+                <td className="px-4 whitespace-nowrap">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="type-subtitle-s text-fg-primary">{p.name}</span>
                   </div>
                 </td>
 
                 {/* Availability */}
-                <td style={{ padding: '0 16px', whiteSpace: 'nowrap' }}>
+                <td className="px-4 whitespace-nowrap">
                   {Number.isFinite(avail) ? (
-                    <span style={{
-                      fontSize: 14, fontWeight: 500,
-                      color: TIER_COLOR[status],
-                      fontFamily: 'var(--font-space-mono), monospace',
-                      letterSpacing: '-0.3px',
-                    }}>
+                    <span className={`text-sm font-medium font-mono tracking-[-0.3px] ${TIER_TEXT_CLASS[status]}`}>
                       {avail.toFixed(2)}%
                     </span>
                   ) : (
-                    <span style={{ color: TEXT.ghost, fontSize: 13 }}>—</span>
+                    <span className="text-fg-ghost text-[13px]">—</span>
                   )}
                 </td>
 
                 {/* Latency bar */}
-                <td style={{ padding: '0 16px' }}>
+                <td className="px-4">
                   <LatencyBar p50ms={p.p50ms} p95ms={p.p95ms} p99ms={p.p99ms} maxVal={maxP95ms} bestP95ms={bestP95ms} />
                 </td>
 
                 {/* P95 sparkline */}
-                <td style={{ padding: '0 16px' }}>
+                <td className="px-4">
                   {p.trend?.length ? (
                     <Sparkline values={p.trend} width={120} height={24} stroke={accentColor} strokeWidth={1.5} opacity={1} />
                   ) : (
-                    <span style={{ color: TEXT.ghost, fontSize: 13 }}>—</span>
+                    <span className="text-fg-ghost text-[13px]">—</span>
                   )}
                 </td>
 
                 {/* Regional P95 heatmap */}
                 {presentRegions.map(r => {
                   const ms = regions[r] != null ? Math.round(regions[r] * 1000) : null;
-                  const { bg, color } = heatCell(ms, bestP95ms);
                   return (
-                    <td key={r} style={{
-                      padding: '0 8px', textAlign: 'center',
-                      background: bg, color,
-                      fontFamily: 'var(--font-space-mono), monospace',
-                      fontSize: 12, letterSpacing: '-0.2px', whiteSpace: 'nowrap',
-                    }}>
-                      {ms != null ? fmtMs(ms) : <span style={{ color: TEXT.ghost }}>—</span>}
+                    <td key={r} className={`px-2 text-center font-mono text-xs tracking-[-0.2px] whitespace-nowrap ${heatCellClass(ms, bestP95ms)}`}>
+                      {ms != null ? fmtMs(ms) : <span className="text-fg-ghost">—</span>}
                     </td>
                   );
                 })}

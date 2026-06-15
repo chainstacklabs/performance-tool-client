@@ -2,23 +2,9 @@
 
 export default function LiveDot() {
   return (
-    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 9, height: 9, flexShrink: 0 }}>
-      <span style={{
-        position: 'absolute',
-        inset: 0,
-        borderRadius: '50%',
-        background: '#25B15F',
-        opacity: 0.6,
-        animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite',
-      }} />
-      <span style={{
-        position: 'relative',
-        display: 'inline-flex',
-        width: 6,
-        height: 6,
-        borderRadius: '50%',
-        background: '#25B15F',
-      }} />
+    <span className="relative inline-flex items-center justify-center w-[9px] h-[9px] shrink-0">
+      <span className="absolute inset-0 rounded-full bg-signal-ok opacity-60 animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]" />
+      <span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-signal-ok" />
     </span>
   );
 }

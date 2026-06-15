@@ -15,34 +15,13 @@ const Header = () => {
   }, []);
 
   return (
-    <header style={{
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '20px 0',
-    }}>
+    <header className="flex flex-row justify-between items-center py-5">
       <Logo />
 
       {popover && (
         <div
-          style={{
-            position: 'fixed',
-            left: popover.x + 16,
-            top: popover.y + 16,
-            background: '#1A1E24',
-            border: '1px solid #2E3338',
-            borderRadius: 8,
-            padding: '7px 12px',
-            color: '#F6F9FD',
-            fontSize: 13,
-            fontWeight: 500,
-            lineHeight: '18px',
-            whiteSpace: 'nowrap',
-            pointerEvents: 'none',
-            zIndex: 9999,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-          }}
+          className="fixed bg-[#1A1E24] border border-[#2E3338] rounded-lg px-3 py-[7px] text-fg-primary text-[13px] font-medium leading-[18px] whitespace-nowrap pointer-events-none z-[9999] shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+          style={{ left: popover.x + 16, top: popover.y + 16 }}
         >
           That&apos;s the smart move :)
         </div>
@@ -53,27 +32,9 @@ const Header = () => {
         target="_blank"
         rel="noopener noreferrer"
         onMouseMove={handleMouseMove}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#007BFF',
-          color: '#FFFFFF',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '10px 24px',
-          fontSize: '15px',
-          fontWeight: 500,
-          fontFamily: "\"Suisse Int'l\", sans-serif",
-          lineHeight: '20px',
-          letterSpacing: '0.15px',
-          textDecoration: 'none',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.background = '#005EE0'}
-        onMouseLeave={e => { e.currentTarget.style.background = '#007BFF'; handleMouseLeave(); }}
+        onMouseLeave={handleMouseLeave}
+        className="inline-flex items-center justify-center bg-[#007BFF] hover:bg-[#005EE0] text-white border-none rounded-lg px-6 py-2.5 text-[15px] font-medium leading-5 tracking-[0.15px] no-underline cursor-pointer whitespace-nowrap transition-colors"
+        style={{ fontFamily: "\"Suisse Int'l\", sans-serif" }}
       >
         Start for free
       </a>
