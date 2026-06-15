@@ -1,7 +1,7 @@
 import { CHAINS } from '@/lib/queries';
 import { fetchChainData } from '@/lib/chain-data';
 import Header from '@/components/Header/Header';
-import LiveDot from '@/components/LiveDot';
+import FreshnessIndicator from '@/components/RpcPerformance/FreshnessIndicator';
 import RpcPerformancePage from '@/components/RpcPerformance/RpcPerformancePage';
 import PageBackground from '@/components/PageBackground';
 import DotGrid from '@/components/DotGrid';
@@ -35,10 +35,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <div className="type-h2 text-fg-primary">
                 RPC provider performance
               </div>
-              <div className="flex items-center gap-1.5 mt-3">
-                <span className="text-fg-muted text-[15px] leading-5 font-normal">Updated every minute</span>
-                <LiveDot />
-              </div>
+              <FreshnessIndicator />
             </div>
             <div className="pb-8">
               <RpcPerformancePage allChainsData={allChainsData} chains={CHAINS} timeRange={timeRange} />

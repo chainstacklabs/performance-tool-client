@@ -48,7 +48,7 @@ export default function Loading() {
                 RPC provider performance
               </div>
               <div className="flex items-center gap-1.5 mt-3">
-                <span className="text-fg-muted text-[15px] leading-5 font-normal">Updated every minute</span>
+                <span className="text-fg-muted text-[15px] leading-5 font-normal">Live · updates every 3 min</span>
                 <LiveDot />
               </div>
             </div>

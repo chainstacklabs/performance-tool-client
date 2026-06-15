@@ -35,7 +35,9 @@ function authHeaders(): Record<string, string> {
 async function fetchProm<T>(
   path: string,
   params: Record<string, string | number>,
-  { revalidate = 60 }: FetchPromOpts = {},
+  // 180s matches the probes' */3 (every-3-min) measurement cron — no point
+  // re-querying Grafana more often than the data changes.
+  { revalidate = 180 }: FetchPromOpts = {},
 ): Promise<T> {
   const url = new URL(`${GRAFANA_URL}/api/datasources/proxy/uid/${PROM_DS_UID}${path}`);
   for (const [k, v] of Object.entries(params)) {

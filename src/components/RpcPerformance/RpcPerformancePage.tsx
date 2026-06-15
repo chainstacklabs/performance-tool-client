@@ -28,7 +28,7 @@ function HowWeRank() {
       {visible && (
         <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-[#1A1E24] border border-[#2E3338] rounded-lg px-3.5 py-2.5 w-max max-w-[340px] pointer-events-none shadow-[0_4px_16px_rgba(0,0,0,0.4)] z-50 animate-tooltipIn">
           <div className="text-fg-primary text-[13px] leading-[18px] font-medium mb-1.5">
-            We evaluate RPC providers based on their speed (response time) and reliability (success rate) across all monitored regions.
+            We evaluate RPC providers based on their speed (response time) and reliability (success rate) across all monitored regions
           </div>
           <div className="text-fg-muted text-[13px] leading-[18px] font-mono">
             Score = 1 / ((1/ResponseTime) × (SuccessRate³))
