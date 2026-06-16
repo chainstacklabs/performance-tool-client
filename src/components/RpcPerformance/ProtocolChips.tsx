@@ -2,21 +2,8 @@
 
 import Image from 'next/image';
 import type { CSSProperties } from 'react';
-import { BRAND, type Rgb } from './brandColors';
+import { brandRgba, chainLogo } from './brandColors';
 import type { Chain } from '@/lib/types';
-
-const LOGO_MAP: Record<string, string> = {
-  Ethereum:    'ethereum',
-  Arbitrum:    'arbitrum',
-  Base:        'base',
-  BNB:         'bnb',
-  Hyperliquid: 'hyperliquid',
-  Monad:       'monad',
-  Solana:      'solana',
-  TON:         'ton',
-};
-
-const rgba = (c: Rgb, a: number) => `rgba(${c.r},${c.g},${c.b},${a})`;
 
 interface ProtocolChipsProps {
   chains: Chain[];
@@ -29,14 +16,15 @@ export default function ProtocolChips({ chains, active, onChange }: ProtocolChip
     <div className="flex flex-wrap gap-2">
       {chains.map((chain) => {
         const isActive = chain.promName === active;
-        const logo = LOGO_MAP[chain.promName];
-        const brand = BRAND[chain.promName];
+        const logo = chainLogo(chain.promName);
+        const border = brandRgba(chain.promName, 0.65);
+        const fill = brandRgba(chain.promName, 0.15);
 
         // Brand colors are per-protocol → passed as CSS variables
         const style = isActive
           ? ({
-              '--chip-bd': brand ? rgba(brand, 0.65) : '#4DAFFF',
-              ...(brand ? { '--chip-bg': rgba(brand, 0.15) } : {}),
+              '--chip-bd': border ?? '#4DAFFF',
+              ...(fill ? { '--chip-bg': fill } : {}),
             } as CSSProperties)
           : undefined;
 
@@ -47,7 +35,7 @@ export default function ProtocolChips({ chains, active, onChange }: ProtocolChip
             style={style}
             className={`flex items-center gap-2 h-12 rounded-[10px] pl-3 pr-[18px] cursor-pointer border-[1.5px] transition-[background-color,border-color] duration-150 ${
               isActive
-                ? `border-[color:var(--chip-bd)] ${brand ? 'bg-[var(--chip-bg)]' : 'bg-transparent'}`
+                ? `border-[color:var(--chip-bd)] ${fill ? 'bg-[var(--chip-bg)]' : 'bg-transparent'}`
                 : 'bg-transparent border-[#2E3338] hover:border-fg-ghost'
             }`}
           >

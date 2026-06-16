@@ -1,5 +1,6 @@
 // Pure derived metric helpers — no React, no server-only imports
 import { providerDisplayName } from './providerName';
+import { isNum } from '@/lib/num';
 import type {
   Chain,
   Provider,
@@ -13,10 +14,10 @@ export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
   return providers.map((p) => ({
     ...p,
     displayName: providerDisplayName(p.name),
-    p95ms: Number.isFinite(p.p95) ? Math.round((p.p95 as number) * 1000) : null,
-    p99ms: Number.isFinite(p.p99) ? Math.round((p.p99 as number) * 1000) : null,
-    p50ms: Number.isFinite(p.p50) ? Math.round((p.p50 as number) * 1000) : null,
-    availability: Number.isFinite(p.success) ? +((p.success as number) * 100).toFixed(2) : null,
+    p95ms: isNum(p.p95) ? Math.round(p.p95 * 1000) : null,
+    p99ms: isNum(p.p99) ? Math.round(p.p99 * 1000) : null,
+    p50ms: isNum(p.p50) ? Math.round(p.p50 * 1000) : null,
+    availability: isNum(p.success) ? +(p.success * 100).toFixed(2) : null,
   }));
 }
 
@@ -31,10 +32,10 @@ export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
  *  unhealthy   < 95.0%
  */
 export function availTier(pct: number | null): AvailTier {
-  if (!Number.isFinite(pct)) return 'unknown';
-  if ((pct as number) >= 99.9) return 'healthy';
-  if ((pct as number) >= 99.0) return 'acceptable';
-  if ((pct as number) >= 95.0) return 'degraded';
+  if (!isNum(pct)) return 'unknown';
+  if (pct >= 99.9) return 'healthy';
+  if (pct >= 99.0) return 'acceptable';
+  if (pct >= 95.0) return 'degraded';
   return 'unhealthy';
 }
 
@@ -57,8 +58,8 @@ function grafanaScore(p: Provider): number {
   const terms: number[] = [];
   for (const [region, p95r] of Object.entries(p.regions)) {
     const srr = p.regionSuccess[region];
-    if (!Number.isFinite(p95r) || p95r <= 0) continue;
-    if (!Number.isFinite(srr)) continue; // no reliability data for this region
+    if (!isNum(p95r) || p95r <= 0) continue;
+    if (!isNum(srr)) continue; // no reliability data for this region
     terms.push((1 / p95r) * Math.pow(srr, 3));
   }
   if (terms.length === 0) return Infinity;
@@ -86,7 +87,7 @@ export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary
   // The headline always names the actual #1 row (sorted[0]) — no swapping in a
   // different provider. Tier only adds a uptime caveat to the detail line.
   const tier   = leader.availTier ?? availTier(leader.availability);
-  const avPct  = Number.isFinite(leader.availability) ? `${(leader.availability as number).toFixed(2)}%` : null;
+  const avPct  = isNum(leader.availability) ? `${leader.availability.toFixed(2)}%` : null;
   const p95str = leader.p95ms != null ? `${leader.p95ms} ms P95` : null;
 
   const detail = [

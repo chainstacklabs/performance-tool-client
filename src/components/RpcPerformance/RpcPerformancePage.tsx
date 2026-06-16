@@ -9,6 +9,7 @@ import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
 import { enrichProviders, computeScores, sortByScore, generateSummary } from './metrics';
 import { brandHex } from './brandColors';
+import { resolveProtocol, rangeQuery } from '@/lib/url-params';
 import type { Chain, ChainData, TimeRange } from '@/lib/types';
 
 function HowWeRank() {
@@ -85,35 +86,26 @@ interface RpcPerformancePageProps {
 export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h' }: RpcPerformancePageProps) {
   const searchParams = useSearchParams();
   const [isTimeRangeLoading, setIsTimeRangeLoading] = useState(false);
-  const defaultProtocol = chains[0]?.promName ?? '';
-  const resolveProtocol = (param: string | null) =>
-    chains.find((c) => c.promName.toLowerCase() === param?.toLowerCase())?.promName ?? defaultProtocol;
 
   const [activeProtocol, setActiveProtocol] = useState(() =>
-    resolveProtocol(searchParams.get('protocol'))
+    resolveProtocol(chains, searchParams.get('protocol'))
   );
 
   useEffect(() => {
     const url = new URL(window.location.href);
     const protocol = url.searchParams.get('protocol') || activeProtocol.toLowerCase();
     const range = url.searchParams.get('range') || timeRange;
-    const ordered = new URLSearchParams();
-    ordered.set('protocol', protocol);
-    ordered.set('range', range);
-    window.history.replaceState(null, '', `?${ordered.toString()}`);
+    window.history.replaceState(null, '', `?${rangeQuery({ protocol, range })}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    setActiveProtocol(resolveProtocol(searchParams.get('protocol')));
+    setActiveProtocol(resolveProtocol(chains, searchParams.get('protocol')));
   }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleProtocolChange(p: string) {
     setActiveProtocol(p);
     const cur = new URLSearchParams(window.location.search);
-    const ordered = new URLSearchParams();
-    ordered.set('protocol', p.toLowerCase());
-    ordered.set('range', cur.get('range') || timeRange);
-    window.history.replaceState(null, '', `?${ordered.toString()}`);
+    window.history.replaceState(null, '', `?${rangeQuery({ protocol: p.toLowerCase(), range: cur.get('range') || timeRange })}`);
   }
 
   const chainData = useMemo(

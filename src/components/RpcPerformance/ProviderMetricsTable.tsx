@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import Sparkline from '@/components/Chain/Sparkline';
 import { availTier } from './metrics';
+import { isNum } from '@/lib/num';
 import type { AvailTier, ScoredProvider } from '@/lib/types';
 
 /* ─── helpers ─────────────────────────────────────────────── */
@@ -63,7 +64,7 @@ function groupRegions(regionsRaw: Record<string, number> | undefined): Record<st
   const out: Record<string, number> = {};
   for (const [code, val] of Object.entries(regionsRaw ?? {})) {
     const label = REGION_DISPLAY[code];
-    if (!label || !Number.isFinite(val)) continue;
+    if (!label || !isNum(val)) continue;
     if (out[label] == null || val < out[label]) out[label] = val;
   }
   return out;
@@ -136,7 +137,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
   const maxP95ms = Math.max(...providers.map((p) => p.p99ms ?? p.p95ms ?? 0), 1);
   // Best (lowest) P95 in this table — used for relative color thresholds
   const bestP95ms = Math.min(
-    ...providers.map((p) => p.p95ms).filter((v): v is number => Number.isFinite(v)),
+    ...providers.map((p) => p.p95ms).filter(isNum),
   );
 
   const regionMaps     = providers.map((p) => groupRegions(p.regions));
@@ -198,9 +199,9 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
 
                 {/* Availability */}
                 <td className="px-4 whitespace-nowrap">
-                  {Number.isFinite(avail) ? (
+                  {isNum(avail) ? (
                     <span className={`text-sm font-medium font-mono tracking-[-0.3px] ${TIER_TEXT_CLASS[status]}`}>
-                      {(avail as number).toFixed(2)}%
+                      {avail.toFixed(2)}%
                     </span>
                   ) : (
                     <span className="text-fg-ghost text-[13px]">—</span>

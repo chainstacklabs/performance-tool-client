@@ -2,6 +2,7 @@
 
 import { useTransition, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { rangeQuery } from '@/lib/url-params';
 import type { TimeRange } from '@/lib/types';
 
 const RANGES: { value: TimeRange; label: string }[] = [
@@ -29,12 +30,9 @@ export default function TimeRangeSwitcher({ current, onLoadingChange }: TimeRang
   function handleChange(value: TimeRange) {
     setOptimistic(value); // instant visual switch
     const cur = new URLSearchParams(window.location.search);
-    const ordered = new URLSearchParams();
-    const protocol = cur.get('protocol');
-    if (protocol) ordered.set('protocol', protocol);
-    ordered.set('range', value);
+    const query = rangeQuery({ protocol: cur.get('protocol'), range: value });
     startTransition(() => {
-      router.replace(`?${ordered.toString()}`, { scroll: false });
+      router.replace(`?${query}`, { scroll: false });
     });
   }
 
