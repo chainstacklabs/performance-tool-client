@@ -1,37 +1,40 @@
-// 'use client';
-import { Inter } from 'next/font/google';
+import { Space_Mono } from 'next/font/google';
+import type { ReactNode } from 'react';
 import './globals.css';
-import Head from 'next/head';
 
-const inter = Inter({ subsets: ['latin'] });
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+});
+
+const siteUrl = process.env.NEXT_PUBLIC_CLIENT_DOMAIN;
 
 export const metadata = {
+  // Resolves relative URLs below (OG image, canonical). Falls back to Next's
+  // localhost default with a build warning if the env var is unset.
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
   title: 'Chainstack Node performance tool',
-  description:
-    'Test RPC node with various methods and get transparent preformance results.',
+  description: 'Test RPC node with various methods and get transparent performance results.',
   openGraph: {
     type: 'website',
-    url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN,
+    url: '/',
     title: 'Chainstack Node performance tool',
-    description:
-      'Test RPC node with various methods and get transparent preformance results.',
-    images: [
-      {
-        url: process.env.NEXT_PUBLIC_CLIENT_DOMAIN + '/' + 'og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Chainstack Node performance tool',
-      },
-    ],
+    description: 'Test RPC node with various methods and get transparent performance results.',
+    images: [{
+      url: '/og-image.png',
+      width: 1200, height: 630,
+      alt: 'Chainstack Node performance tool',
+    }],
   },
 };
 
-export default function RootLayout({ children }: any) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className="dark-blue wg-antialiased"
-      style={{ background: '#000417' }}
+      className={`dark-blue wg-antialiased ${spaceMono.variable}`}
+      style={{ background: '#03070d' }}
     >
       <head>
         <script
@@ -43,9 +46,9 @@ export default function RootLayout({ children }: any) {
             }}();
             `,
           }}
-        ></script>
+        />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
