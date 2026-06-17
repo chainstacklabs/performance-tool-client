@@ -33,7 +33,7 @@ const Header = () => {
       )}
 
       <a
-        href="https://chainstack.com/"
+        href="https://console.chainstack.com/user/account?utm_campaign=compare"
         target="_blank"
         rel="noopener noreferrer"
         onMouseMove={handleMouseMove}
