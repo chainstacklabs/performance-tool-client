@@ -6,7 +6,7 @@
 // CASING for labels whose casing differs from how we display them — it is not
 // a tier list and does not rot.
 const DISPLAY_CASING: Record<string, string> = {
-  quicknode: 'QuickNode',
+  quicknode: 'Quicknode',
   drpc:      'dRPC',
 };
 
