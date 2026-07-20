@@ -10,6 +10,7 @@ export const CHAINS: Chain[] = [
   { name: 'Arbitrum',    promName: 'Arbitrum',    publicToken: 'b8f98de094e84c17becb38a1b318e2f2' },
   { name: 'Base',        promName: 'Base',        publicToken: '11861148d82247128307025fac628b6e' },
   { name: 'Hyperliquid', promName: 'Hyperliquid', publicToken: '5f957bbcc3ae4c9d8d9669a299a24676' },
+  { name: 'Robinhood',   promName: 'Robinhood',   publicToken: '5e422a0d05c74da493846cace52d2aa3' },
 ];
 
 const baseSelector = (chain: string): string =>

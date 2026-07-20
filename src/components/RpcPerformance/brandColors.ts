@@ -18,6 +18,7 @@ export const CHAIN_BRAND: Record<string, ChainBrand> = {
   Base:        { rgb: { r: 0,   g: 82,  b: 255 }, logo: 'base'        },
   BNB:         { rgb: { r: 240, g: 185, b: 11  }, logo: 'bnb'         },
   Hyperliquid: { rgb: { r: 0,   g: 212, b: 170 }, logo: 'hyperliquid' },
+  Robinhood:   { rgb: { r: 204, g: 255, b: 0   }, logo: 'robinhood'   },
   Solana:      { rgb: { r: 153, g: 69,  b: 255 }, logo: 'solana'      },
 };
 
