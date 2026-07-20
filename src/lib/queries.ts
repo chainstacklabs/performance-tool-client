@@ -9,9 +9,7 @@ export const CHAINS: Chain[] = [
   { name: 'BNB Chain',   promName: 'BNB',         publicToken: '059a680a502a4d8782e93fcc1f2f1be9' },
   { name: 'Arbitrum',    promName: 'Arbitrum',    publicToken: 'b8f98de094e84c17becb38a1b318e2f2' },
   { name: 'Base',        promName: 'Base',        publicToken: '11861148d82247128307025fac628b6e' },
-  { name: 'TON',         promName: 'TON',         publicToken: 'deeaf524ea264f42a12718f675511b13' },
   { name: 'Hyperliquid', promName: 'Hyperliquid', publicToken: '5f957bbcc3ae4c9d8d9669a299a24676' },
-  { name: 'Monad',       promName: 'Monad',       publicToken: 'ae4e8ccc089b460f95d5d2f29dd0d022' },
 ];
 
 const baseSelector = (chain: string): string =>
