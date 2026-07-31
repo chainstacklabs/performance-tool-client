@@ -50,3 +50,7 @@ src/lib/          # PromQL, Grafana client, scoring
 Fork or branch from `main`, run `npm run lint` and `npm run build`, then open a pull request. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 See `CLAUDE.md` before touching the data layer.
+
+## License
+
+[Apache 2.0](LICENSE).
