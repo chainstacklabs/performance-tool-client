@@ -87,9 +87,18 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
   const searchParams = useSearchParams();
   const [isTimeRangeLoading, setIsTimeRangeLoading] = useState(false);
 
-  const [activeProtocol, setActiveProtocol] = useState(() =>
-    resolveProtocol(chains, searchParams.get('protocol'))
-  );
+  const urlProtocol = searchParams.get('protocol');
+  const [activeProtocol, setActiveProtocol] = useState(() => resolveProtocol(chains, urlProtocol));
+  const [syncedUrlProtocol, setSyncedUrlProtocol] = useState(urlProtocol);
+
+  // Sync back when the router's URL changes (e.g. back/forward navigation).
+  // Adjusted during render rather than in an effect, and keyed on the param
+  // value instead of the searchParams object, so an unrelated `range` change no
+  // longer triggers a redundant reset to the same protocol.
+  if (syncedUrlProtocol !== urlProtocol) {
+    setSyncedUrlProtocol(urlProtocol);
+    setActiveProtocol(resolveProtocol(chains, urlProtocol));
+  }
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -97,10 +106,6 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     const range = url.searchParams.get('range') || timeRange;
     window.history.replaceState(null, '', `?${rangeQuery({ protocol, range })}`);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    setActiveProtocol(resolveProtocol(chains, searchParams.get('protocol')));
-  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleProtocolChange(p: string) {
     setActiveProtocol(p);

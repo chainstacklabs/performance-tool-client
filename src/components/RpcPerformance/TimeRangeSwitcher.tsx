@@ -18,17 +18,20 @@ interface TimeRangeSwitcherProps {
 export default function TimeRangeSwitcher({ current, onLoadingChange }: TimeRangeSwitcherProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [optimistic, setOptimistic] = useState<TimeRange>(current);
+  const [clicked, setClicked] = useState<TimeRange | null>(null);
 
-  // Sync back if server overrides (e.g. on back/forward navigation)
-  useEffect(() => { setOptimistic(current); }, [current]);
+  // Derived, not synced state: show the clicked range only while the navigation
+  // is in flight, then fall back to whatever the server resolved. This means
+  // back/forward navigation needs no sync — `current` is always the source of
+  // truth the moment the transition settles.
+  const optimistic = isPending && clicked ? clicked : current;
 
   useEffect(() => {
     onLoadingChange?.(isPending);
   }, [isPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleChange(value: TimeRange) {
-    setOptimistic(value); // instant visual switch
+    setClicked(value); // instant visual switch
     const cur = new URLSearchParams(window.location.search);
     const query = rangeQuery({ protocol: cur.get('protocol'), range: value });
     startTransition(() => {
