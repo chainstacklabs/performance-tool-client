@@ -5,6 +5,7 @@ import FreshnessIndicator from '@/components/RpcPerformance/FreshnessIndicator';
 import RpcPerformancePage from '@/components/RpcPerformance/RpcPerformancePage';
 import PageBackground from '@/components/PageBackground';
 import DotGrid from '@/components/DotGrid';
+import { resolveProtocol } from '@/lib/url-params';
 import type { ChainData, TimeRange } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -15,12 +16,16 @@ function fetchAllChains(timeRange: TimeRange): Promise<ChainData[]> {
 
 interface HomeProps {
   // Next.js 15 passes searchParams as a Promise.
-  searchParams?: Promise<{ range?: string }>;
+  searchParams?: Promise<{ range?: string; protocol?: string }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const { range } = (await searchParams) ?? {};
+  const { range, protocol } = (await searchParams) ?? {};
   const timeRange: TimeRange = range === '7d' ? '7d' : '24h';
+  // Resolved here rather than from useSearchParams() in the client component:
+  // that hook is empty during prerender inside the loading.tsx boundary, so a
+  // deep link would render the fallback protocol and only correct on hydration.
+  const initialProtocol = resolveProtocol(CHAINS, protocol ?? null);
   const allChainsData = await fetchAllChains(timeRange);
 
   return (
@@ -40,7 +45,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <FreshnessIndicator />
             </div>
             <div className="pb-8">
-              <RpcPerformancePage allChainsData={allChainsData} chains={CHAINS} timeRange={timeRange} />
+              <RpcPerformancePage allChainsData={allChainsData} chains={CHAINS} timeRange={timeRange} initialProtocol={initialProtocol} />
             </div>
           </div>
         </main>

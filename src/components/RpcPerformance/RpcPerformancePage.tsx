@@ -81,14 +81,16 @@ interface RpcPerformancePageProps {
   allChainsData: ChainData[];
   chains: Chain[];
   timeRange?: TimeRange;
+  /** Resolved server-side from `?protocol=`, so deep links render correctly on first paint. */
+  initialProtocol: string;
 }
 
-export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h' }: RpcPerformancePageProps) {
+export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h', initialProtocol }: RpcPerformancePageProps) {
   const searchParams = useSearchParams();
   const [isTimeRangeLoading, setIsTimeRangeLoading] = useState(false);
 
   const urlProtocol = searchParams.get('protocol');
-  const [activeProtocol, setActiveProtocol] = useState(() => resolveProtocol(chains, urlProtocol));
+  const [activeProtocol, setActiveProtocol] = useState(initialProtocol);
   const [syncedUrlProtocol, setSyncedUrlProtocol] = useState(urlProtocol);
 
   // Sync back when the router's URL changes (e.g. back/forward navigation).

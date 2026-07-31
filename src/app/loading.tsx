@@ -14,8 +14,11 @@ import { resolveProtocol } from '@/lib/url-params';
 import type { TimeRange } from '@/lib/types';
 
 export default function Loading() {
+  // Next gives loading.tsx no searchParams, so the protocol is unknowable until
+  // this runs on the client. Highlight nothing rather than guessing CHAINS[0] —
+  // otherwise a deep link paints the wrong chip as active until hydration.
   const activeProtocol = useMemo(() => {
-    if (typeof window === 'undefined') return CHAINS[0].promName;
+    if (typeof window === 'undefined') return null;
     const p = new URLSearchParams(window.location.search).get('protocol');
     return resolveProtocol(CHAINS, p);
   }, []);
@@ -26,7 +29,7 @@ export default function Loading() {
   }, []);
 
   const rowCount = useMemo(() => {
-    if (typeof window === 'undefined') return 5;
+    if (typeof window === 'undefined' || !activeProtocol) return 5;
     try {
       const cached = localStorage.getItem(`rpc_rows_${activeProtocol}`);
       return cached ? parseInt(cached, 10) : 5;
@@ -57,7 +60,7 @@ export default function Loading() {
             <div className="pb-8">
               {/* Protocol chips */}
               <div className="mb-6">
-                <ProtocolChips chains={CHAINS} active={activeProtocol} onChange={() => {}} />
+                <ProtocolChips chains={CHAINS} active={activeProtocol ?? ''} onChange={() => {}} />
               </div>
 
               {/* Summary skeleton + actions */}
