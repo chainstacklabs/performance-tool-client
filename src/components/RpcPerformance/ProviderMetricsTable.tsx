@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import Sparkline from '@/components/Chain/Sparkline';
-import { availTier } from './metrics';
+import { groupByRegion, REGION_ORDER, REGION_EMOJI } from './regions';
 import { isNum } from '@/lib/num';
 import type { AvailTier, ScoredProvider } from '@/lib/types';
 
@@ -52,23 +52,6 @@ const TIER_TEXT_CLASS: Record<AvailTier, string> = {
   unhealthy:  'text-tier-unhealthy',
   unknown:    'text-tier-unknown',
 };
-
-const REGION_DISPLAY: Record<string, string> = {
-  fra1: 'DE', sfo1: 'US', sin1: 'SG', hnd1: 'JP',
-  'eu-west-1': 'DE', 'us-east-1': 'US', 'ap-southeast-1': 'SG', 'ap-northeast-1': 'JP',
-};
-const REGION_ORDER: string[] = ['DE', 'US', 'SG', 'JP'];
-const REGION_EMOJI: Record<string, string> = { DE: '🇩🇪', US: '🇺🇸', SG: '🇸🇬', JP: '🇯🇵' };
-
-function groupRegions(regionsRaw: Record<string, number> | undefined): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const [code, val] of Object.entries(regionsRaw ?? {})) {
-    const label = REGION_DISPLAY[code];
-    if (!label || !isNum(val)) continue;
-    if (out[label] == null || val < out[label]) out[label] = val;
-  }
-  return out;
-}
 
 // Convert a brand "rgb(r,g,b)" string to "rgba(r,g,b,a)"
 const toRgba = (rgb: string, a: number) => rgb.replace('rgb(', 'rgba(').replace(')', `,${a})`);
@@ -140,8 +123,19 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
     ...providers.map((p) => p.p95ms).filter(isNum),
   );
 
-  const regionMaps     = providers.map((p) => groupRegions(p.regions));
+  const regionMaps     = providers.map((p) => groupByRegion(p.regions));
   const presentRegions = REGION_ORDER.filter((r) => regionMaps.some((m) => m[r] != null));
+
+  // Colour each region cell against the best value in ITS OWN region, not
+  // against bestP95ms (a cross-region average). Regional numbers scatter wider
+  // than their average, so the old yardstick pushed cells to yellow/red for no
+  // reason. Seconds here; converted at the call site.
+  const bestByRegion: Record<string, number> = {};
+  for (const m of regionMaps) {
+    for (const [region, val] of Object.entries(m)) {
+      if (bestByRegion[region] == null || val < bestByRegion[region]) bestByRegion[region] = val;
+    }
+  }
 
   // Total region section is always 240px — each column gets an equal share.
   const regionColW = presentRegions.length > 0 ? Math.round(240 / presentRegions.length) : 80;
@@ -175,7 +169,8 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
         <tbody>
           {providers.map((p, i) => {
             const avail   = p.availability;
-            const status  = availTier(avail);
+            // computeScores already derived this from the unrounded success rate.
+            const status  = p.availTier;
             const regions = regionMaps[i];
 
             // Row highlight is brand-derived → CSS variables; hover via class.
@@ -225,8 +220,9 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                 {/* Regional P95 heatmap */}
                 {presentRegions.map((r) => {
                   const ms = regions[r] != null ? Math.round(regions[r] * 1000) : null;
+                  const bestMs = Math.round((bestByRegion[r] ?? 0) * 1000);
                   return (
-                    <td key={r} className={`px-2 text-center font-mono text-xs tracking-[-0.2px] whitespace-nowrap ${heatCellClass(ms, bestP95ms)}`}>
+                    <td key={r} className={`px-2 text-center font-mono text-xs tracking-[-0.2px] whitespace-nowrap ${heatCellClass(ms, bestMs)}`}>
                       {ms != null ? fmtMs(ms) : <span className="text-fg-ghost">—</span>}
                     </td>
                   );

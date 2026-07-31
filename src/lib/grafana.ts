@@ -1,6 +1,6 @@
 import 'server-only';
 
-const GRAFANA_URL = 'https://chainstack.grafana.net';
+export const GRAFANA_URL = 'https://chainstack.grafana.net';
 const PROM_DS_UID = 'grafanacloud-prom';
 
 /** A single result row from a Prometheus instant query. */
