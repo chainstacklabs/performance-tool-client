@@ -49,8 +49,8 @@ export default function TimeRangeSwitcher({ current, onLoadingChange }: TimeRang
             onClick={() => handleChange(value)}
             className={`h-7 px-3.5 rounded-[7px] border-none cursor-pointer text-sm font-[inherit] transition-colors ${
               isActive
-                ? 'font-medium bg-white/[0.12] text-fg-primary'
-                : 'font-normal bg-transparent text-fg-muted hover:text-[#C0C8D4] hover:bg-white/[0.05]'
+                ? 'font-medium bg-white/12 text-fg-primary'
+                : 'font-normal bg-transparent text-fg-muted hover:text-[#C0C8D4] hover:bg-white/5'
             }`}
           >
             {label}

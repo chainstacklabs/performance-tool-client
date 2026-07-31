@@ -1,6 +1,58 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --font-mono: var(--font-space-mono), monospace;
+
+  /* Foreground / text scale */
+  --color-fg-primary: #f6f9fd;
+  --color-fg-muted: #8d95a5;
+  --color-fg-dim: #656e80;
+  --color-fg-faint: #606772;
+  --color-fg-ghost: #4a5260;
+
+  /* Availability tier colors (see metrics.js availTier()) */
+  --color-tier-healthy: #25b15f;
+  --color-tier-acceptable: #6fc784;
+  --color-tier-degraded: #ffdd33;
+  --color-tier-unhealthy: #ff294c;
+  --color-tier-unknown: #4a5260;
+
+  /* Generic signal colors */
+  --color-signal-ok: #25b15f;
+  --color-signal-warn: #ffdd33;
+  --color-signal-bad: #ff294c;
+
+  --color-accent: #4dafff;
+
+  /* Surface / structural */
+  --color-panel: #161a1e;
+  --color-panel-head: #0e1115;
+  --color-panel-border: #252a30;
+  --color-panel-row: #1e2328;
+
+  --animate-skeletonPulse: skeletonPulse 1.6s ease-in-out infinite;
+  --animate-tooltipIn: tooltipIn 0.15s ease;
+
+  @keyframes skeletonPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+  @keyframes tooltipIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+}
 
 /* ── Typography tokens (Figma Design System 2.0, node 5812:2933) ──
    Trimmed to the two styles this app uses; the full sheet lives in Figma. */

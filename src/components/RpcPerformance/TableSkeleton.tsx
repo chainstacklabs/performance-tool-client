@@ -21,7 +21,7 @@ const RIGHT_COLS: ColSpec[] = [
 ];
 
 const Bar = ({ h, w }: { h: number | string; w: number | string }) => (
-  <div className="rounded bg-white/[0.07] shrink-0" style={{ height: h, width: w }} />
+  <div className="rounded-sm bg-white/[0.07] shrink-0" style={{ height: h, width: w }} />
 );
 
 function Row({ isHeader, delay, lastRow }: { isHeader?: boolean; delay?: number; lastRow?: boolean }) {

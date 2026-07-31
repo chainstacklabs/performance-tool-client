@@ -32,7 +32,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <div className="relative min-h-screen">
       <PageBackground />
       <DotGrid />
-      <div className="relative z-[1]">
+      <div className="relative z-1">
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
           <Header />
         </div>

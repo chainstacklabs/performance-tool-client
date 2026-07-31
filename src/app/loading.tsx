@@ -40,7 +40,7 @@ export default function Loading() {
     <div className="relative min-h-screen">
       <PageBackground />
       <DotGrid />
-      <div className="relative z-[1]">
+      <div className="relative z-1">
         <div className="lg:m-auto lg:max-w-6xl sm:mx-4 mx-4">
           <Header />
         </div>
@@ -67,7 +67,7 @@ export default function Loading() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5 min-h-10">
                 <div className="flex flex-col gap-1.5">
                   <div className="w-[280px] h-[18px] rounded-[5px] bg-white/[0.07] animate-skeletonPulse" />
-                  <div className="w-[200px] h-[13px] rounded bg-white/[0.07] animate-skeletonPulse" />
+                  <div className="w-[200px] h-[13px] rounded-sm bg-white/[0.07] animate-skeletonPulse" />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button className="inline-flex items-center gap-1.5 bg-transparent border-none rounded-lg px-3.5 h-[34px] cursor-default text-fg-muted text-sm font-[inherit] font-medium">

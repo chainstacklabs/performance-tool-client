@@ -35,7 +35,7 @@ export default function ProtocolChips({ chains, active, onChange }: ProtocolChip
             style={style}
             className={`flex items-center gap-2 h-12 rounded-[10px] pl-3 pr-[18px] cursor-pointer border-[1.5px] transition-[background-color,border-color] duration-150 ${
               isActive
-                ? `border-[color:var(--chip-bd)] ${fill ? 'bg-[var(--chip-bg)]' : 'bg-transparent'}`
+                ? `border-(--chip-bd) ${fill ? 'bg-(--chip-bg)' : 'bg-transparent'}`
                 : 'bg-transparent border-[#2E3338] hover:border-fg-ghost'
             }`}
           >
