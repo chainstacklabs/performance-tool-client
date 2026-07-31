@@ -30,4 +30,6 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 ## Conventions
 
-Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.js` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Vercel deploys `main`.
+Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.js` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+**Do not add a `.vercelignore`.** Vercel deploys `main` through the Git integration, which clones the repository, so there is no upload step for `.vercelignore` to filter — it does nothing here, and one was removed after it appeared to work but did not. Vercel's docs describe the ignore list as "only relevant when using Vercel CLI". Docs and `LICENSE` therefore show up in the deployment source inspector; that is cosmetic, because only `public/` and the build output are served and `/README.md` returns 404. The sibling `compare-dashboard-functions` repo does deploy by CLI (`vercel --prod` per region), which is why its `.vercelignore` is meaningful and copying it here was not.
