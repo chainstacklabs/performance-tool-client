@@ -39,7 +39,6 @@ const Header = () => {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className="inline-flex items-center justify-center bg-[#007BFF] hover:bg-[#005EE0] text-white border-none rounded-lg px-6 py-2.5 text-[15px] font-medium leading-5 tracking-[0.15px] no-underline cursor-pointer whitespace-nowrap transition-colors"
-        style={{ fontFamily: "\"Suisse Int'l\", sans-serif" }}
       >
         Start for free
       </a>
