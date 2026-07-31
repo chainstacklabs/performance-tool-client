@@ -18,6 +18,15 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* Dark-page defaults, formerly injected by the wedgesTW plugin's dark theme:
+   inherited text color for anything without an explicit text-* class, and
+   color-scheme so scrollbars/form controls render dark. The page background
+   is the inline style on <html> in layout.tsx plus .infra-bg below. */
+html {
+  color: #FFFFFF;
+  color-scheme: dark;
+}
+
 /* Space Mono for all monospace elements */
 .font-mono, code, kbd, pre {
   font-family: var(--font-space-mono), 'Courier New', monospace !important;
