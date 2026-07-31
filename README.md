@@ -1,134 +1,52 @@
-# Performance Tool Client
+# performance-tool-client
 
-A modern web application for monitoring and analyzing blockchain network performance metrics.
+RPC provider performance comparison, as a single-page Next.js app. Chainstack Compare frontend.
 
-## Overview
+Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, and Robinhood, measured from four regions.
 
-This tool provides real-time performance monitoring and analysis capabilities for blockchain networks, built with Next.js, TypeScript, and Tailwind CSS.
+This app only renders. The probes and dashboards that produce the data live in [compare-dashboard-functions](https://github.com/chainstacklabs/compare-dashboard-functions); this app queries their Grafana at request time.
 
-## Prerequisites
+## Setup
 
-- Node.js (v18 or higher)
-- npm or yarn
-- Modern web browser
-
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/your-username/performance-tool-client.git
-cd performance-tool-client
-```
-
-2. Install dependencies:
+Needs Node.js 20.9 or later.
 
 ```bash
 npm install
-# or
-yarn install
+cp .env.sample .env.local
 ```
 
-3. Set up environment variables:
+Set `GRAFANA_API_TOKEN` in `.env.local` — a Grafana service account token with the Viewer role. Without it the page renders but every metric shows as unavailable.
 
-```bash
-cp .env.example .env.local
-```
+To run against your own Grafana, change `GRAFANA_URL` and `PROM_DS_UID` in `src/lib/grafana.ts` and the `CHAINS` list in `src/lib/queries.ts`.
 
 ## Commands
 
-Run the development server on localhost:
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | dev server on localhost:3000 |
+| `npm run build` | production build, includes type checking |
+| `npm start` | serve the production build |
+| `npm run lint` | ESLint |
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+No test suite — lint and build are the checks.
 
-Build the application:
+## URL parameters
 
-```bash
-npm run build
-# or
-yarn build
-```
+- `protocol` — `ethereum`, `solana`, `bnb`, `arbitrum`, `base`, `hyperliquid`, `robinhood`. Defaults to `ethereum`.
+- `range` — `24h` or `7d`. Defaults to `24h`.
 
-More about [deploying options](https://nextjs.org/docs/app/building-your-application/deploying)
+Unrecognized values fall back to the default, so links are safe to share.
 
-Deployments:
-
-Deployed on Vercel automatically on PR merge.
-
-## How to Add New Method
-
-Navigate to `src/app/store/store.js` and find the `METHODS` array:
-
-```javascript
-export const METHODS = entity([
-  {
-    id: 0,
-    method_used: 'eth_getBlockByNumber',
-    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-get-block',
-    perform: true,
-    isLoading: true,
-    data: {},
-  },
-  {
-    id: 1,
-    method_used: 'eth_call',
-    method_url: process.env.NEXT_PUBLIC_BACKEND_APP_PATH_URL + 'test-eth-call',
-    perform: true,
-    isLoading: true,
-    data: {},
-  },
-]);
-```
-
-To add a new method:
-
-1. Add a new object at the end of the array
-2. Increment the `id` field value
-3. Set `method_used` for the card label shown in results UI
-4. Update `method_url` with the new path
-5. Keep other fields unchanged
-
-## Project Structure
+## Layout
 
 ```
-├── src/
-│   ├── app/          # Next.js App Router components
-│   └── components/   # Reusable React components
-└── public/           # Static assets
+src/app/          # single route, layout, loading fallback
+src/components/   # RpcPerformance/ holds the table, chips, range switcher
+src/lib/          # PromQL, Grafana client, scoring
 ```
-
-## Key Directories
-
-- `/app/compare-double/page.js`: Implements side-by-side comparison functionality for two blockchain nodes page
-- `/app/compare-single/page.js`: Implements testing functionality for one blockchain node page
-- `/app/injection-result-double/page.js`: Implements side-by-side comparison functionality for two blockchain nodes for injected page
-- `/app/store/store.js`: Contains global state management and methods configuration
-- `/app/page.js`: Initial page
-
-## Core Technologies
-
-- [Next.js](https://nextjs.org/) - React Framework
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [ESLint](https://eslint.org/) - Code linting
-- [Jest](https://jestjs.io/) - Testing framework
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Fork or branch from `main`, run `npm run lint` and `npm run build`, then open a pull request. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
-## Code Quality
-
-- Follows best practices for React and Next.js
-- Implements maintainable and scalable code structure
-- Includes comprehensive documentation
-- Uses TypeScript for type safety
-- Adheres to ESLint configuration
+See `CLAUDE.md` before touching the data layer.
