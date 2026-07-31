@@ -1,0 +1,19 @@
+# Excluded from the Vercel deployment — none of this is read by `next build`
+# or served at runtime. Mirrors compare-dashboard-functions.
+# Do not add anything the build needs: package.json, package-lock.json, src/,
+# public/, next.config.js, tsconfig.json, postcss.config.js, tailwind.config.ts.
+
+README.md
+CLAUDE.md
+AGENTS.md
+spec*.md
+LICENSE
+
+*.sample
+*.example*
+*.local*
+
+.gitattributes
+.coderabbit.yaml
+.claude
+.vscode
