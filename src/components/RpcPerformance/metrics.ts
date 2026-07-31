@@ -17,18 +17,25 @@ export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
     p95ms: isNum(p.p95) ? Math.round(p.p95 * 1000) : null,
     p99ms: isNum(p.p99) ? Math.round(p.p99 * 1000) : null,
     p50ms: isNum(p.p50) ? Math.round(p.p50 * 1000) : null,
-    availability: isNum(p.success) ? +(p.success * 100).toFixed(2) : null,
+    // Truncated, not rounded, so the displayed figure can never contradict the
+    // tier colour: rounding 99.897% up to "99.90%" reads as a threshold bug when
+    // availTier (correctly, on the raw value) calls it `acceptable`, not
+    // `healthy`. Truncation only ever moves the number away from the boundary.
+    availability: isNum(p.success) ? Math.floor(p.success * 10000) / 100 : null,
   }));
 }
 
 /**
  * Availability tiers — DISPLAY ONLY (color the availability %, and add a uptime
- * caveat to the summary). They do NOT gate ranking: ordering is purely by
- * grafanaScore, matching the compare dashboard's score panel.
+ * caveat to the summary). They do NOT gate ranking: ordering is purely Grafana's
+ * score, which already folds reliability in.
+ *
+ * Takes a percentage (0–100) and must be given the UNROUNDED value — rounding
+ * first lets 99.895% cross into `healthy`.
  *
  *  healthy     >= 99.9%
- *  acceptable  99.0–99.9%
- *  degraded    95.0–99.0%
+ *  acceptable  [99.0, 99.9)
+ *  degraded    [95.0, 99.0)
  *  unhealthy   < 95.0%
  */
 export function availTier(pct: number | null): AvailTier {
@@ -40,43 +47,34 @@ export function availTier(pct: number | null): AvailTier {
 }
 
 /**
- * Ranking score — matches the compare dashboard's "Provider score" panel:
+ * Attach the ranking score. This app deliberately does NOT compute one: the
+ * formula lives in Grafana's "Provider score" panel and is fetched in
+ * lib/score.ts, so the site and the dashboard it links to can never disagree.
+ * A re-implementation used to live here and did drift out of sync.
  *
- *   score = 1 / mean_over_regions( (1 / p95_region) × successRate_region³ )
- *
- * The speed×reliability term is computed PER REGION, then averaged, then
- * inverted. Lower score = better. SuccessRate³ makes even small reliability
- * drops (99% vs 97%) move the score noticeably. Single-region case reduces to
- * the displayed formula `1 / ((1/rt) × sr³)` = `rt / sr³`.
- *
- * If a provider has no region with both a p95 and a success rate, it is
- * unscoreable and returns Infinity (ranks last). We do NOT substitute a
- * latency-only number — that would silently change the ranking. A wholesale
- * success-query failure surfaces via the partial-data banner instead.
+ * Providers with no score from Grafana get Infinity and rank last, keeping their
+ * incoming p95 order. We do NOT substitute a locally derived number — inventing
+ * a ranking is worse than not having one, and the partial-data banner already
+ * tells the user the score is missing.
  */
-function grafanaScore(p: Provider): number {
-  const terms: number[] = [];
-  for (const [region, p95r] of Object.entries(p.regions)) {
-    const srr = p.regionSuccess[region];
-    if (!isNum(p95r) || p95r <= 0) continue;
-    if (!isNum(srr)) continue; // no reliability data for this region
-    terms.push((1 / p95r) * Math.pow(srr, 3));
-  }
-  if (terms.length === 0) return Infinity;
-  const mean = terms.reduce((a, b) => a + b, 0) / terms.length;
-  return mean > 0 ? 1 / mean : Infinity;
-}
-
 export function computeScores(enriched: EnrichedProvider[]): ScoredProvider[] {
   return enriched.map((p) => ({
     ...p,
-    availTier:    availTier(p.availability),
-    grafanaScore: grafanaScore(p),
+    // Tier off the raw success rate, not the 2dp-rounded display value, so
+    // 99.895% doesn't get rounded up into `healthy`.
+    availTier:    availTier(isNum(p.success) ? p.success * 100 : null),
+    grafanaScore: isNum(p.score) ? p.score : Infinity,
   }));
 }
 
+/**
+ * Ties (notably several unscoreable Infinity providers) keep their incoming
+ * order, which fetchChainData sets to ascending p95 — a sane fallback. Relies on
+ * Array#sort being stable and on an Infinity−Infinity=NaN comparator result
+ * being treated as 0, both of which the spec guarantees.
+ */
 export function sortByScore(providers: ScoredProvider[]): ScoredProvider[] {
-  return [...providers].sort((a, b) => (a.grafanaScore ?? Infinity) - (b.grafanaScore ?? Infinity));
+  return [...providers].sort((a, b) => a.grafanaScore - b.grafanaScore);
 }
 
 export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary | null {
@@ -84,9 +82,13 @@ export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary
   if (!leader) return null;
   const name = chain.name;
 
-  // The headline always names the actual #1 row (sorted[0]) — no swapping in a
+  // The headline always names the actual top row (sorted[0]) — no swapping in a
   // different provider. Tier only adds a uptime caveat to the detail line.
-  const tier   = leader.availTier ?? availTier(leader.availability);
+  const tier   = leader.availTier;
+  // Without a score from Grafana there is no ranking, and sortByScore has fallen
+  // back to p95 order. Describe what we can actually see instead of claiming a
+  // rank we didn't compute.
+  const ranked = Number.isFinite(leader.grafanaScore);
   const avPct  = isNum(leader.availability) ? `${leader.availability.toFixed(2)}%` : null;
   const p95str = leader.p95ms != null ? `${leader.p95ms} ms P95` : null;
 
@@ -98,7 +100,9 @@ export function generateSummary(chain: Chain, sorted: ScoredProvider[]): Summary
   ].filter(Boolean).join(' · ');
 
   return {
-    headline: `${leader.displayName} ranks #1 for ${name}`,
+    headline: ranked
+      ? `${leader.displayName} ranks #1 for ${name}`
+      : `${leader.displayName} has the lowest P95 for ${name}`,
     detail,
   };
 }

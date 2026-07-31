@@ -20,6 +20,11 @@ export interface Provider {
   trend: number[];
   /** mean success rate 0–1 across regions, or null when unknown (display only) */
   success: number | null;
+  /**
+   * Ranking score from Grafana's "Provider score" panel — lower is better.
+   * Null when the panel could not be read; never computed here.
+   */
+  score: number | null;
 }
 
 export interface ChainData {
@@ -31,7 +36,10 @@ export interface ChainData {
   error: boolean;
   /** true when providers exist but some query failed (data incomplete) */
   partial: boolean;
-  /** names of the queries that failed (p50/p95/p99/success/trend) */
+  /**
+   * names of the metrics that came back incomplete
+   * (p50/p95/p99/success/trend/score)
+   */
   degradedMetrics: string[];
 }
 

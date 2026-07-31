@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { runPromQuery, runPromRangeQuery } from './grafana';
 import type { PromInstantResult, PromRangeResult } from './grafana';
 import { providerByRegionQuery, providerTrendQuery, providerSuccessQuery } from './queries';
+import { fetchProviderScores } from './score';
 import type { Chain, ChainData, Provider, TimeRange } from './types';
 
 // Trend (sparkline) span per range. Step is sized to keep ~168 points either way.
@@ -69,7 +70,7 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
   const end = minuteAlignedEnd();
   const start = end - windowSeconds;
 
-  const [p50, p95, p99, success, trend] = await Promise.all([
+  const [p50, p95, p99, success, trend, score] = await Promise.all([
     safe('p50', runPromQuery(providerByRegionQuery(chain.promName, 0.5, timeRange))),
     safe('p95', runPromQuery(providerByRegionQuery(chain.promName, 0.95, timeRange))),
     safe('p99', runPromQuery(providerByRegionQuery(chain.promName, 0.99, timeRange))),
@@ -82,18 +83,19 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
         step: stepSeconds,
       }),
     ),
+    safe('score', fetchProviderScores(chain.publicToken, timeRange)),
   ]);
 
-  const degradedMetrics = Object.entries({ p50, p95, p99, success, trend })
+  const failedQueries = Object.entries({ p50, p95, p99, success, trend, score })
     .filter(([, r]) => !r.ok)
     .map(([name]) => name);
-  const hadError = degradedMetrics.length > 0;
 
   const p50Map = p50.ok ? quantileByRegionToMap(p50.value) : new Map();
   const p95Map = p95.ok ? quantileByRegionToMap(p95.value) : new Map();
   const p99Map = p99.ok ? quantileByRegionToMap(p99.value) : new Map();
   const trendMap = trend.ok ? trendToMap(trend.value) : new Map<string, number[]>();
   const successMap: RegionMap = success.ok ? quantileByRegionToMap(success.value) : new Map();
+  const scoreMap: Record<string, number> = score.ok ? score.value : {};
 
   const providerNames = new Set<string>([
     ...p50Map.keys(),
@@ -118,9 +120,20 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
       regionSuccess: Object.fromEntries(successMap.get(name) ?? []) as Record<string, number>,
       trend: trendMap.get(name) ?? [],
       success: avgOfMap(successMap.get(name)),
+      // Joined on the raw `provider` label, which is the same identity Grafana's
+      // score panel returns.
+      score: Number.isFinite(scoreMap[name]) ? scoreMap[name] : null,
     }))
     .filter((p) => p.p95 !== null)
     .sort((a, b) => (a.p95 as number) - (b.p95 as number));
+
+  // A provider that has latency data but no score would be ranked last without
+  // any explanation, so count that as incomplete data too — e.g. a newly
+  // onboarded provider whose score series hasn't caught up yet.
+  const degradedMetrics = failedQueries.includes('score') || providers.every((p) => p.score !== null)
+    ? failedQueries
+    : [...failedQueries, 'score'];
+  const hadError = degradedMetrics.length > 0;
 
   return {
     chain,
