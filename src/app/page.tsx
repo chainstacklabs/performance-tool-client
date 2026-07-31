@@ -14,11 +14,13 @@ function fetchAllChains(timeRange: TimeRange): Promise<ChainData[]> {
 }
 
 interface HomeProps {
-  searchParams?: { range?: string };
+  // Next.js 15 passes searchParams as a Promise.
+  searchParams?: Promise<{ range?: string }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const timeRange: TimeRange = searchParams?.range === '7d' ? '7d' : '24h';
+  const { range } = (await searchParams) ?? {};
+  const timeRange: TimeRange = range === '7d' ? '7d' : '24h';
   const allChainsData = await fetchAllChains(timeRange);
 
   return (
