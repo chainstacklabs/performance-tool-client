@@ -26,10 +26,10 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 **ESLint stays on 9.x.** ESLint 10 breaks two ways — `eslint-plugin-react` supports nothing above 9.7, and `eslint-config-next`'s parser is vendored inside `next`. Neither is fixable with an override.
 
-**`@lemonsqueezy/wedges` is a devDependency on purpose** — only used by the Tailwind plugin in `tailwind.config.ts`. Its `react@^18` peer pins React 18; moving it back to `dependencies` does not change that.
-
 ## Conventions
 
 Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.js` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+**Do not reintroduce `@lemonsqueezy/wedges`.** It was removed because it pinned React 18 (peer dependency) and Tailwind 3 (its `wedgesTW` plugin) while contributing nothing — no component was ever rendered, and no wedges utility class was used. The dark-page defaults its plugin injected on `<html>` (`color`, `color-scheme`) now live in `globals.css`.
 
 **Do not add a `.vercelignore`.** Vercel deploys `main` through the Git integration, which clones the repository, so there is no upload step for `.vercelignore` to filter — it does nothing here, and one was removed after it appeared to work but did not. Vercel's docs describe the ignore list as "only relevant when using Vercel CLI". Docs and `LICENSE` therefore show up in the deployment source inspector; that is cosmetic, because only `public/` and the build output are served and `/README.md` returns 404. The sibling `compare-dashboard-functions` repo does deploy by CLI (`vercel --prod` per region), which is why its `.vercelignore` is meaningful and copying it here was not.

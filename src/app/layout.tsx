@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`dark-blue wg-antialiased ${spaceMono.variable}`}
+      className={`antialiased ${spaceMono.variable}`}
       style={{ background: '#03070d' }}
     >
       <head>
