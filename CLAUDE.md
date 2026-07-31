@@ -14,7 +14,7 @@ Needs `GRAFANA_API_TOKEN` in `.env.local` or every metric reads as unavailable.
 
 Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
-**Never compute or display the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The score orders rows only — it has known flaws, so showing the number invites questions the UI cannot answer. If the formula is wrong, fix the Grafana panel.
+**Never compute or display the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The score orders rows only — showing the raw number invites questions the UI cannot answer. Any improvement to the formula belongs in the Grafana panel, not here.
 
 **`activeProtocol` in `RpcPerformancePage.tsx` must stay React state**, not derived from `useSearchParams`. Chip clicks use `history.replaceState` to bypass the router on purpose; the page is `force-dynamic`, so routing each click would cost a server round trip.
 
@@ -29,6 +29,8 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 ## Conventions
 
 Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.js` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+Tailwind 4 is configured CSS-first: design tokens (colors, fonts, keyframes) live in the `@theme` block in `src/app/globals.css`. There is no `tailwind.config.ts`.
 
 **Do not reintroduce `@lemonsqueezy/wedges`.** It was removed because it pinned React 18 (peer dependency) and Tailwind 3 (its `wedgesTW` plugin) while contributing nothing — no component was ever rendered, and no wedges utility class was used. The dark-page defaults its plugin injected on `<html>` (`color`, `color-scheme`) now live in `globals.css`.
 

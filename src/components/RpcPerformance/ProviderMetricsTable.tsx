@@ -101,7 +101,7 @@ function LatencyBar({ p50ms, p95ms, p99ms, maxVal, bestP95ms }: LatencyBarProps)
 /* ─── main table ──────────────────────────────────────────── */
 
 const TH = ({ children, align = 'left' }: { children: ReactNode; align?: 'left' | 'center' }) => (
-  <th className={`text-fg-faint text-xs font-mono uppercase tracking-[0.05em] font-normal px-4 h-11 whitespace-nowrap border-b border-panel-border bg-panel-head ${
+  <th className={`text-fg-faint text-xs font-mono uppercase tracking-wider font-normal px-4 h-11 whitespace-nowrap border-b border-panel-border bg-panel-head ${
     align === 'center' ? 'text-center' : 'text-left'
   }`}>{children}</th>
 );
@@ -183,7 +183,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
               <tr
                 key={p.name}
                 style={rowVars}
-                className="h-[68px] border-b border-panel-row transition-colors bg-[var(--row-bg)] hover:bg-[var(--row-bg-hover)]"
+                className="h-[68px] border-b border-panel-row transition-colors bg-(--row-bg) hover:bg-(--row-bg-hover)"
               >
                 {/* Provider */}
                 <td className="px-4 whitespace-nowrap">

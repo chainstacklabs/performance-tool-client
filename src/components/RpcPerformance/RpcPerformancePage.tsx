@@ -157,7 +157,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
         {isTimeRangeLoading ? (
           <div className="flex flex-col gap-1.5">
             <div className="w-[280px] h-[18px] rounded-[5px] bg-white/[0.07] animate-skeletonPulse" />
-            <div className="w-[200px] h-[13px] rounded bg-white/[0.07] animate-skeletonPulse" />
+            <div className="w-[200px] h-[13px] rounded-sm bg-white/[0.07] animate-skeletonPulse" />
           </div>
         ) : summary?.headline ? (
           <div>
@@ -179,7 +179,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
 
       {/* Partial-data warning — some metrics failed but we still have providers */}
       {!isTimeRangeLoading && chainData?.partial && !chainData?.error && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-signal-warn/[0.08] border border-signal-warn/[0.25] rounded-lg text-signal-warn text-[13px]">
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-signal-warn/8 border border-signal-warn/25 rounded-lg text-signal-warn text-[13px]">
           <Warning size={14} weight="fill" />
           Partial data{chainData.degradedMetrics?.length ? ` — ${chainData.degradedMetrics.join(', ')} unavailable` : ''}; ranking may be affected.
         </div>

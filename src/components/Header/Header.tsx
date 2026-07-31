@@ -25,7 +25,7 @@ const Header = () => {
 
       {popover && (
         <div
-          className="fixed bg-[#1A1E24] border border-[#2E3338] rounded-lg px-3 py-[7px] text-fg-primary text-[13px] font-medium leading-[18px] whitespace-nowrap pointer-events-none z-[9999] shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+          className="fixed bg-[#1A1E24] border border-[#2E3338] rounded-lg px-3 py-[7px] text-fg-primary text-[13px] font-medium leading-[18px] whitespace-nowrap pointer-events-none z-9999 shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
           style={{ left: popover.x + 16, top: popover.y + 16 }}
         >
           That&apos;s the smart move :)
