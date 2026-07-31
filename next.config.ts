@@ -1,4 +1,5 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from 'next';
+
 const GRAFANA_DASHBOARD_URL =
   'https://chainstack.grafana.net/public-dashboards/65c0fcb02f994faf845d4ec095771bd0?orgId=1';
 
@@ -22,7 +23,7 @@ const cspDirectives = [
   "form-action 'self'",
 ].join('; ');
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   async headers() {
     return [
       {
@@ -46,4 +47,4 @@ const nextConfig = {
   reactStrictMode: true,
 };
 
-module.exports = nextConfig;
+export default nextConfig;

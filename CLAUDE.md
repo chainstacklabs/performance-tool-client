@@ -28,7 +28,7 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 ## Conventions
 
-Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.js` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+Latencies are seconds in `src/lib/`, milliseconds after `metrics.ts`. `next.config.ts` owns the CSP, so new third-party scripts need their origin added there. Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 Tailwind 4 is configured CSS-first: design tokens (colors, fonts, keyframes) live in the `@theme` block in `src/app/globals.css`. There is no `tailwind.config.ts`.
 
