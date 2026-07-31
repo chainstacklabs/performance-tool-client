@@ -1,4 +1,4 @@
-export interface Rgb {
+interface Rgb {
   r: number;
   g: number;
   b: number;
@@ -21,10 +21,6 @@ export const CHAIN_BRAND: Record<string, ChainBrand> = {
   Robinhood:   { rgb: { r: 204, g: 255, b: 0   }, logo: 'robinhood'   },
   Solana:      { rgb: { r: 153, g: 69,  b: 255 }, logo: 'solana'      },
 };
-
-export function brandRgb(chain: string): Rgb | null {
-  return CHAIN_BRAND[chain]?.rgb ?? null;
-}
 
 export function chainLogo(chain: string): string | null {
   return CHAIN_BRAND[chain]?.logo ?? null;
