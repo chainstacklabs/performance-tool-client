@@ -27,7 +27,10 @@ const cspDirectives = [
   "img-src 'self' data: https:",
   // Nothing is iframed in production; Grafana opens via target="_blank" links.
   `frame-src ${isPreview ? 'https://vercel.live' : "'none'"}`,
-  `connect-src 'self' https://api.segment.io https://*.segment.io${isPreview ? ' https://vercel.live wss://ws-us3.pusher.com https://*.pusher.com' : ''}`,
+  // cdn.segment.com appears here as well as in script-src: analytics.js fetches
+  // its destination settings from cdn.segment.com over fetch(), which connect-src
+  // governs. Without it the bundle loads but cannot initialise.
+  `connect-src 'self' https://cdn.segment.com https://api.segment.io https://*.segment.io${isPreview ? ' https://vercel.live wss://ws-us3.pusher.com https://*.pusher.com' : ''}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
