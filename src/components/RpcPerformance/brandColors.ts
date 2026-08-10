@@ -12,7 +12,7 @@ interface ChainBrand {
 
 // Single source of per-chain display metadata, keyed by promName. Adding a
 // chain means one entry here (plus the data entry in lib/queries.ts).
-export const CHAIN_BRAND: Record<string, ChainBrand> = {
+const CHAIN_BRAND: Record<string, ChainBrand> = {
   Ethereum:    { rgb: { r: 98,  g: 126, b: 234 }, logo: 'ethereum'    },
   Arbitrum:    { rgb: { r: 40,  g: 160, b: 240 }, logo: 'arbitrum'    },
   Base:        { rgb: { r: 0,   g: 82,  b: 255 }, logo: 'base'        },
