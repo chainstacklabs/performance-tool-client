@@ -38,7 +38,7 @@ export function enrichProviders(providers: Provider[]): EnrichedProvider[] {
  *  degraded    [95.0, 99.0)
  *  unhealthy   < 95.0%
  */
-export function availTier(pct: number | null): AvailTier {
+function availTier(pct: number | null): AvailTier {
   if (!isNum(pct)) return 'unknown';
   if (pct >= 99.9) return 'healthy';
   if (pct >= 99.0) return 'acceptable';
