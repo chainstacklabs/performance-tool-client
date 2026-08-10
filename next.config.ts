@@ -1,7 +1,15 @@
 import type { NextConfig } from 'next';
+import { CHAINS } from './src/lib/queries';
+
+// /dashboard lands on Ethereum's public compare dashboard. The token comes from
+// CHAINS so it stays in step with the app's own "open in Grafana" links rather
+// than being a second copy that can drift. Fail the build if it is missing — a
+// broken redirect target is worse than a loud error.
+const ethereumToken = CHAINS.find((c) => c.promName === 'Ethereum')?.publicToken;
+if (!ethereumToken) throw new Error('No Ethereum entry in CHAINS to build the /dashboard redirect from');
 
 const GRAFANA_DASHBOARD_URL =
-  'https://chainstack.grafana.net/public-dashboards/65c0fcb02f994faf845d4ec095771bd0?orgId=1';
+  `https://chainstack.grafana.net/public-dashboards/${ethereumToken}?orgId=1`;
 
 // Allow the Vercel toolbar (comments/live feedback) on preview deployments only,
 // so production stays locked down. The toolbar loads from vercel.live and uses
