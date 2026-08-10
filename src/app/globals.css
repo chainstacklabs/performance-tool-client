@@ -42,14 +42,17 @@
       opacity: 0.4;
     }
   }
+  /* No translateX here: Tailwind 4's `-translate-x-1/2` emits the standalone
+     `translate` property, which composes with `transform` instead of being
+     overridden by it. Re-centering here would double the shift mid-animation. */
   @keyframes tooltipIn {
     from {
       opacity: 0;
-      transform: translateX(-50%) translateY(4px);
+      transform: translateY(4px);
     }
     to {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
   }
 }
