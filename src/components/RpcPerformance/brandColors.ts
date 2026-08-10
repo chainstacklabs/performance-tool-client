@@ -32,7 +32,8 @@ export function brandRgba(chain: string, alpha: number): string | null {
   return `rgba(${c.r},${c.g},${c.b},${alpha})`;
 }
 
-export function brandHex(chain: string): string {
+/** CSS color for a chain's accent — `rgb()` when known, the accent hex otherwise. */
+export function brandColor(chain: string): string {
   const c = CHAIN_BRAND[chain]?.rgb;
   if (!c) return '#4DAFFF';
   return `rgb(${c.r},${c.g},${c.b})`;
