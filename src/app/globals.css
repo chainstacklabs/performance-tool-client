@@ -10,7 +10,7 @@
   --color-fg-faint: #606772;
   --color-fg-ghost: #4a5260;
 
-  /* Availability tier colors (see metrics.js availTier()) */
+  /* Availability tier colors (see availTier() in RpcPerformance/metrics.ts) */
   --color-tier-healthy: #25b15f;
   --color-tier-acceptable: #6fc784;
   --color-tier-degraded: #ffdd33;
