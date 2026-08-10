@@ -8,7 +8,7 @@ import ProviderMetricsTable from './ProviderMetricsTable';
 import TimeRangeSwitcher from './TimeRangeSwitcher';
 import TableSkeleton from './TableSkeleton';
 import { enrichProviders, computeScores, sortByScore, generateSummary } from './metrics';
-import { brandHex } from './brandColors';
+import { brandColor } from './brandColors';
 import { resolveProtocol, rangeQuery } from '@/lib/url-params';
 import type { Chain, ChainData, TimeRange } from '@/lib/types';
 
@@ -139,7 +139,7 @@ export default function RpcPerformancePage({ allChainsData, chains, timeRange = 
     [chainData, sortedProviders]
   );
 
-  const accentColor = brandHex(activeProtocol);
+  const accentColor = brandColor(activeProtocol);
   const grafanaFrom = timeRange === '7d' ? 'now-7d' : 'now-24h';
   const dashboardUrl = chainData
     ? `https://chainstack.grafana.net/public-dashboards/${chainData.chain.publicToken}?orgId=1&theme=dark&from=${grafanaFrom}&to=now`

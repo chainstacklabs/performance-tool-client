@@ -12,7 +12,7 @@ interface ChainBrand {
 
 // Single source of per-chain display metadata, keyed by promName. Adding a
 // chain means one entry here (plus the data entry in lib/queries.ts).
-export const CHAIN_BRAND: Record<string, ChainBrand> = {
+const CHAIN_BRAND: Record<string, ChainBrand> = {
   Ethereum:    { rgb: { r: 98,  g: 126, b: 234 }, logo: 'ethereum'    },
   Arbitrum:    { rgb: { r: 40,  g: 160, b: 240 }, logo: 'arbitrum'    },
   Base:        { rgb: { r: 0,   g: 82,  b: 255 }, logo: 'base'        },
@@ -32,7 +32,8 @@ export function brandRgba(chain: string, alpha: number): string | null {
   return `rgba(${c.r},${c.g},${c.b},${alpha})`;
 }
 
-export function brandHex(chain: string): string {
+/** CSS color for a chain's accent — `rgb()` when known, the accent hex otherwise. */
+export function brandColor(chain: string): string {
   const c = CHAIN_BRAND[chain]?.rgb;
   if (!c) return '#4DAFFF';
   return `rgb(${c.r},${c.g},${c.b})`;
