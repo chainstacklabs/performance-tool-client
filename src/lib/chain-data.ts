@@ -139,7 +139,6 @@ export const fetchChainData = cache(async (chain: Chain, timeRange: TimeRange = 
     chain,
     providers,
     regions: [...regions].sort(),
-    leader: providers[0] ?? null,
     error: providers.length === 0 && hadError,
     // Some queries failed but we still have providers — data is incomplete and
     // the ranking may be affected. Surfaced in the UI rather than hidden.

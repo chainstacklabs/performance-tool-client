@@ -31,7 +31,6 @@ export interface ChainData {
   chain: Chain;
   providers: Provider[];
   regions: string[];
-  leader: Provider | null;
   /** true when there are no providers AND at least one query failed */
   error: boolean;
   /** true when providers exist but some query failed (data incomplete) */
