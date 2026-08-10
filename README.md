@@ -2,13 +2,13 @@
 
 RPC provider performance comparison, as a single-page Next.js app. Chainstack Compare frontend.
 
-Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, and Robinhood, measured from four regions.
+Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, and Robinhood, measured from three regions per chain (four across the probe fleet).
 
 This app only renders. The probes and dashboards that produce the data live in [compare-dashboard-functions](https://github.com/chainstacklabs/compare-dashboard-functions); this app queries their Grafana at request time.
 
 ## Setup
 
-Needs Node.js 20.9 or later.
+Needs Node.js 22.
 
 ```bash
 npm install
@@ -16,6 +16,8 @@ cp .env.sample .env.local
 ```
 
 Set `GRAFANA_API_TOKEN` in `.env.local` — a Grafana service account token with the Viewer role. Without it the page renders but every metric shows as unavailable.
+
+`NEXT_PUBLIC_CLIENT_DOMAIN` is optional — it only fills in the `og:image` and `og:url` metadata.
 
 To run against your own Grafana, change `GRAFANA_URL` and `PROM_DS_UID` in `src/lib/grafana.ts` and the `CHAINS` list in `src/lib/queries.ts`.
 
@@ -42,7 +44,7 @@ Unrecognized values fall back to the default, so links are safe to share.
 ```
 src/app/          # single route, layout, loading fallback
 src/components/   # RpcPerformance/ holds the table, chips, range switcher
-src/lib/          # PromQL, Grafana client, scoring
+src/lib/          # PromQL, Grafana client, scoring, URL params
 ```
 
 ## Contributing

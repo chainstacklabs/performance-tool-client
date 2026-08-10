@@ -24,7 +24,7 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 **The three `package.json` overrides are load-bearing.** `postcss` because Next pins `8.4.31` internally, `minimatch` as the only route to a patched `brace-expansion`, `sharp` because Next's optional range has an open advisory. Removing any reintroduces a Dependabot alert.
 
-**ESLint stays on 9.x.** ESLint 10 breaks two ways — `eslint-plugin-react` supports nothing above 9.7, and `eslint-config-next`'s parser is vendored inside `next`. Neither is fixable with an override.
+**ESLint stays on 9.x.** `eslint-plugin-react` peers at `^9.7` and nothing higher, and no override fixes a peer range.
 
 ## Conventions
 
