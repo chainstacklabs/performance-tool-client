@@ -13,8 +13,14 @@ export const CHAINS: Chain[] = [
   { name: 'Robinhood',   promName: 'Robinhood',   publicToken: '5e422a0d05c74da493846cace52d2aa3' },
 ];
 
+// api_method="eth_subscribe" is excluded from latency displays: it measures
+// block arrival over a WebSocket subscription, which is bound by chain block
+// cadence and near-identical for every provider, so pooling it into the
+// per-provider average drowns the methods that actually differ. It still
+// counts toward availability (providerSuccessQuery below) and toward the
+// Grafana ranking score, both of which fold in its failures on purpose.
 const baseSelector = (chain: string): string =>
-  `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*"}`;
+  `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*",api_method!="eth_subscribe"}`;
 
 // Inner subquery window/resolution per time range. The coarser 5m step for 7d
 // keeps the sample count manageable (~2016 pts/series vs ~10k at 1m).
