@@ -24,6 +24,8 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 **Never compute or display the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The score orders rows only — showing the raw number invites questions the UI cannot answer. Any improvement to the formula belongs in the Grafana panel, not here.
 
+**`api_method!="eth_subscribe"` in the latency selector is deliberate and asymmetric.** Block arrival is chain cadence, near-identical for every provider, so it would dominate the displayed latency averages — but the availability query and the Grafana score still count it on purpose. Don't "unify" the selectors in `queries.ts`.
+
 **`activeProtocol` in `RpcPerformancePage.tsx` must stay React state**, not derived from `useSearchParams`. Chip clicks use `history.replaceState` to bypass the router on purpose; the page is `force-dynamic`, so routing each click would cost a server round trip.
 
 **`loading.tsx` gets no `searchParams`** — Next passes none to a Suspense fallback. It must not guess the active protocol; guessing paints the wrong chip on every deep link.
