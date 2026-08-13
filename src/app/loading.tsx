@@ -24,8 +24,8 @@ export default function Loading() {
   }, []);
 
   const timeRange = useMemo<TimeRange>(() => {
-    if (typeof window === 'undefined') return '24h';
-    return new URLSearchParams(window.location.search).get('range') === '7d' ? '7d' : '24h';
+    if (typeof window === 'undefined') return '7d';
+    return new URLSearchParams(window.location.search).get('range') === '24h' ? '24h' : '7d';
   }, []);
 
   const rowCount = useMemo(() => {

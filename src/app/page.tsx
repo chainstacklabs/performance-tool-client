@@ -21,7 +21,7 @@ interface HomeProps {
 
 export default async function Home({ searchParams }: HomeProps) {
   const { range, protocol } = (await searchParams) ?? {};
-  const timeRange: TimeRange = range === '7d' ? '7d' : '24h';
+  const timeRange: TimeRange = range === '24h' ? '24h' : '7d';
   // Resolved here rather than from useSearchParams() in the client component:
   // that hook is empty during prerender inside the loading.tsx boundary, so a
   // deep link would render the fallback protocol and only correct on hydration.

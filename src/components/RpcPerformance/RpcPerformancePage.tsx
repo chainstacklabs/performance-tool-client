@@ -91,7 +91,7 @@ interface RpcPerformancePageProps {
   initialProtocol: string;
 }
 
-export default function RpcPerformancePage({ allChainsData, chains, timeRange = '24h', initialProtocol }: RpcPerformancePageProps) {
+export default function RpcPerformancePage({ allChainsData, chains, timeRange = '7d', initialProtocol }: RpcPerformancePageProps) {
   const searchParams = useSearchParams();
   const [isTimeRangeLoading, setIsTimeRangeLoading] = useState(false);
 
