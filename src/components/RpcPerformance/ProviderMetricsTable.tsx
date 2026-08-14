@@ -14,6 +14,14 @@ function fmtMs(ms: number | null): string | null {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
+// Grafana renders the score stat with two decimals; mirror that so the site
+// and the linked dashboard show the same figure. Three decimals below 0.1,
+// where two would collapse adjacent providers into a tie.
+function fmtScore(score: number): string | null {
+  if (!Number.isFinite(score)) return null;
+  return score < 0.1 ? score.toFixed(3) : score.toFixed(2);
+}
+
 type RelLevel = 'good' | 'warn' | 'bad' | 'unknown';
 
 // Relative thresholds: compare against the best provider in the current table.
@@ -142,9 +150,10 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] border-collapse table-fixed">
+      <table className="w-full min-w-[720px] border-collapse table-fixed">
         <colgroup>
           <col className="w-40" />
+          <col className="w-[80px]" />
           <col className="w-[130px]" />
           <col className="w-[220px]" />
           <col className="w-[140px]" />
@@ -153,6 +162,7 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
         <thead>
           <tr>
             <TH>Provider</TH>
+            <TH>Score</TH>
             <TH>Availability</TH>
             <TH>P50 / P95 / P99</TH>
             <TH>P95, {rangeLabel}</TH>
@@ -190,6 +200,17 @@ export default function ProviderMetricsTable({ providers, accentColor = '#4DAFFF
                   <div className="flex flex-col gap-0.5">
                     <span className="type-subtitle-s text-fg-primary">{p.displayName}</span>
                   </div>
+                </td>
+
+                {/* Score — Grafana's value shown verbatim, never computed here */}
+                <td className="px-4 whitespace-nowrap">
+                  {fmtScore(p.grafanaScore) != null ? (
+                    <span className="text-sm font-medium font-mono tracking-[-0.3px] text-fg-primary">
+                      {fmtScore(p.grafanaScore)}
+                    </span>
+                  ) : (
+                    <span className="text-fg-ghost text-[13px]">—</span>
+                  )}
                 </td>
 
                 {/* Availability */}
