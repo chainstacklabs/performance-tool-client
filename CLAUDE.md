@@ -22,7 +22,7 @@ Deeper sweeps are a one-off, not a per-PR gate, and deliberately not `devDepende
 
 Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
-**Never compute or display the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The score orders rows only — showing the raw number invites questions the UI cannot answer. Any improvement to the formula belongs in the Grafana panel, not here.
+**Never compute the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The table's Score column displays the fetched value verbatim (since the formula became interpretable — mean p95 / SuccessRate³, averaged across regions — the old "never display" rule was lifted); any improvement to the formula belongs in the Grafana panel, not here.
 
 **`api_method!="eth_subscribe"` in the latency selector is deliberate and asymmetric.** Block arrival is chain cadence, near-identical for every provider, so it would dominate the displayed latency averages — but the availability query and the Grafana score still count it on purpose. Don't "unify" the selectors in `queries.ts`.
 

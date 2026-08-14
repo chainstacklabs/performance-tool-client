@@ -32,13 +32,15 @@ function HowWeRank() {
             We evaluate RPC providers based on their speed (response time) and reliability (success rate) across all monitored regions
           </div>
           <div className="text-fg-muted text-[13px] leading-[18px] font-mono">
-            Score = 1 / ((1/ResponseTime) × (SuccessRate³))
+            Score = ResponseTime / SuccessRate³, averaged across regions
           </div>
           {/* Mirrors the methodology text on the Grafana compare dashboards —
               keep the two in sync when the panel description changes. */}
           <div className="text-fg-dim text-xs leading-4 mt-1.5">
-            Per-method p95 latencies are combined as a harmonic mean, so no single
-            slow method dominates the score. All methods are weighted equally.
+            Lower is better. Per-method p95 latencies are combined with equal
+            weights, and regional scores are averaged arithmetically, so one slow
+            region cannot be hidden by fast ones. The score is read directly from
+            the Grafana compare dashboards.
           </div>
         </div>
       )}
