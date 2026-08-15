@@ -24,14 +24,18 @@ function fmtScore(score: number): string | null {
 
 type RelLevel = 'good' | 'warn' | 'bad' | 'unknown';
 
-// Relative thresholds: compare against the best provider in the current table.
-// green  ≤ best × 1.5  — competitive
-// yellow ≤ best × 2.5  — moderately slower
-// red    > best × 2.5  — clearly degraded
+// Relative to the best value in the column, with an absolute slack so a fast
+// number is never punished for trailing an ultra-fast leader by a margin no
+// user can perceive: pure multiples painted 49ms red when the column's best
+// was 18ms, while an identical 51ms sat green one column over (best 45ms).
+// The slack dominates at fast baselines, the multiple at slow ones.
+// green  ≤ max(best × 1.5, best + 75ms)   — competitive
+// yellow ≤ max(best × 2.5, best + 250ms)  — moderately slower
+// red    beyond that                      — clearly degraded
 function relativeLevel(ms: number | null, bestMs: number | null): RelLevel {
   if (ms == null || bestMs == null) return 'unknown';
-  if (ms <= bestMs * 1.5) return 'good';
-  if (ms <= bestMs * 2.5) return 'warn';
+  if (ms <= Math.max(bestMs * 1.5, bestMs + 75)) return 'good';
+  if (ms <= Math.max(bestMs * 2.5, bestMs + 250)) return 'warn';
   return 'bad';
 }
 
