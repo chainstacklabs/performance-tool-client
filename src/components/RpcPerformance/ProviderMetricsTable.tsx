@@ -14,12 +14,15 @@ function fmtMs(ms: number | null): string | null {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
-// Grafana renders the score stat with two decimals; mirror that so the site
-// and the linked dashboard show the same figure. Three decimals below 0.1,
-// where two would collapse adjacent providers into a tie.
+// Always three decimals. Scores straddle 0.1 within a single table — Solana runs
+// 0.045 to 1.25 — so switching precision at that boundary left the column ragged.
+// Three is also the precision the ranking needs: at two, Base's top three (0.136,
+// 0.140, 0.143) all print 0.14, a visual tie across three ranked positions.
+// Grafana's stat panel is set to two decimals, so this shows one digit more than
+// the linked dashboard — the same fetched value, never recomputed here.
 function fmtScore(score: number): string | null {
   if (!Number.isFinite(score)) return null;
-  return score < 0.1 ? score.toFixed(3) : score.toFixed(2);
+  return score.toFixed(3);
 }
 
 type RelLevel = 'good' | 'warn' | 'bad' | 'unknown';
