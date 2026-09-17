@@ -15,6 +15,11 @@ interface ChainBrand {
 const CHAIN_BRAND: Record<string, ChainBrand> = {
   Ethereum:    { rgb: { r: 98,  g: 126, b: 234 }, logo: 'ethereum'    },
   Arbitrum:    { rgb: { r: 40,  g: 160, b: 240 }, logo: 'arbitrum'    },
+  // Arc publishes four primaries. This is validator-blue; arc.svg's tile uses
+  // protocol-navy (#1B3158), which is too dark to double as the accent — at 23%
+  // lightness the active chip is hard to tell from the inactive ones. Same
+  // split as Arbitrum, whose tile is dark navy and whose accent is not.
+  Arc:         { rgb: { r: 47,  g: 87,  b: 140 }, logo: 'arc'         },
   Base:        { rgb: { r: 0,   g: 82,  b: 255 }, logo: 'base'        },
   BNB:         { rgb: { r: 240, g: 185, b: 11  }, logo: 'bnb'         },
   Hyperliquid: { rgb: { r: 0,   g: 212, b: 170 }, logo: 'hyperliquid' },

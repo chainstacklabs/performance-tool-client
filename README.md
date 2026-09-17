@@ -2,7 +2,7 @@
 
 RPC provider performance comparison, as a single-page Next.js app. Chainstack Compare frontend.
 
-Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, and Robinhood, measured from three regions per chain (four across the probe fleet).
+Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, Robinhood, and Arc, measured from three regions per chain (four across the probe fleet).
 
 This app only renders. The probes and dashboards that produce the data live in [compare-dashboard-functions](https://github.com/chainstacklabs/compare-dashboard-functions); this app queries their Grafana at request time.
 
@@ -34,7 +34,7 @@ No test suite — lint and build are the checks.
 
 ## URL parameters
 
-- `protocol` — `ethereum`, `solana`, `bnb`, `arbitrum`, `base`, `hyperliquid`, `robinhood`. Defaults to `ethereum`.
+- `protocol` — `ethereum`, `solana`, `bnb`, `arbitrum`, `base`, `hyperliquid`, `robinhood`, `arc`. Defaults to `ethereum`.
 - `range` — `24h` or `7d`. Defaults to `24h`.
 
 Unrecognized values fall back to the default, so links are safe to share.

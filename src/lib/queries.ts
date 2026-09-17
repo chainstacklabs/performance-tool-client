@@ -11,6 +11,7 @@ export const CHAINS: Chain[] = [
   { name: 'Base',        promName: 'Base',        publicToken: '11861148d82247128307025fac628b6e' },
   { name: 'Hyperliquid', promName: 'Hyperliquid', publicToken: '5f957bbcc3ae4c9d8d9669a299a24676' },
   { name: 'Robinhood',   promName: 'Robinhood',   publicToken: '5e422a0d05c74da493846cace52d2aa3' },
+  { name: 'Arc',         promName: 'Arc',         publicToken: '9741196346864b1c9805806a2a28dfb7' },
 ];
 
 // api_method="eth_subscribe" is excluded from latency displays: it measures
