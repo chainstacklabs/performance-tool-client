@@ -1,10 +1,10 @@
 # performance-tool-client
 
-RPC provider performance comparison, as a single-page Next.js app. Chainstack Compare frontend.
+Single-page Next.js app behind [Chainstack Compare](https://compare.chainstack.com): RPC provider performance side by side.
 
-Shows P50/P95/P99 latency, availability, and per-region breakdowns for RPC providers across Ethereum, Solana, BNB Chain, Arbitrum, Base, Hyperliquid, Robinhood, and Arc, measured from three regions per chain (four across the probe fleet).
+Shows P50/P95/P99 latency, availability, the provider score, and per-region breakdowns across Ethereum, Solana, BNB Smart Chain, Arbitrum, Base, Hyperliquid, Robinhood, and Arc. Each chain is measured from three of the four probe regions.
 
-This app only renders. The probes and dashboards that produce the data live in [compare-dashboard-functions](https://github.com/chainstacklabs/compare-dashboard-functions); this app queries their Grafana at request time.
+This app only renders. The probes and dashboards that produce the data live in [compare-dashboard-functions](https://github.com/chainstacklabs/compare-dashboard-functions); this app queries their Grafana at request time and displays the score as Grafana computes it.
 
 ## Setup
 
@@ -44,7 +44,7 @@ Unrecognized values fall back to the default, so links are safe to share.
 ```
 src/app/          # single route, layout, loading fallback
 src/components/   # RpcPerformance/ holds the table, chips, range switcher
-src/lib/          # PromQL, Grafana client, scoring, URL params
+src/lib/          # PromQL, Grafana client, score fetch, URL params
 ```
 
 ## Contributing
