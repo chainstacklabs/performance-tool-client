@@ -10,7 +10,7 @@ Single-page Next.js app showing RPC provider performance. One route `/`, rendere
 
 Needs `GRAFANA_API_TOKEN` in `.env.local` or every metric reads as unavailable — a local run without it exercises the render path, not the data path, so clicking through proves less than it appears to.
 
-Deeper sweeps are a one-off, not a per-PR gate, and deliberately not `devDependencies` — they add ~157 packages to a 433-package tree for something run a few times a year, against a repo that keeps `npm audit` at zero on purpose. Reach for them with `npx` when doing dead-code or dependency work:
+Deeper sweeps are a one-off, not a per-PR gate, and deliberately not `devDependencies` — they add ~157 packages to a 433-package tree for something run a few times a year, against a repo that keeps its production audit at zero on purpose. Reach for them with `npx` when doing dead-code or dependency work:
 
 - `npx knip` — unused files, exports and dependencies. The one that finds what grep misses, because it tells a function apart from a same-named property.
 - `npx tsc --noEmit --noUnusedLocals --noUnusedParameters` — unused locals and parameters, which the committed `tsconfig.json` does not enable.
@@ -33,6 +33,8 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 **Keep `server-only` on anything reading `GRAFANA_API_TOKEN`.** It marks `grafana.ts`, `chain-data.ts`, and `score.ts`. The rest of `src/lib/` is shared with client components by design.
 
 **The three `package.json` overrides are load-bearing.** `postcss` because Next pins `8.4.31` internally, `minimatch` as the only route to a patched `brace-expansion`, `sharp` because Next's optional range has an open advisory. Removing any reintroduces a Dependabot alert.
+
+**Gate on `npm audit --omit=dev`; it stays at zero.** The full `npm audit` can report advisories in dev-only tooling (the ESLint chain) that have no patched release; those never ship. Never run `npm audit fix --force`: it "fixes" them by downgrading `eslint-config-next` to 14.x.
 
 **ESLint stays on 9.x.** `eslint-plugin-react` peers at `^9.7` and nothing higher, and no override fixes a peer range.
 
