@@ -31,6 +31,19 @@ const RANGE_SUBQUERY: Record<TimeRange, { window: string; step: string }> = {
 };
 const subquery = (range: TimeRange) => RANGE_SUBQUERY[range];
 
+// US West is probed from more than one Vercel site over time (sfo1, then pdx1).
+// Both count as one region, `us-west`, so it keeps a single share of every
+// cross-region average while both sites are inside the query window. The inner
+// label_replace keeps the original site in `probe_site`, so the relabelled
+// series stay distinct until they are aggregated; relabelling in one step fails
+// with duplicate label sets whenever both sites report.
+const asProbeRegion = (expr: string): string =>
+  `label_replace(label_replace(${expr}, "probe_site", "$1", "source_region", "(.*)"), "source_region", "us-west", "source_region", "sfo1|pdx1")`;
+
+// One series per region: samples from both US West sites form a single timeline,
+// so a quantile over it is taken over every US West sample once.
+const mergeProbeSites = (expr: string): string => `avg without (probe_site) (${asProbeRegion(expr)})`;
+
 // Per-provider, per-region quantile latency over the selected range. Aggregating
 // by `avg by (provider)` on the result gives the global per-provider number
 // (matches the source dashboard's regional p95 panel aggregation).
@@ -39,7 +52,7 @@ export const providerByRegionQuery = (chain: string, q: number, range: TimeRange
   return `
 avg by (provider, source_region) (
   quantile_over_time(${q},
-    (${baseSelector(chain)} > 0)[${window}:${step}]
+    (${mergeProbeSites(`${baseSelector(chain)} > 0`)})[${window}:${step}]
   )
 )`.trim();
 };
@@ -50,18 +63,18 @@ avg by (provider, source_region) (
 export const providerSuccessQuery = (chain: string, range: TimeRange = '24h'): string => {
   const { window } = subquery(range);
   return `
-sum by (provider, source_region) (count_over_time(response_latency_seconds{
+sum by (provider, source_region) (${asProbeRegion(`count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   response_status="success",
   provider!~"TEST_.*"
-}[${window}]))
+}[${window}])`)})
 /
-sum by (provider, source_region) (count_over_time(response_latency_seconds{
+sum by (provider, source_region) (${asProbeRegion(`count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
   provider!~"TEST_.*"
-}[${window}]))`.trim();
+}[${window}])`)})`.trim();
 };
 
 // Per-provider p95 latency, evaluated at each step over a time range.
@@ -70,6 +83,6 @@ sum by (provider, source_region) (count_over_time(response_latency_seconds{
 export const providerTrendQuery = (chain: string): string => `
 avg by (provider) (
   quantile_over_time(0.95,
-    (${baseSelector(chain)} > 0)[1h:1m]
+    (${mergeProbeSites(`${baseSelector(chain)} > 0`)})[1h:1m]
   )
 )`.trim();

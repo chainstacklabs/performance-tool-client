@@ -9,6 +9,8 @@ import { isNum } from '@/lib/num';
 
 const REGION_LABEL: Record<string, string> = {
   fra1: 'DE', sfo1: 'US', sin1: 'SG', hnd1: 'JP',
+  // US West sites are merged into this one label by the queries (lib/queries.ts).
+  'us-west': 'US',
   'eu-west-1': 'DE', 'us-east-1': 'US', 'ap-southeast-1': 'SG', 'ap-northeast-1': 'JP',
 };
 
