@@ -17,7 +17,7 @@ cp .env.sample .env.local
 
 Set `GRAFANA_API_TOKEN` in `.env.local` — a Grafana service account token with the Viewer role. Without it the page renders but every metric shows as unavailable.
 
-`NEXT_PUBLIC_CLIENT_DOMAIN` is optional — it only fills in the `og:image` and `og:url` metadata.
+`NEXT_PUBLIC_CLIENT_DOMAIN` is optional — it sets the base URL for the canonical link and the `og:image` and `og:url` metadata, and defaults to `https://compare.chainstack.com`.
 
 To run against your own Grafana, change `GRAFANA_URL` and `PROM_DS_UID` in `src/lib/grafana.ts` and the `CHAINS` list in `src/lib/queries.ts`.
 

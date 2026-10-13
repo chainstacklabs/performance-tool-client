@@ -8,23 +8,26 @@ const spaceMono = Space_Mono({
   variable: '--font-space-mono',
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_CLIENT_DOMAIN;
+const siteUrl = process.env.NEXT_PUBLIC_CLIENT_DOMAIN || 'https://compare.chainstack.com';
+const title = 'RPC provider performance comparison | Chainstack';
+const description =
+  'Live RPC provider benchmarks across Ethereum, Solana, BNB Chain, Base and more: availability and P50/P95/P99 latency, updated every 3 minutes.';
 
 export const metadata = {
-  // Resolves relative URLs below (OG image, canonical). Falls back to Next's
-  // localhost default with a build warning if the env var is unset.
-  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-  title: 'Chainstack Node performance tool',
-  description: 'Test RPC node with various methods and get transparent performance results.',
+  // Resolves relative URLs below (OG image, og:url, canonical).
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     url: '/',
-    title: 'Chainstack Node performance tool',
-    description: 'Test RPC node with various methods and get transparent performance results.',
+    title,
+    description,
     images: [{
       url: '/og-image.png',
       width: 1200, height: 630,
-      alt: 'Chainstack Node performance tool',
+      alt: title,
     }],
   },
 };
