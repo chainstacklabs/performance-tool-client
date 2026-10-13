@@ -21,7 +21,20 @@ export const CHAINS: Chain[] = [
 // counts toward availability (providerSuccessQuery below) and toward the
 // Grafana ranking score, both of which fold in its failures on purpose.
 const baseSelector = (chain: string): string =>
-  `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*",api_method!="eth_subscribe"}`;
+  `response_latency_seconds{metric_type="response_time",blockchain="${chain}",response_status="success",provider!~"TEST_.*",api_method!="eth_subscribe"${methodScope(chain)}}`;
+
+// Chains whose Grafana score covers only some of the probed methods. Latency and
+// availability use the same subset, so the displayed numbers describe what is
+// ranked. Hyperliquid's score uses its five EVM methods; the HyperCore Info API
+// methods (clearinghouseState, openOrders) are not offered by every provider.
+const SCORED_METHODS: Record<string, string> = {
+  Hyperliquid: 'eth_call|eth_getBalance|eth_getLogs|eth_getTransactionReceipt|eth_blockNumber',
+};
+
+const methodScope = (chain: string): string => {
+  const methods = SCORED_METHODS[chain];
+  return methods ? `,api_method=~"(${methods})"` : '';
+};
 
 // Inner subquery window/resolution per time range. The coarser 5m step for 7d
 // keeps the sample count manageable (~2016 pts/series vs ~10k at 1m).
@@ -67,13 +80,13 @@ sum by (provider, source_region) (${asProbeRegion(`count_over_time(response_late
   metric_type="response_time",
   blockchain="${chain}",
   response_status="success",
-  provider!~"TEST_.*"
+  provider!~"TEST_.*"${methodScope(chain)}
 }[${window}])`)})
 /
 sum by (provider, source_region) (${asProbeRegion(`count_over_time(response_latency_seconds{
   metric_type="response_time",
   blockchain="${chain}",
-  provider!~"TEST_.*"
+  provider!~"TEST_.*"${methodScope(chain)}
 }[${window}])`)})`.trim();
 };
 
