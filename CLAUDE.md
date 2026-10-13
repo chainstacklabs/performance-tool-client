@@ -24,7 +24,7 @@ Each one is deliberate, looks like something to tidy up, and breaks if you do.
 
 **Never compute the ranking score.** `src/lib/score.ts` reads it from a Grafana stat panel. An earlier JavaScript reimplementation drifted and disagreed on the Hyperliquid winner. The table's Score column displays the fetched value verbatim (since the formula became interpretable — mean p95 / SuccessRate³, averaged across regions — the old "never display" rule was lifted); any improvement to the formula belongs in the Grafana panel, not here.
 
-**`api_method!="eth_subscribe"` in the latency selector is deliberate and asymmetric.** Block arrival is chain cadence, near-identical for every provider, so it would dominate the displayed latency averages — but the availability query and the Grafana score still count it on purpose. Don't "unify" the selectors in `queries.ts`.
+**`api_method!="eth_subscribe"` in the latency selector is deliberate and asymmetric.** Block arrival is chain cadence, near-identical for every provider, so it would dominate the displayed latency averages — but the availability query and the Grafana score still count it on purpose. Don't "unify" the selectors in `queries.ts`. Separately, `SCORED_METHODS` narrows both latency and availability to the methods a chain's Grafana score uses (Hyperliquid: its five EVM methods); it must match the `api_method` filter in that chain's score panel.
 
 **`activeProtocol` in `RpcPerformancePage.tsx` must stay React state**, not derived from `useSearchParams`. Chip clicks use `history.replaceState` to bypass the router on purpose; the page is `force-dynamic`, so routing each click would cost a server round trip.
 
