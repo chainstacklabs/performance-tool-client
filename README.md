@@ -1,6 +1,6 @@
 # performance-tool-client
 
-Single-page Next.js app behind [Chainstack Compare](https://compare.chainstack.com): RPC provider performance side by side.
+Single-page Next.js app behind [Chainstack Compare](https://compare.chainstack.com/?utm_source=github&utm_medium=referral&utm_campaign=performance-tool-client): RPC provider performance side by side. To run your own nodes, sign up for a [Chainstack account](https://console.chainstack.com/sign-up?utm_source=github&utm_medium=referral&utm_campaign=performance-tool-client).
 
 Shows P50/P95/P99 latency, availability, the provider score, and per-region breakdowns across Ethereum, Solana, BNB Smart Chain, Arbitrum, Base, Hyperliquid, Robinhood, and Arc. Each chain is measured from three of the four probe regions.
 
